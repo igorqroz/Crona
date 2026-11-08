@@ -55,7 +55,7 @@ Essas regras variam de empresa para empresa. Cada uma pode ser **ligada, desliga
 3. Se A e B concordam, a negociação vai para o gestor.
 4. Com a aprovação do gestor, as férias dos dois são atualizadas.
 
-Status: `AGUARDANDO_COLEGA` → `CONTRAPROPOSTA` → `AGUARDANDO_GESTOR` → `APROVADA` | `RECUSADA`.
+Status: `AGUARDANDO_COLEGA` ⇄ `AGUARDANDO_SOLICITANTE` (enquanto houver contrapropostas) → `AGUARDANDO_GESTOR` → `APROVADA` | `RECUSADA` | `CANCELADA`. Detalhes em [modelo-de-dominio.md](modelo-de-dominio.md#37-negociação-com-rodadas).
 
 ## 5. Perfis
 

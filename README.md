@@ -43,7 +43,7 @@ Cada empresa organiza as férias do seu jeito, então o Crona separa as regras e
 | **Regras da CLT** | Direito a 30 dias, prazo de vencimento, divisão em até 3 períodos, abono de 1/3 | Não, valem para todos |
 | **Regras da empresa** | Limite de pessoas de férias por setor ou na empresa toda, antecedência mínima, períodos bloqueados | Sim: cada empresa liga, desliga e ajusta as suas |
 
-Todas as regras estão detalhadas em [docs/regras-de-negocio.md](docs/regras-de-negocio.md).
+Todas as regras estão detalhadas em [docs/regras-de-negocio.md](docs/regras-de-negocio.md), e o modelo de dados em [docs/modelo-de-dominio.md](docs/modelo-de-dominio.md).
 
 ## Stack
 
