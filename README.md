@@ -62,7 +62,7 @@ Todas as regras estão detalhadas em [docs/regras-de-negocio.md](docs/regras-de-
 O projeto é construído em fases, e cada fase entrega algo que funciona.
 
 - [x] **Fase 0 — Fundação:** repositório, documentação e regras de negócio
-- [ ] **Fase 1 — Modelo de domínio:** entidades, relacionamentos e banco PostgreSQL com Flyway
+- [x] **Fase 1 — Modelo de domínio:** entidades, relacionamentos e banco PostgreSQL com Flyway
 - [ ] **Fase 2 — Primeira API:** projeto Spring Boot, cadastro de departamentos e colaboradores, primeiros testes
 - [ ] **Fase 3 — Autenticação:** login com Spring Security + JWT e permissões por perfil
 - [ ] **Fase 4 — Regras de férias:** períodos aquisitivos, saldo, divisão das férias e regras da empresa (com TDD)
