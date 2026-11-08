@@ -1,4 +1,4 @@
-# Crona — Gestão de Férias CLT
+# Crona — Gestão de Férias
 
 O Crona é um sistema web para **planejar, solicitar, negociar e aprovar férias** dentro das regras da CLT e das regras de cada empresa.
 
