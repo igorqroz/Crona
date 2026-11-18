@@ -23,6 +23,9 @@ dist/
 application-local.yml
 application-local.properties
 
+# Anotações privadas (análises de outros sistemas, prints, rascunhos): nunca sobem
+/notas/
+
 # Sistema operacional
 .DS_Store
 Thumbs.db
