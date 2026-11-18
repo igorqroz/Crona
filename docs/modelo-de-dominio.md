@@ -15,9 +15,9 @@ erDiagram
     EMPRESA ||--|| CONFIGURACAO_FERIAS : "tem"
     EMPRESA ||--o{ DEPARTAMENTO : "tem"
     EMPRESA ||--o{ COLABORADOR : "emprega"
-    EMPRESA ||--o{ PERIODO_BLOQUEADO : "define"
+    EMPRESA ||--o{ PERIODO_RESTRITO : "define"
     EMPRESA |o--o{ FERIADO : "cadastra"
-    DEPARTAMENTO |o--o{ PERIODO_BLOQUEADO : "pode ter"
+    DEPARTAMENTO |o--o{ PERIODO_RESTRITO : "pode ter"
     DEPARTAMENTO ||--o{ COLABORADOR : "agrupa"
     COLABORADOR |o--o{ COLABORADOR : "gerencia"
     COLABORADOR ||--o{ PERIODO_AQUISITIVO : "acumula"
@@ -40,6 +40,7 @@ erDiagram
         int percentual_minimo_trabalhando "EMP-01, nulo = desligada"
         int limite_ferias_simultaneas_empresa "EMP-04, nulo = desligada"
         int antecedencia_minima_dias "EMP-03, mínimo 30"
+        boolean exige_confirmacao_rh "EMP-06"
     }
     DEPARTAMENTO {
         bigint id PK
@@ -77,10 +78,13 @@ erDiagram
         date data_fim
         int dias_gozo
         int dias_abono "CLT-06"
-        varchar status "PENDENTE, APROVADA, RECUSADA, CANCELADA"
-        bigint decidido_por_id FK
-        timestamp decidido_em
-        varchar motivo_recusa
+        varchar status "AGUARDANDO_GESTOR, AGUARDANDO_RH, APROVADA, RECUSADA, CANCELADA"
+        varchar recado_colaborador
+        bigint gestor_decidiu_por_id FK
+        timestamp gestor_decidiu_em
+        bigint rh_confirmou_por_id FK "só com EMP-06"
+        timestamp rh_confirmou_em
+        varchar mensagem_decisao "motivo ou sugestão de data"
     }
     NEGOCIACAO {
         bigint id PK
@@ -101,10 +105,11 @@ erDiagram
         date fim_colega
         varchar mensagem
     }
-    PERIODO_BLOQUEADO {
+    PERIODO_RESTRITO {
         bigint id PK
         bigint empresa_id FK
         bigint departamento_id FK "nulo = empresa toda"
+        varchar tipo "ALERTA ou BLOQUEIO"
         date data_inicio
         date data_fim
         varchar motivo
@@ -124,14 +129,14 @@ Todas as tabelas também terão `criado_em` e `atualizado_em`. Eles ficaram fora
 | Entidade | O que representa |
 |---|---|
 | **Empresa** | Cada cliente do Crona. Todos os outros dados pertencem a uma empresa. |
-| **Configuração de férias** | As regras da empresa (EMP-01, 03 e 04). Uma por empresa. |
+| **Configuração de férias** | As regras da empresa (EMP-01, 03, 04 e 06). Uma por empresa. |
 | **Departamento** | Setor da empresa. Usado no limite por setor (EMP-01). |
 | **Colaborador** | Quem usa o sistema. Guarda os dados de trabalho e de login. |
 | **Período aquisitivo** | Cada 12 meses trabalhados, com o direito de dias que ele gerou. |
 | **Solicitação de férias** | Um pedido de férias, inteiro ou uma parte delas. |
 | **Negociação** | Uma troca de período entre dois colaboradores. |
 | **Proposta de negociação** | Cada rodada da negociação: a proposta inicial e as contrapropostas. |
-| **Período bloqueado** | Datas em que não se pode sair de férias (EMP-05). |
+| **Período restrito** | Datas sensíveis, como fechamento do mês, que geram alerta ou bloqueiam o pedido (EMP-05). |
 | **Feriado** | Usado para impedir o início das férias perto de um feriado (CLT-05). |
 
 ## 3. Decisões e por quê
@@ -161,7 +166,7 @@ O colaborador já guarda `email`, `senha_hash` e `perfil`. Uma tabela `usuario` 
 ### 3.5 Período aquisitivo é guardado, mas o saldo é calculado
 No protótipo os períodos eram recalculados a cada tela. Aqui eles ficam salvos, porque cada um tem dados próprios que precisam de histórico: faltas (CLT-02) e prazo de concessão (CLT-03).
 
-Já o **saldo não fica salvo**. Ele é calculado: `dias_direito` menos a soma dos dias das solicitações `PENDENTE` e `APROVADA` daquele período. Guardar o saldo seria dado duplicado, e dado duplicado acaba ficando diferente do original.
+Já o **saldo não fica salvo**. Ele é calculado: `dias_direito` menos a soma dos dias das solicitações `AGUARDANDO_GESTOR`, `AGUARDANDO_RH` e `APROVADA` daquele período. Guardar o saldo seria dado duplicado, e dado duplicado acaba ficando diferente do original.
 
 ### 3.6 Solicitação aponta para o período aquisitivo
 Cada pedido "gasta" dias de um período específico. É isso que permite validar a divisão em até 3 partes (CLT-04) e o abono (CLT-06) por período.
@@ -176,7 +181,7 @@ Quando o gestor aprova, as solicitações antigas viram `CANCELADA` e são criad
 Status da negociação: `AGUARDANDO_COLEGA`, `AGUARDANDO_SOLICITANTE` (quando há contraproposta), `AGUARDANDO_GESTOR`, `APROVADA`, `RECUSADA`, `CANCELADA`.
 
 ### 3.8 Enums como texto
-Campos como `status` e `perfil` são guardados como texto (`'PENDENTE'`), não como número (`0`, `1`). Fica legível no banco, e reordenar o enum no Java não estraga os dados. O banco também confere os valores aceitos com uma restrição `CHECK`.
+Campos como `status` e `perfil` são guardados como texto (`'AGUARDANDO_GESTOR'`), não como número (`0`, `1`). Fica legível no banco, e reordenar o enum no Java não estraga os dados. O banco também confere os valores aceitos com uma restrição `CHECK`.
 
 ### 3.9 Chave primária numérica
 Os `id` são `BIGINT` gerados pelo banco. É simples, rápido e combina bem com JPA.
