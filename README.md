@@ -43,7 +43,7 @@ Cada empresa organiza as férias do seu jeito, então o Crona separa as regras e
 | **Regras da CLT** | Direito a 30 dias, prazo de vencimento, divisão em até 3 períodos, abono de 1/3 | Não, valem para todos |
 | **Regras da empresa** | Limite de pessoas de férias por setor ou na empresa toda, antecedência mínima, períodos bloqueados | Sim: cada empresa liga, desliga e ajusta as suas |
 
-Todas as regras estão detalhadas em [docs/regras-de-negocio.md](docs/regras-de-negocio.md), e o modelo de dados em [docs/modelo-de-dominio.md](docs/modelo-de-dominio.md).
+Todas as regras estão detalhadas em [docs/regras-de-negocio.md](docs/regras-de-negocio.md), e o modelo de dados em [docs/modelo-de-dominio.md](docs/modelo-de-dominio.md). Padrões de sistemas de gestão em produção que o Crona vai seguir (e armadilhas a evitar) estão em [docs/padroes-de-referencia.md](docs/padroes-de-referencia.md).
 
 ## Stack
 
@@ -54,7 +54,7 @@ Todas as regras estão detalhadas em [docs/regras-de-negocio.md](docs/regras-de-
 | Persistência | Spring Data JPA / Hibernate | Mapeamento entre objetos Java e tabelas |
 | Segurança | Spring Security + JWT | Login e permissões por perfil |
 | Testes | JUnit 5 + Mockito | Cada regra de negócio vira um teste |
-| Front-end | Angular | Interface web |
+| Front-end | Angular + TypeScript | Interface web |
 | Relatórios | JasperReports | Recibo de férias em PDF |
 
 ## Roadmap
@@ -68,7 +68,7 @@ O projeto é construído em fases, e cada fase entrega algo que funciona.
 - [ ] **Fase 4 — Regras de férias:** períodos aquisitivos, saldo, divisão das férias e regras da empresa (com TDD)
 - [ ] **Fase 5 — Solicitação e aprovação:** fluxo completo do pedido até a aprovação do gestor
 - [ ] **Fase 6 — Negociação:** proposta de troca entre colegas, contraproposta e aprovação
-- [ ] **Fase 7 — Front-end Angular:** telas baseadas no protótipo
+- [ ] **Fase 7 — Front-end Angular:** telas do [redesign](docs/redesign.md), versão para computador (celular fica para depois)
 - [ ] **Fase 8 — Extras:** recibo em PDF, notificações e calendário do departamento
 - [ ] **Fase 9 — Entrega:** Docker, CI com GitHub Actions e deploy
 

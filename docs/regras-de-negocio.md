@@ -34,20 +34,25 @@ Essas regras variam de empresa para empresa. Cada uma pode ser **ligada, desliga
 
 | Código | Regra | Padrão no protótipo |
 |---|---|---|
-| EMP-01 | **Limite por departamento:** um percentual mínimo do departamento precisa continuar trabalhando. Se a nova solicitação passar do limite, ela é **bloqueada**. | 30% trabalhando |
+| EMP-01 | **Limite por departamento:** um percentual mínimo do departamento precisa continuar trabalhando. O percentual é **o mesmo para todos os departamentos**, e a tela mostra o limite já convertido em pessoas (ex.: 10 pessoas e 70% trabalhando → no máximo 3 fora por dia). Se a nova solicitação passar do limite, ela **pode ser enviada como ponto de atenção**: o colaborador vê o aviso (e uma data alternativa), e o gestor decide se recusa ou se **aprova mesmo assim**. | 30% trabalhando |
 | EMP-02 | **Aviso de sobreposição:** se há colegas de férias no período, mas dentro do limite, o sistema **avisa** e permite enviar. | — |
 | EMP-03 | **Antecedência mínima** para solicitar, em dias. Nunca menor que os 30 dias da CLT-07. | 30 dias |
 | EMP-04 | **Limite da empresa toda (financeiro):** não deixar muita gente da empresa sair ao mesmo tempo, por causa do impacto no caixa (CLT-08). | **Não existe no protótipo** |
-| EMP-05 | **Períodos bloqueados:** datas em que ninguém (ou um departamento) pode sair, como fechamento de mês ou alta temporada. | **Não existe no protótipo** |
+| EMP-05 | **Períodos restritos:** datas sensíveis para a empresa toda ou para um departamento, como fechamento do mês ou alta temporada. Ao cadastrar, a empresa escolhe o tipo: **alerta** (o pedido pode ser enviado e o gestor vê o aviso) ou **bloqueio** (o pedido nem pode ser enviado). | **Não existe no protótipo** |
+| EMP-06 | **Confirmação do RH:** depois da aprovação do gestor, o pedido ainda passa pelo RH antes de ser aprovado de vez e gerar o aviso de férias. Desligada, a aprovação do gestor já é a final. | **Não existe no protótipo** |
 
 ## 4. Fluxos
 
 ### Solicitação de férias
-1. O colaborador escolhe o PA, a quantidade de dias e a data de início.
-2. O sistema calcula a data de fim e valida as regras (CLT-03 a CLT-07, EMP-01 a EMP-05, as que estiverem ligadas).
-3. Se bloqueada, o sistema mostra os colegas no período e sugere uma negociação.
-4. Se válida, vai para o gestor como **pendente**.
-5. O gestor **aprova** ou **recusa**.
+1. O colaborador escolhe o primeiro e o último dia no calendário, que mostra quantos colegas já estarão fora em cada dia.
+2. O sistema confere as regras (CLT-03 a CLT-07, EMP-01 a EMP-06, as que estiverem ligadas) e separa o resultado em dois tipos:
+   - **Impedimento:** o pedido não pode ser enviado (ex.: passa do saldo ou cai num período restrito do tipo bloqueio).
+   - **Ponto de atenção:** o pedido pode ser enviado, e o gestor verá o aviso (ex.: passa do limite do departamento).
+3. Quando há conflito com colegas, o sistema sugere uma data alternativa e a opção de propor uma troca.
+4. Enviado, o pedido vai para o gestor (`AGUARDANDO_GESTOR`). O colaborador pode deixar um recado.
+5. O gestor **aprova**, **aprova mesmo assim** (quando há ponto de atenção) ou **recusa**. Ao recusar, pode escrever o motivo ou sugerir outra data.
+6. Se a EMP-06 estiver ligada, o pedido aprovado vai para o RH (`AGUARDANDO_RH`), que confirma.
+7. Aprovado de vez (`APROVADA`), o sistema gera o aviso de férias.
 
 ### Negociação de troca
 1. O colaborador A propõe ao colaborador B: "eu fico com o período X e você com o período Y".
@@ -72,8 +77,11 @@ Para responder com quem conhece o processo na empresa antes da Fase 4:
 - [ ] **EMP-04:** o limite financeiro é por **número de pessoas** de férias ao mesmo tempo ou por **valor total** a pagar no mês?
 - [ ] O Financeiro precisa de algum papel no sistema (ex.: ver a previsão de pagamentos do mês)?
 - [ ] Quantas vezes uma negociação pode ir e voltar com contraproposta?
-- [ ] O gestor pode aprovar uma solicitação que passa do limite do departamento (exceção)?
+- [ ] Para cada regra, ela é **impedimento** ou **ponto de atenção**? No redesign, até regras da CLT (início antes da folga, antecedência de 30 dias) aparecem como ponto de atenção. Decidir na Fase 4.
+- [x] O gestor pode aprovar uma solicitação que passa do limite do departamento? **Sim** (decidido no redesign): o pedido chega com ponto de atenção e o gestor pode "aprovar mesmo assim". Ver EMP-01.
 - [ ] Faltas injustificadas (CLT-02) vão ser lançadas no Crona ou vêm de outro sistema?
+- [ ] Criar a **EMP-07** (não permitir cancelar férias aprovadas a menos de N dias do início)? Proposta em [padroes-de-referencia.md](padroes-de-referencia.md#pad-05--bloqueio-por-prazo-e-confirmação-em-ação-sensível).
+- [ ] Feriados móveis e estaduais/municipais para a CLT-05: como cadastrar? Ver [PAD-11](padroes-de-referencia.md#pad-11--feriados-recorrentes-e-móveis).
 
 ## 7. O que corrigir em relação ao protótipo
 
