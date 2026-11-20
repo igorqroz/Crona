@@ -115,7 +115,8 @@ class SegurancaApiTest {
                 "SELECT d.id FROM departamento d JOIN empresa e ON e.id = d.empresa_id "
                         + "WHERE e.cnpj = ? AND d.nome = 'Engenharia'", Long.class, ApiTestBase.CNPJ_EMPRESA_DEMO);
 
-        var usuarioDaB = jwt().jwt(t -> t.subject("999").claim("empresa_id", empresaB).claim("perfil", "ADMIN"));
+        var usuarioDaB = jwt().jwt(t -> t.subject("999").claim("empresa_id", empresaB).claim("perfil", "ADMIN"))
+                .authorities(new ConversorDePermissoes());
 
         // A lista só traz o departamento da B...
         mockMvc.perform(get("/departamentos").with(usuarioDaB))
@@ -125,6 +126,60 @@ class SegurancaApiTest {
         mockMvc.perform(get("/departamentos/" + engenhariaDaDemo).with(usuarioDaB))
                 .andExpect(status().isNotFound());
     }
+
+    // ------------------------------------------------------------------ permissões (403)
+
+    @Test
+    @DisplayName("COLABORADOR (Ana): vê departamentos, mas não lista nem cadastra colaboradores")
+    void permissoesDoColaborador() throws Exception {
+        String ana = "Bearer " + entrar("ana.lima@demo.crona", "crona123");
+
+        mockMvc.perform(get("/departamentos").header(HttpHeaders.AUTHORIZATION, ana))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/colaboradores").header(HttpHeaders.AUTHORIZATION, ana))
+                .andExpect(status().isForbidden());
+        // O buraco encontrado no teste manual: a Ana conseguia criar um ADMIN.
+        mockMvc.perform(post("/colaboradores").header(HttpHeaders.AUTHORIZATION, ana)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(NOVO_ADMIN))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.detail").value("Você não tem permissão para esta ação."));
+    }
+
+    @Test
+    @DisplayName("GESTOR (Roberto): consulta colaboradores, mas não cadastra nem mexe em departamentos")
+    void permissoesDoGestor() throws Exception {
+        String roberto = "Bearer " + entrar("roberto.neves@demo.crona", "crona123");
+
+        mockMvc.perform(get("/colaboradores").header(HttpHeaders.AUTHORIZATION, roberto))
+                .andExpect(status().isOk());
+        mockMvc.perform(post("/colaboradores").header(HttpHeaders.AUTHORIZATION, roberto)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(NOVO_ADMIN))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/departamentos").header(HttpHeaders.AUTHORIZATION, roberto)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"nome": "Departamento do Roberto"}
+                                """))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("ADMIN (Rafael): cadastra colaborador")
+    void permissoesDoAdmin() throws Exception {
+        String rafael = "Bearer " + entrar("rafael.costa@demo.crona", "crona123");
+
+        mockMvc.perform(post("/colaboradores").header(HttpHeaders.AUTHORIZATION, rafael)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(NOVO_ADMIN))
+                .andExpect(status().isCreated());
+    }
+
+    private static final String NOVO_ADMIN = """
+            {"nome": "Teste", "email": "teste.permissao@demo.crona", "senha": "segredo123",
+             "perfil": "ADMIN", "dataAdmissao": "2025-01-06"}
+            """;
 
     private String entrar(String email, String senha) throws Exception {
         var json = mockMvc.perform(post("/auth/login")

@@ -1,6 +1,7 @@
 package br.com.crona;
 
 import br.com.crona.empresa.EmpresaRepository;
+import br.com.crona.seguranca.ConversorDePermissoes;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -41,10 +42,13 @@ public abstract class ApiTestBase {
 
         mockMvc = MockMvcBuilders.webAppContextSetup(contexto)
                 .apply(springSecurity())                        // liga os filtros do Spring Security
-                .defaultRequest(get("/").with(jwt().jwt(token -> token
-                        .subject("1")
-                        .claim("empresa_id", empresaDemo)
-                        .claim("perfil", "ADMIN"))))            // todo request leva este token
+                .defaultRequest(get("/").with(jwt()                // todo request leva este token
+                        .jwt(token -> token
+                                .subject("1")
+                                .claim("empresa_id", empresaDemo)
+                                .claim("perfil", "ADMIN"))
+                        // Calcula as permissões do perfil do mesmo jeito que a API faz de verdade.
+                        .authorities(new ConversorDePermissoes())))
                 .defaultResponseCharacterEncoding(StandardCharsets.UTF_8)
                 .build();
     }

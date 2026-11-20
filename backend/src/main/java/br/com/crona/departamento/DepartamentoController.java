@@ -2,6 +2,7 @@ package br.com.crona.departamento;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,17 +34,20 @@ public class DepartamentoController {
         this.service = service;
     }
 
+    @PreAuthorize("hasAuthority('DEPARTAMENTO_VER')")
     @GetMapping
     public List<DepartamentoResposta> listar() {
         return service.listar();
     }
 
+    @PreAuthorize("hasAuthority('DEPARTAMENTO_VER')")
     @GetMapping("/{id}")
     public DepartamentoResposta buscar(@PathVariable Long id) {
         return service.buscar(id);
     }
 
     // @Valid: confere as anotações do record (@NotBlank, @Size) antes de chamar o service.
+    @PreAuthorize("hasAuthority('DEPARTAMENTO_GERENCIAR')")
     @PostMapping
     public ResponseEntity<DepartamentoResposta> criar(@Valid @RequestBody DepartamentoRequisicao requisicao) {
         var criado = service.criar(requisicao);
@@ -53,11 +57,13 @@ public class DepartamentoController {
         return ResponseEntity.created(localizacao).body(criado);
     }
 
+    @PreAuthorize("hasAuthority('DEPARTAMENTO_GERENCIAR')")
     @PutMapping("/{id}")
     public DepartamentoResposta renomear(@PathVariable Long id, @Valid @RequestBody DepartamentoRequisicao requisicao) {
         return service.renomear(id, requisicao);
     }
 
+    @PreAuthorize("hasAuthority('DEPARTAMENTO_GERENCIAR')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
         service.excluir(id);

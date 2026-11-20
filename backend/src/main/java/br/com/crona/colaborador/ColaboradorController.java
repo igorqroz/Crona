@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,6 +38,7 @@ public class ColaboradorController {
         this.service = service;
     }
 
+    @PreAuthorize("hasAuthority('COLABORADOR_VER')")
     @GetMapping
     public PaginaResposta<ColaboradorResposta> pesquisar(
             @RequestParam(required = false) String busca,
@@ -47,11 +49,13 @@ public class ColaboradorController {
         return service.pesquisar(busca, departamentoId, ativo, paginacao);
     }
 
+    @PreAuthorize("hasAuthority('COLABORADOR_VER')")
     @GetMapping("/{id}")
     public ColaboradorResposta buscar(@PathVariable Long id) {
         return service.buscar(id);
     }
 
+    @PreAuthorize("hasAuthority('COLABORADOR_GERENCIAR')")
     @PostMapping
     public ResponseEntity<ColaboradorResposta> cadastrar(@Valid @RequestBody ColaboradorCadastro dados) {
         var criado = service.cadastrar(dados);
@@ -60,16 +64,19 @@ public class ColaboradorController {
         return ResponseEntity.created(localizacao).body(criado);
     }
 
+    @PreAuthorize("hasAuthority('COLABORADOR_GERENCIAR')")
     @PutMapping("/{id}")
     public ColaboradorResposta atualizar(@PathVariable Long id, @Valid @RequestBody ColaboradorAtualizacao dados) {
         return service.atualizar(id, dados);
     }
 
+    @PreAuthorize("hasAuthority('COLABORADOR_GERENCIAR')")
     @PostMapping("/{id}/desativar")
     public ColaboradorResposta desativar(@PathVariable Long id) {
         return service.desativar(id);
     }
 
+    @PreAuthorize("hasAuthority('COLABORADOR_GERENCIAR')")
     @PostMapping("/{id}/reativar")
     public ColaboradorResposta reativar(@PathVariable Long id) {
         return service.reativar(id);

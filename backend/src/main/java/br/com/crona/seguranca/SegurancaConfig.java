@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,6 +16,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
@@ -34,6 +35,8 @@ import java.nio.charset.StandardCharsets;
  */
 @Configuration
 @EnableConfigurationProperties(JwtPropriedades.class)
+// Liga o @PreAuthorize nos controllers: a permissão é conferida antes de o método rodar.
+@EnableMethodSecurity
 public class SegurancaConfig {
 
     @Bean
@@ -56,13 +59,20 @@ public class SegurancaConfig {
                         .anyRequest().authenticated())
                 // "Resource server": quem confere o token de cada requisição.
                 .oauth2ResourceServer(servidor -> servidor
-                        .jwt(Customizer.withDefaults())
+                        // Ao aceitar um token, transforma o perfil dele em permissões.
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(conversorDeAutenticacao()))
                         .authenticationEntryPoint((req, resp, erro) -> resolvedorDeErros.resolveException(req, resp, null, erro)))
                 .exceptionHandling(erros -> erros
                         .authenticationEntryPoint((req, resp, erro) -> resolvedorDeErros.resolveException(req, resp, null, erro))
                         .accessDeniedHandler((req, resp, erro) -> resolvedorDeErros.resolveException(req, resp, null, erro)));
 
         return http.build();
+    }
+
+    private JwtAuthenticationConverter conversorDeAutenticacao() {
+        var conversor = new JwtAuthenticationConverter();
+        conversor.setJwtGrantedAuthoritiesConverter(new ConversorDePermissoes());
+        return conversor;
     }
 
     /** A chave secreta que assina (e confere) os tokens. Algoritmo HS256 (HMAC + SHA-256). */
