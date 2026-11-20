@@ -11,6 +11,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -82,6 +83,14 @@ public class Colaborador extends EntidadeBase {
     public void alocar(Departamento departamento, Colaborador gestor) {
         this.departamento = departamento;
         this.gestor = gestor;
+    }
+
+    /**
+     * Confere a senha digitada no login. O hash nunca sai desta classe: quem está de fora
+     * só pergunta "esta senha confere?" e recebe sim ou não.
+     */
+    public boolean senhaConfere(String senhaDigitada, PasswordEncoder passwordEncoder) {
+        return passwordEncoder.matches(senhaDigitada, senhaHash);
     }
 
     /** Desligar não apaga: o histórico de férias continua existindo (e é exigido por lei). */

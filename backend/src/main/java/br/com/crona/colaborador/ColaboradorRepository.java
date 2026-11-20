@@ -40,6 +40,9 @@ public interface ColaboradorRepository extends JpaRepository<Colaborador, Long> 
     // O e-mail é o login, então é único no sistema inteiro, não só na empresa.
     boolean existsByEmailIgnoreCase(String email);
 
+    // Usado no login: aqui ainda não se sabe a empresa, ela vem do próprio colaborador.
+    Optional<Colaborador> findByEmailIgnoreCase(String email);
+
     boolean existsByEmailIgnoreCaseAndIdNot(String email, Long id);
 
     // Este colaborador é gestor de alguém ativo?

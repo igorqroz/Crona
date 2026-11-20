@@ -93,8 +93,11 @@ Para rodar os testes automatizados: `./mvnw test` (dentro de `backend/`).
 
 ### Endpoints
 
+Toda rota, menos o login, exige o cabeçalho `Authorization: Bearer <token>`. O token vem do login e vale 8 horas.
+
 | Método | Caminho | O que faz |
 |---|---|---|
+| `POST` | `/auth/login` | Recebe `{"email", "senha"}` e devolve o token |
 | `GET` | `/departamentos` | Lista os departamentos |
 | `GET` `POST` | `/departamentos`, `/departamentos/{id}` | Busca e cadastra |
 | `PUT` `DELETE` | `/departamentos/{id}` | Renomeia e exclui |
@@ -102,7 +105,9 @@ Para rodar os testes automatizados: `./mvnw test` (dentro de `backend/`).
 | `GET` `POST` `PUT` | `/colaboradores`, `/colaboradores/{id}` | Busca, cadastra e altera |
 | `POST` | `/colaboradores/{id}/desativar`, `/colaboradores/{id}/reativar` | Desativa e reativa (colaborador nunca é apagado) |
 
-Os erros seguem o padrão ProblemDetail (RFC 9457): `400` dado inválido, `404` não encontrado, `409` conflito, `422` regra de negócio.
+Os erros seguem o padrão ProblemDetail (RFC 9457): `400` dado inválido, `401` sem login ou token inválido, `403` sem permissão, `404` não encontrado, `409` conflito, `422` regra de negócio.
+
+Em produção, a chave que assina os tokens vem da variável de ambiente `JWT_SEGREDO` (mínimo de 32 caracteres). Sem ela, a API não sobe.
 
 ## Protótipo
 
