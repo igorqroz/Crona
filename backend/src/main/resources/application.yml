@@ -25,6 +25,12 @@ spring:
     # Fecha a conexão com o banco ao fim de cada operação, e não da requisição inteira.
     open-in-view: false
 
+  data:
+    web:
+      pageable:
+        # Ninguém consegue pedir ?size=1000000 e derrubar o servidor.
+        max-page-size: 100
+
   flyway:
     # Pasta das migrações (este já é o padrão; fica escrito para ficar claro).
     locations: classpath:db/migration
