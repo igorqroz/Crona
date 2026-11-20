@@ -15,6 +15,8 @@
 	<description>API do Crona - Gestao de Ferias</description>
 	<properties>
 		<java.version>21</java.version>
+		<!-- Vazio de propósito: o surefire (mais abaixo) completa com o agente do Mockito -->
+		<argLine></argLine>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -76,6 +78,27 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<!-- Descobre o caminho do jar do Mockito (vira a propriedade ${org.mockito:mockito-core:jar}) -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>properties</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- Carrega o Mockito como agente da JVM nos testes, como a documentação dele pede.
+			     Sem isto, versões futuras do Java vão bloquear o Mockito. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>@{argLine} -javaagent:${org.mockito:mockito-core:jar}</argLine>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
