@@ -63,7 +63,7 @@ O projeto é construído em fases, e cada fase entrega algo que funciona.
 
 - [x] **Fase 0 — Fundação:** repositório, documentação e regras de negócio
 - [x] **Fase 1 — Modelo de domínio:** entidades, relacionamentos e banco PostgreSQL com Flyway
-- [ ] **Fase 2 — Primeira API:** projeto Spring Boot, cadastro de departamentos e colaboradores, primeiros testes
+- [x] **Fase 2 — Primeira API:** projeto Spring Boot, cadastro de departamentos e colaboradores, primeiros testes
 - [ ] **Fase 3 — Autenticação:** login com Spring Security + JWT e permissões por perfil
 - [ ] **Fase 4 — Regras de férias:** períodos aquisitivos, saldo, divisão das férias e regras da empresa (com TDD)
 - [ ] **Fase 5 — Solicitação e aprovação:** fluxo completo do pedido até a aprovação do gestor
@@ -71,6 +71,38 @@ O projeto é construído em fases, e cada fase entrega algo que funciona.
 - [ ] **Fase 7 — Front-end Angular:** telas do [redesign](docs/redesign.md), versão para computador (celular fica para depois)
 - [ ] **Fase 8 — Extras:** recibo em PDF, notificações e calendário do departamento
 - [ ] **Fase 9 — Entrega:** Docker, CI com GitHub Actions e deploy
+
+## Como rodar
+
+**Pré-requisitos:** Java 21 e PostgreSQL rodando na porta 5432.
+
+1. Crie o banco e o usuário (uma vez só, como o superusuário `postgres`):
+   ```bash
+   psql -U postgres -f scripts/criar-banco-local.sql
+   ```
+2. Suba a API. Na primeira vez, o Flyway cria as tabelas e os dados de exemplo:
+   ```bash
+   cd backend
+   ./mvnw spring-boot:run
+   ```
+3. Teste: abra `http://localhost:8080/colaboradores` no navegador.
+
+Para rodar os testes automatizados: `./mvnw test` (dentro de `backend/`).
+
+**Dados de exemplo** (só no perfil `dev`): a *Empresa Demo*, 5 departamentos e 6 colaboradores com os nomes do redesign. Todos usam a senha `crona123`.
+
+### Endpoints
+
+| Método | Caminho | O que faz |
+|---|---|---|
+| `GET` | `/departamentos` | Lista os departamentos |
+| `GET` `POST` | `/departamentos`, `/departamentos/{id}` | Busca e cadastra |
+| `PUT` `DELETE` | `/departamentos/{id}` | Renomeia e exclui |
+| `GET` | `/colaboradores?busca=&departamentoId=&ativo=&page=&size=&sort=` | Pesquisa paginada |
+| `GET` `POST` `PUT` | `/colaboradores`, `/colaboradores/{id}` | Busca, cadastra e altera |
+| `POST` | `/colaboradores/{id}/desativar`, `/colaboradores/{id}/reativar` | Desativa e reativa (colaborador nunca é apagado) |
+
+Os erros seguem o padrão ProblemDetail (RFC 9457): `400` dado inválido, `404` não encontrado, `409` conflito, `422` regra de negócio.
 
 ## Protótipo
 

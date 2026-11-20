@@ -1,0 +1,36 @@
+# Configuração da API do Crona.
+# Os valores depois de ":" dentro de ${...} são o padrão para a sua máquina.
+# Em produção, eles vêm de variáveis de ambiente (DB_URL, DB_USUARIO, DB_SENHA)
+# e a senha real nunca fica no repositório.
+
+spring:
+  application:
+    name: crona-api
+
+  profiles:
+    # Sem perfil informado, usa "dev" (sua máquina). Em produção, o servidor
+    # informa outro perfil pela variável de ambiente SPRING_PROFILES_ACTIVE.
+    default: dev
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/crona}
+    username: ${DB_USUARIO:crona}
+    password: ${DB_SENHA:crona_dev}
+
+  jpa:
+    hibernate:
+      # Quem cria e altera tabelas é o Flyway. O Hibernate só confere se as
+      # classes Java batem com o banco e, se não baterem, a aplicação nem sobe.
+      ddl-auto: validate
+    # Fecha a conexão com o banco ao fim de cada operação, e não da requisição inteira.
+    open-in-view: false
+
+  data:
+    web:
+      pageable:
+        # Ninguém consegue pedir ?size=1000000 e derrubar o servidor.
+        max-page-size: 100
+
+  flyway:
+    # Pasta das migrações (este já é o padrão; fica escrito para ficar claro).
+    locations: classpath:db/migration
