@@ -1,13 +1,10 @@
 package br.com.crona.departamento;
 
+import br.com.crona.ApiTestBase;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
@@ -30,13 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * no final (ROLLBACK). Assim os testes não deixam lixo no banco (armadilha A-08)
  * e um teste não interfere no outro.
  */
-@SpringBootTest
-@AutoConfigureMockMvc
-@Transactional
-class DepartamentoApiTest {
-
-    @Autowired
-    private MockMvc mockMvc;
+class DepartamentoApiTest extends ApiTestBase {
 
     @Test
     @DisplayName("GET /departamentos lista os departamentos da empresa em ordem alfabética")

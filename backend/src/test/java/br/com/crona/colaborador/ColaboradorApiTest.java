@@ -1,16 +1,14 @@
 package br.com.crona.colaborador;
 
+import br.com.crona.ApiTestBase;
+
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
@@ -25,13 +23,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Usa os colaboradores dos dados de desenvolvimento (Roberto, Ana...).
  * Cada teste é desfeito no final (@Transactional).
  */
-@SpringBootTest
-@AutoConfigureMockMvc
-@Transactional
-class ColaboradorApiTest {
+class ColaboradorApiTest extends ApiTestBase {
 
-    @Autowired
-    private MockMvc mockMvc;
     @Autowired
     private ColaboradorRepository colaboradorRepository;
     @Autowired

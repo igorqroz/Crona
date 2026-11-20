@@ -8,6 +8,7 @@ spring:
     locations: classpath:db/migration,classpath:db/dev
 
 crona:
-  dev:
-    # Empresa usada pela API até existir login (Fase 3). Criada em db/dev/R__dados_desenvolvimento.sql.
-    empresa-cnpj: "11222333000181"
+  jwt:
+    # Segredo SÓ de desenvolvimento. Em produção ele vem da variável de ambiente JWT_SEGREDO,
+    # é diferente deste e nunca fica no repositório: quem tem o segredo consegue fabricar tokens.
+    segredo: "segredo-de-desenvolvimento-do-crona-nao-use-em-producao"

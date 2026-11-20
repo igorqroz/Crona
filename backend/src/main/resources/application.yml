@@ -34,3 +34,11 @@ spring:
   flyway:
     # Pasta das migrações (este já é o padrão; fica escrito para ficar claro).
     locations: classpath:db/migration
+
+crona:
+  jwt:
+    # Chave que assina os tokens. Sem valor padrão de propósito: em produção, se a variável
+    # JWT_SEGREDO não existir, a aplicação nem sobe (melhor que subir com um segredo conhecido).
+    segredo: ${JWT_SEGREDO}
+    # Por quanto tempo um token vale depois do login.
+    validade: 8h

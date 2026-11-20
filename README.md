@@ -64,7 +64,7 @@ O projeto é construído em fases, e cada fase entrega algo que funciona.
 - [x] **Fase 0 — Fundação:** repositório, documentação e regras de negócio
 - [x] **Fase 1 — Modelo de domínio:** entidades, relacionamentos e banco PostgreSQL com Flyway
 - [x] **Fase 2 — Primeira API:** projeto Spring Boot, cadastro de departamentos e colaboradores, primeiros testes
-- [ ] **Fase 3 — Autenticação:** login com Spring Security + JWT e permissões por perfil
+- [x] **Fase 3 — Autenticação:** login com Spring Security + JWT e permissões por perfil
 - [ ] **Fase 4 — Regras de férias:** períodos aquisitivos, saldo, divisão das férias e regras da empresa (com TDD)
 - [ ] **Fase 5 — Solicitação e aprovação:** fluxo completo do pedido até a aprovação do gestor
 - [ ] **Fase 6 — Negociação:** proposta de troca entre colegas, contraproposta e aprovação
@@ -93,16 +93,29 @@ Para rodar os testes automatizados: `./mvnw test` (dentro de `backend/`).
 
 ### Endpoints
 
-| Método | Caminho | O que faz |
-|---|---|---|
-| `GET` | `/departamentos` | Lista os departamentos |
-| `GET` `POST` | `/departamentos`, `/departamentos/{id}` | Busca e cadastra |
-| `PUT` `DELETE` | `/departamentos/{id}` | Renomeia e exclui |
-| `GET` | `/colaboradores?busca=&departamentoId=&ativo=&page=&size=&sort=` | Pesquisa paginada |
-| `GET` `POST` `PUT` | `/colaboradores`, `/colaboradores/{id}` | Busca, cadastra e altera |
-| `POST` | `/colaboradores/{id}/desativar`, `/colaboradores/{id}/reativar` | Desativa e reativa (colaborador nunca é apagado) |
+Toda rota, menos o login, exige o cabeçalho `Authorization: Bearer <token>`. O token vem do login e vale 8 horas.
 
-Os erros seguem o padrão ProblemDetail (RFC 9457): `400` dado inválido, `404` não encontrado, `409` conflito, `422` regra de negócio.
+| Método | Caminho | O que faz | Permissão |
+|---|---|---|---|
+| `POST` | `/auth/login` | Recebe `{"email", "senha"}` e devolve o token | Nenhuma (aberta) |
+| `GET` | `/departamentos`, `/departamentos/{id}` | Lista e busca | `DEPARTAMENTO_VER` |
+| `POST` `PUT` `DELETE` | `/departamentos`, `/departamentos/{id}` | Cadastra, renomeia e exclui | `DEPARTAMENTO_GERENCIAR` |
+| `GET` | `/colaboradores?busca=&departamentoId=&ativo=&page=&size=&sort=` | Pesquisa paginada | `COLABORADOR_VER` |
+| `GET` | `/colaboradores/{id}` | Busca | `COLABORADOR_VER` |
+| `POST` `PUT` | `/colaboradores`, `/colaboradores/{id}` | Cadastra e altera | `COLABORADOR_GERENCIAR` |
+| `POST` | `/colaboradores/{id}/desativar`, `/colaboradores/{id}/reativar` | Desativa e reativa (colaborador nunca é apagado) | `COLABORADOR_GERENCIAR` |
+
+**Permissões de cada perfil** (definidas em [`Permissao.java`](backend/src/main/java/br/com/crona/seguranca/Permissao.java)):
+
+| Perfil | Permissões |
+|---|---|
+| Colaborador | `DEPARTAMENTO_VER` |
+| Gestor | `DEPARTAMENTO_VER`, `COLABORADOR_VER` |
+| Administrador | Todas |
+
+Os erros seguem o padrão ProblemDetail (RFC 9457): `400` dado inválido, `401` sem login ou token inválido, `403` sem permissão, `404` não encontrado, `409` conflito, `422` regra de negócio.
+
+Em produção, a chave que assina os tokens vem da variável de ambiente `JWT_SEGREDO` (mínimo de 32 caracteres). Sem ela, a API não sobe.
 
 ## Protótipo
 

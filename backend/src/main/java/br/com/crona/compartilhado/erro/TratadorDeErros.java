@@ -10,6 +10,9 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -36,6 +39,31 @@ import java.util.Map;
 public class TratadorDeErros extends ResponseEntityExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(TratadorDeErros.class);
+
+    // ------------------------------------------------------------ segurança
+
+    // Login com e-mail ou senha errados.
+    @ExceptionHandler(CredenciaisInvalidasException.class)
+    public ProblemDetail credenciaisInvalidas(CredenciaisInvalidasException e) {
+        return problema(HttpStatus.UNAUTHORIZED, "Não autenticado", e.getMessage());
+    }
+
+    // 401 = "não sei quem você é": sem token, token adulterado ou vencido.
+    @ExceptionHandler(AuthenticationException.class)
+    public ProblemDetail naoAutenticado(AuthenticationException e) {
+        String detalhe = e instanceof OAuth2AuthenticationException
+                ? "Token inválido ou expirado. Faça login de novo."
+                : "Faça login para continuar.";
+        return problema(HttpStatus.UNAUTHORIZED, "Não autenticado", detalhe);
+    }
+
+    // 403 = "sei quem você é, mas você não pode fazer isso".
+    @ExceptionHandler(AccessDeniedException.class)
+    public ProblemDetail semPermissao(AccessDeniedException e) {
+        return problema(HttpStatus.FORBIDDEN, "Sem permissão", "Você não tem permissão para esta ação.");
+    }
+
+    // ------------------------------------------------------------ regras do negócio
 
     @ExceptionHandler(RecursoNaoEncontradoException.class)
     public ProblemDetail naoEncontrado(RecursoNaoEncontradoException e) {
