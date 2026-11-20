@@ -1,0 +1,8 @@
+# Perfil "dev": só na sua máquina.
+# É o perfil padrão (ver spring.profiles.default em application.yml).
+# Em produção, o perfil é outro e esta configuração não é carregada.
+
+spring:
+  flyway:
+    # Além das migrações normais, roda os dados de desenvolvimento (db/dev).
+    locations: classpath:db/migration,classpath:db/dev
