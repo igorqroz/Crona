@@ -6,3 +6,8 @@ spring:
   flyway:
     # Além das migrações normais, roda os dados de desenvolvimento (db/dev).
     locations: classpath:db/migration,classpath:db/dev
+
+crona:
+  dev:
+    # Empresa usada pela API até existir login (Fase 3). Criada em db/dev/R__dados_desenvolvimento.sql.
+    empresa-cnpj: "11222333000181"
