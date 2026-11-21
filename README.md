@@ -2,7 +2,7 @@
 
 O Crona é um sistema web para **planejar, solicitar, negociar e aprovar férias** dentro das regras da CLT e das regras de cada empresa.
 
-> 🚧 **Em desenvolvimento.** O projeto está na Fase 0 (fundação). Veja o [roadmap](#roadmap).
+> 🚧 **Em desenvolvimento.** A API (back-end) já cobre o fluxo completo: simular, pedir, negociar troca e aprovar. A próxima etapa é o front-end. Veja o [roadmap](#roadmap).
 
 ## O problema
 
@@ -49,8 +49,8 @@ Todas as regras estão detalhadas em [docs/regras-de-negocio.md](docs/regras-de-
 
 | Camada | Tecnologia | Para quê |
 |---|---|---|
-| Back-end | Java 21 + Spring Boot 3 | API REST com as regras de negócio |
-| Banco | PostgreSQL + Flyway | Dados relacionais, com o esquema versionado como código |
+| Back-end | Java 21 + Spring Boot 4 | API REST com as regras de negócio |
+| Banco | PostgreSQL 18 + Flyway | Dados relacionais, com o esquema versionado como código |
 | Persistência | Spring Data JPA / Hibernate | Mapeamento entre objetos Java e tabelas |
 | Segurança | Spring Security + JWT | Login e permissões por perfil |
 | Testes | JUnit 5 + Mockito | Cada regra de negócio vira um teste |
@@ -67,7 +67,7 @@ O projeto é construído em fases, e cada fase entrega algo que funciona.
 - [x] **Fase 3 — Autenticação:** login com Spring Security + JWT e permissões por perfil
 - [x] **Fase 4 — Regras de férias:** períodos aquisitivos, saldo, divisão das férias e regras da empresa (com TDD)
 - [x] **Fase 5 — Solicitação e aprovação:** fluxo completo do pedido até a aprovação do gestor
-- [ ] **Fase 6 — Negociação:** proposta de troca entre colegas, contraproposta e aprovação
+- [x] **Fase 6 — Negociação:** proposta de troca entre colegas, contraproposta e aprovação
 - [ ] **Fase 7 — Front-end Angular:** telas do [redesign](docs/redesign.md), versão para computador (celular fica para depois)
 - [ ] **Fase 8 — Extras:** recibo em PDF, notificações e calendário do departamento
 - [ ] **Fase 9 — Entrega:** Docker, CI com GitHub Actions e deploy
@@ -121,8 +121,16 @@ Toda rota, menos o login, exige o cabeçalho `Authorization: Bearer <token>`. O 
 | `POST` | `/aprovacoes/{id}/recusar` | Recusa, sempre com `{"mensagem"}` | `SOLICITACAO_APROVAR` |
 | `POST` | `/aprovacoes/aprovar-sem-conflito` | Aprova de uma vez os pedidos sem alerta | `SOLICITACAO_APROVAR` |
 | `GET` `POST` | `/confirmacoes-rh`, `/confirmacoes-rh/{id}/confirmar`, `/confirmacoes-rh/{id}/recusar` | A etapa do RH, quando a EMP-06 está ligada | `SOLICITACAO_CONFIRMAR_RH` |
+| `GET` | `/minhas-ferias/equipe` | Férias aprovadas dos colegas da minha equipe que ainda vão começar (as que dá para propor trocar) | Estar logado |
+| `GET` | `/minhas-ferias/negociacoes` | As trocas que propus e as que recebi, com o histórico de propostas | Estar logado |
+| `POST` | `/minhas-ferias/negociacoes` | Propõe uma troca (`{"pedidoDoColegaId", "pedidoDoSolicitanteId", "inicioSolicitante", "diasSolicitante", "inicioColega", "mensagem"}`). Com impedimento, responde `422` com o checklist dos dois | Estar logado |
+| `POST` | `/minhas-ferias/negociacoes/{id}/contrapropor`, `/aceitar`, `/recusar`, `/cancelar` | Responde à proposta (só quem está na vez) ou desiste dela (só quem propôs) | Estar logado |
+| `GET` | `/aprovacoes/negociacoes`, `/aprovacoes/negociacoes/{id}` | As trocas da equipe esperando decisão, com o checklist das datas novas dos dois | `SOLICITACAO_APROVAR` |
+| `POST` | `/aprovacoes/negociacoes/{id}/aprovar`, `/aprovacoes/negociacoes/{id}/recusar` | Aprova (as datas dos dois mudam) ou recusa com motivo | `SOLICITACAO_APROVAR` |
 
 **Ciclo de vida de um pedido:** `AGUARDANDO_GESTOR` → (`AGUARDANDO_RH`, se a EMP-06 estiver ligada) → `APROVADA`. Ele também pode terminar `RECUSADA` (pelo gestor ou pelo RH, sempre com motivo) ou `CANCELADA` (pelo colaborador, enquanto está em análise). Na hora de aprovar, o pedido é reavaliado com as regras do momento, porque o cenário pode ter mudado desde o envio.
+
+**Troca de férias entre colegas:** a Ana propõe ao Bruno "eu fico com as suas férias e você fica com estas datas". A negociação vai e volta entre `AGUARDANDO_COLEGA` e `AGUARDANDO_SOLICITANTE` enquanto houver contrapropostas, sem limite de rodadas. Quando os dois concordam, ela vai para o gestor (`AGUARDANDO_GESTOR`), que aprova ou recusa. Só entram férias já aprovadas, cada um mantém a quantidade de dias que tinha, e os dois precisam ter o mesmo gestor. As datas novas passam pelas mesmas regras do pedido, avaliadas como se a troca já tivesse acontecido. Detalhes em [regras-de-negocio.md](docs/regras-de-negocio.md#negociação-de-troca).
 
 As regras de férias ficam em classes de domínio puras, testadas com TDD: [`CalendarioAquisitivo`](backend/src/main/java/br/com/crona/ferias/CalendarioAquisitivo.java), [`SaldoDoPeriodo`](backend/src/main/java/br/com/crona/ferias/SaldoDoPeriodo.java), [`ValidadorDeFerias`](backend/src/main/java/br/com/crona/ferias/validacao/ValidadorDeFerias.java) (CLT) e [`ValidadorDaEquipe`](backend/src/main/java/br/com/crona/ferias/validacao/ValidadorDaEquipe.java) (regras da empresa). Cada verificação cita o código da regra em [regras-de-negocio.md](docs/regras-de-negocio.md).
 
