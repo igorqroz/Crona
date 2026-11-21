@@ -2,7 +2,7 @@
 
 O Crona é um sistema web para **planejar, solicitar, negociar e aprovar férias** dentro das regras da CLT e das regras de cada empresa.
 
-> 🚧 **Em desenvolvimento.** A API (back-end) já cobre o fluxo completo: simular, pedir, negociar troca e aprovar. A próxima etapa é o front-end. Veja o [roadmap](#roadmap).
+> 🚧 **Em desenvolvimento.** O fluxo principal já funciona de ponta a ponta, na API e na tela: o colaborador pede ou negocia uma troca, e o gestor aprova. A próxima etapa são os extras (recibo em PDF, notificações). Veja o [roadmap](#roadmap).
 
 ## O problema
 
@@ -68,11 +68,11 @@ O projeto é construído em fases, e cada fase entrega algo que funciona.
 - [x] **Fase 4 — Regras de férias:** períodos aquisitivos, saldo, divisão das férias e regras da empresa (com TDD)
 - [x] **Fase 5 — Solicitação e aprovação:** fluxo completo do pedido até a aprovação do gestor
 - [x] **Fase 6 — Negociação:** proposta de troca entre colegas, contraproposta e aprovação
-- [ ] **Fase 7 — Front-end Angular:** telas do [redesign](docs/redesign.md), versão para computador (celular fica para depois)
+- [x] **Fase 7 — Front-end Angular:** telas do [redesign](docs/redesign.md), versão para computador (celular fica para depois)
   - [x] 7a: projeto Angular 22, login e tela Início do colaborador
   - [x] 7b: solicitar férias (calendário com os colegas fora, checklist das regras e envio)
   - [x] 7c: trocas de período (propor, contrapropor, aceitar, recusar e cancelar, com o histórico das rodadas)
-  - [ ] 7d: aprovações do gestor
+  - [x] 7d: aprovações do gestor (fila com filtro, detalhe com a equipe no período, aprovar mesmo assim, aprovação em lote, trocas e confirmação do RH)
 - [ ] **Fase 8 — Extras:** recibo em PDF, notificações e calendário do departamento
 - [ ] **Fase 9 — Entrega:** Docker, CI com GitHub Actions e deploy
 
@@ -107,7 +107,7 @@ cd frontend
 npm install     # só na primeira vez
 npm start       # abre em http://localhost:4200
 ```
-Entre com um dos usuários dos dados de exemplo (por exemplo `ana.lima@demo.crona` / `crona123`). Em desenvolvimento, o Angular repassa as chamadas `/api/...` para a API na porta 8080 ([`proxy.conf.json`](frontend/proxy.conf.json)), então não é preciso configurar CORS.
+Entre com um dos usuários dos dados de exemplo: `ana.lima@demo.crona` (colaboradora), `roberto.neves@demo.crona` (gestor, vê o menu **Aprovações**) ou `rafael.costa@demo.crona` (RH), todos com a senha `crona123`. Em desenvolvimento, o Angular repassa as chamadas `/api/...` para a API na porta 8080 ([`proxy.conf.json`](frontend/proxy.conf.json)), então não é preciso configurar CORS.
 
 Testes do front (Vitest): `npm test` (dentro de `frontend/`).
 

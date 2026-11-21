@@ -163,6 +163,50 @@ export interface CalendarioDaEquipe {
   feriados: string[];
 }
 
+// ------------------------------------------------------------------ gestor e RH (Fase 7d)
+
+export type SituacaoDoPedido = 'SEM_CONFLITO' | 'COM_ATENCAO' | 'COM_IMPEDIMENTO';
+
+/** Um pedido na fila de aprovação (GET /aprovacoes e /confirmacoes-rh). */
+export interface ItemDeAprovacao {
+  id: number;
+  colaborador: Referencia;
+  departamento: string | null;
+  inicio: string;
+  fim: string;
+  diasGozo: number;
+  diasAbono: number;
+  periodo: number;
+  recado: string | null;
+  enviadoEm: string;
+  situacao: SituacaoDoPedido;
+  /** Só as verificações que não passaram. */
+  alertas: Verificacao[];
+}
+
+export interface DetalheDaAprovacao {
+  pedido: ItemDeAprovacao;
+  livresNoPeriodo: number;
+  voltaAoTrabalho: string;
+  concederAte: string;
+  limiteDoDepartamento: number | null;
+  verificacoes: Verificacao[];
+  colegasNoPeriodo: AusenciaNoCalendario[];
+}
+
+export interface TrocaParaAprovar {
+  negociacao: Negociacao;
+  situacao: SituacaoDoPedido;
+  verificacoesSolicitante: Verificacao[];
+  verificacoesColega: Verificacao[];
+}
+
+/** A decisão do gestor. Para recusar e para "aprovar mesmo assim", a mensagem é obrigatória. */
+export interface Decisao {
+  mesmoAssim?: boolean;
+  mensagem?: string;
+}
+
 /** O corpo dos erros da API (ProblemDetail, RFC 9457). */
 export interface Problema {
   title?: string;

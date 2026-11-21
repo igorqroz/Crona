@@ -2,7 +2,7 @@
   <div class="marca"><crona-logo /></div>
 
   <nav aria-label="Principal">
-    @for (item of menu; track item.rota) {
+    <ng-template #itemDoMenu let-item>
       <a class="link" [routerLink]="item.rota" routerLinkActive="ativo" ariaCurrentWhenActive="page">
         <crona-icone [nome]="item.icone" />
         <span>{{ item.texto }}</span>
@@ -10,6 +10,21 @@
           <span class="contador" [attr.aria-label]="item.contador() + ' esperando você'">{{ item.contador() }}</span>
         }
       </a>
+    </ng-template>
+
+    <div class="grupo">
+      @for (item of menu; track item.rota) {
+        <ng-container *ngTemplateOutlet="itemDoMenu; context: { $implicit: item }" />
+      }
+    </div>
+
+    @if (menuDeGestao().length > 0) {
+      <div class="grupo">
+        <span class="titulo-do-grupo">Gestão</span>
+        @for (item of menuDeGestao(); track item.rota) {
+          <ng-container *ngTemplateOutlet="itemDoMenu; context: { $implicit: item }" />
+        }
+      </div>
     }
   </nav>
 

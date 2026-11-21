@@ -1,0 +1,121 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+}
+
+.cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+h3 {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.lados {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lado {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: var(--raio);
+  background: var(--cor-fundo);
+}
+
+.datas {
+  display: grid;
+  grid-template-columns: 130px max-content max-content max-content;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.nome {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hoje,
+.seta {
+  color: var(--cor-texto-suave);
+}
+
+.datas strong {
+  color: var(--cor-primaria-escura);
+}
+
+.recado {
+  margin: 0;
+  font-size: 13px;
+  color: var(--cor-texto-secundario);
+}
+
+.mensagem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cor-texto-secundario);
+}
+
+textarea {
+  resize: vertical;
+  padding: 10px 12px;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio);
+  font-family: var(--fonte-texto);
+  font-size: 14px;
+  color: var(--cor-texto);
+}
+
+.acoes {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+
+.recusar,
+.bloqueado {
+  color: #B42318;
+}
+
+.bloqueado {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Cores dos selos (as mesmas da lista de pedidos). */
+.selo.ok {
+  background: var(--cor-sucesso-fundo);
+  color: var(--cor-sucesso-texto);
+}
+
+.selo.atencao {
+  background: var(--cor-alerta-fundo);
+  color: var(--cor-alerta-texto);
+}
+
+.selo.impedimento {
+  background: #FDECEC;
+  color: #B42318;
+}
