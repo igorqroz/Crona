@@ -66,7 +66,7 @@ O projeto é construído em fases, e cada fase entrega algo que funciona.
 - [x] **Fase 2 — Primeira API:** projeto Spring Boot, cadastro de departamentos e colaboradores, primeiros testes
 - [x] **Fase 3 — Autenticação:** login com Spring Security + JWT e permissões por perfil
 - [x] **Fase 4 — Regras de férias:** períodos aquisitivos, saldo, divisão das férias e regras da empresa (com TDD)
-- [ ] **Fase 5 — Solicitação e aprovação:** fluxo completo do pedido até a aprovação do gestor
+- [x] **Fase 5 — Solicitação e aprovação:** fluxo completo do pedido até a aprovação do gestor
 - [ ] **Fase 6 — Negociação:** proposta de troca entre colegas, contraproposta e aprovação
 - [ ] **Fase 7 — Front-end Angular:** telas do [redesign](docs/redesign.md), versão para computador (celular fica para depois)
 - [ ] **Fase 8 — Extras:** recibo em PDF, notificações e calendário do departamento
@@ -112,6 +112,17 @@ Toda rota, menos o login, exige o cabeçalho `Authorization: Bearer <token>`. O 
 | `POST` | `/minhas-ferias/simulacao` | Confere um pedido (`{"inicio", "diasGozo", "diasAbono"}`) sem gravar e devolve o checklist das regras | Estar logado |
 | `GET` | `/colaboradores/{id}/periodos-aquisitivos` | Os períodos de um colaborador | `COLABORADOR_VER` |
 | `PUT` | `/colaboradores/{id}/periodos-aquisitivos/{numero}/faltas` | Lança faltas injustificadas (CLT-02) | `COLABORADOR_GERENCIAR` |
+| `POST` | `/minhas-ferias/solicitacoes` | Envia um pedido (`{"inicio", "diasGozo", "diasAbono", "recado"}`). Com impedimento, responde `422` com o checklist e nada é gravado | Estar logado |
+| `GET` | `/minhas-ferias/solicitacoes` | Os meus pedidos, com status e decisão | Estar logado |
+| `POST` | `/minhas-ferias/solicitacoes/{id}/cancelar` | Desiste de um pedido ainda em análise | Estar logado |
+| `GET` | `/aprovacoes?filtro=TODOS\|COM_CONFLITO\|SEM_CONFLITO` | A fila de aprovação (o gestor vê a própria equipe; o ADMIN, a empresa toda) | `SOLICITACAO_APROVAR` |
+| `GET` | `/aprovacoes/{id}` | O checklist completo de um pedido e quem estará fora | `SOLICITACAO_APROVAR` |
+| `POST` | `/aprovacoes/{id}/aprovar` | Aprova. Com pontos de atenção, exige `{"mesmoAssim": true, "mensagem": "motivo"}` | `SOLICITACAO_APROVAR` |
+| `POST` | `/aprovacoes/{id}/recusar` | Recusa, sempre com `{"mensagem"}` | `SOLICITACAO_APROVAR` |
+| `POST` | `/aprovacoes/aprovar-sem-conflito` | Aprova de uma vez os pedidos sem alerta | `SOLICITACAO_APROVAR` |
+| `GET` `POST` | `/confirmacoes-rh`, `/confirmacoes-rh/{id}/confirmar`, `/confirmacoes-rh/{id}/recusar` | A etapa do RH, quando a EMP-06 está ligada | `SOLICITACAO_CONFIRMAR_RH` |
+
+**Ciclo de vida de um pedido:** `AGUARDANDO_GESTOR` → (`AGUARDANDO_RH`, se a EMP-06 estiver ligada) → `APROVADA`. Ele também pode terminar `RECUSADA` (pelo gestor ou pelo RH, sempre com motivo) ou `CANCELADA` (pelo colaborador, enquanto está em análise). Na hora de aprovar, o pedido é reavaliado com as regras do momento, porque o cenário pode ter mudado desde o envio.
 
 As regras de férias ficam em classes de domínio puras, testadas com TDD: [`CalendarioAquisitivo`](backend/src/main/java/br/com/crona/ferias/CalendarioAquisitivo.java), [`SaldoDoPeriodo`](backend/src/main/java/br/com/crona/ferias/SaldoDoPeriodo.java), [`ValidadorDeFerias`](backend/src/main/java/br/com/crona/ferias/validacao/ValidadorDeFerias.java) (CLT) e [`ValidadorDaEquipe`](backend/src/main/java/br/com/crona/ferias/validacao/ValidadorDaEquipe.java) (regras da empresa). Cada verificação cita o código da regra em [regras-de-negocio.md](docs/regras-de-negocio.md).
 
@@ -120,7 +131,7 @@ As regras de férias ficam em classes de domínio puras, testadas com TDD: [`Cal
 | Perfil | Permissões |
 |---|---|
 | Colaborador | `DEPARTAMENTO_VER` |
-| Gestor | `DEPARTAMENTO_VER`, `COLABORADOR_VER` |
+| Gestor | `DEPARTAMENTO_VER`, `COLABORADOR_VER`, `SOLICITACAO_APROVAR` |
 | Administrador | Todas |
 
 Os erros seguem o padrão ProblemDetail (RFC 9457): `400` dado inválido, `401` sem login ou token inválido, `403` sem permissão, `404` não encontrado, `409` conflito, `422` regra de negócio.

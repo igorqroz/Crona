@@ -80,6 +80,13 @@ public class TratadorDeErros extends ResponseEntityExceptionHandler {
         return problema(HttpStatus.UNPROCESSABLE_CONTENT, "Regra de negócio", e.getMessage());
     }
 
+    @ExceptionHandler(PedidoComImpedimentosException.class)
+    public ProblemDetail pedidoComImpedimentos(PedidoComImpedimentosException e) {
+        var problema = problema(HttpStatus.UNPROCESSABLE_CONTENT, "Regra de negócio", e.getMessage());
+        problema.setProperty("verificacoes", e.getVerificacoes());
+        return problema;
+    }
+
     @ExceptionHandler(ParametroInvalidoException.class)
     public ProblemDetail parametroInvalido(ParametroInvalidoException e) {
         return problema(HttpStatus.BAD_REQUEST, "Dados inválidos", e.getMessage());

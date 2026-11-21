@@ -65,17 +65,33 @@ public class SimulacaoService {
         this.relogio = relogio;
     }
 
+    /** A simulação da tela: o pedido de quem está logado, ainda não enviado. */
     @Transactional(readOnly = true)
     public SimulacaoResposta simular(SimulacaoRequisicao pedido) {
+        return paraResposta(avaliar(colaboradorLogado(), pedido, null));
+    }
+
+    /** O resultado completo de uma avaliação, para quem está dentro do pacote (envio e aprovação). */
+    record Avaliacao(ResultadoDaValidacao resultado, PeriodoComSaldo periodo,
+                     List<DadosDaEquipe.Ausencia> colegasNoPeriodo) {
+    }
+
+    /**
+     * O coração da simulação, reaproveitado no envio (Fase 5) e na aprovação do gestor.
+     *
+     * @param ignorarSolicitacaoId ao reavaliar um pedido que JÁ existe, ele não pode contar contra
+     *                             ele mesmo (no saldo e na divisão em partes). Nulo para pedido novo.
+     */
+    @Transactional(readOnly = true)
+    Avaliacao avaliar(Colaborador colaborador, SimulacaoRequisicao pedido, Long ignorarSolicitacaoId) {
         Long empresaId = empresaAtual.id();
-        Colaborador colaborador = colaboradorRepository.findByIdAndEmpresaId(usuarioAtual.id(), empresaId)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Colaborador não encontrado."));
         LocalDate hoje = LocalDate.now(relogio);
         var config = configuracaoRepository.findByEmpresaId(empresaId).orElseGet(ConfiguracaoFerias::padrao);
 
         // 1. Regras do próprio pedido (CLT)
-        var escolhido = escolherPeriodo(colaborador.getId(), pedido.periodo());
-        var resultadoIndividual = ValidadorDeFerias.validar(dadosDoPedido(pedido, escolhido, hoje, empresaId, config));
+        var escolhido = escolherPeriodo(colaborador.getId(), pedido.periodo(), ignorarSolicitacaoId);
+        var resultadoIndividual = ValidadorDeFerias.validar(
+                dadosDoPedido(pedido, escolhido, hoje, empresaId, config, ignorarSolicitacaoId));
 
         // 2. Regras da equipe e da empresa (EMP), nas datas já calculadas
         var resultadoEquipe = ValidadorDaEquipe.validar(
@@ -86,17 +102,27 @@ public class SimulacaoService {
                 resultadoIndividual.voltaAoTrabalho(),
                 Stream.concat(resultadoIndividual.verificacoes().stream(), resultadoEquipe.verificacoes().stream()).toList());
 
+        return new Avaliacao(resultado, escolhido, resultadoEquipe.colegasNoPeriodo());
+    }
+
+    SimulacaoResposta paraResposta(Avaliacao avaliacao) {
+        var resultado = avaliacao.resultado();
         return new SimulacaoResposta(resultado.inicio(), resultado.fim(), resultado.voltaAoTrabalho(),
-                escolhido.periodo().getNumero(), escolhido.saldo().livres(), resultado.podeEnviar(), resumo(resultado),
-                resultado.verificacoes(),
-                resultadoEquipe.colegasNoPeriodo().stream()
+                avaliacao.periodo().periodo().getNumero(), avaliacao.periodo().saldo().livres(),
+                resultado.podeEnviar(), resumo(resultado), resultado.verificacoes(),
+                avaliacao.colegasNoPeriodo().stream()
                         .map(a -> new SimulacaoResposta.ColegaFora(a.nome(), a.inicio(), a.fim(), a.pendente()))
                         .toList());
     }
 
+    Colaborador colaboradorLogado() {
+        return colaboradorRepository.findByIdAndEmpresaId(usuarioAtual.id(), empresaAtual.id())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Colaborador não encontrado."));
+    }
+
     /** O período informado, ou o mais antigo que já pode ser usado e ainda tem dias livres. */
-    private PeriodoComSaldo escolherPeriodo(Long colaboradorId, Integer numero) {
-        var periodos = periodoService.periodosComSaldo(colaboradorId);
+    private PeriodoComSaldo escolherPeriodo(Long colaboradorId, Integer numero, Long ignorarSolicitacaoId) {
+        var periodos = periodoService.periodosComSaldo(colaboradorId, ignorarSolicitacaoId);
         if (periodos.isEmpty()) {
             throw new RegraVioladaException("Você ainda não tem período aquisitivo.");
         }
@@ -111,10 +137,12 @@ public class SimulacaoService {
     }
 
     private DadosParaValidar dadosDoPedido(SimulacaoRequisicao pedido, PeriodoComSaldo escolhido, LocalDate hoje,
-                                           Long empresaId, ConfiguracaoFerias config) {
+                                           Long empresaId, ConfiguracaoFerias config, Long ignorarSolicitacaoId) {
         var periodo = escolhido.periodo();
         var outrosPedidos = solicitacaoRepository.findByPeriodoAquisitivoIdAndStatusIn(
-                periodo.getId(), StatusSolicitacao.EM_ANDAMENTO_OU_APROVADA);
+                        periodo.getId(), StatusSolicitacao.EM_ANDAMENTO_OU_APROVADA).stream()
+                .filter(s -> !s.getId().equals(ignorarSolicitacaoId))
+                .toList();
 
         // Feriados do início até um pouco depois do fim (para calcular a volta ao trabalho).
         LocalDate ateQuando = pedido.inicio().plusDays(pedido.diasGozo() + 10L);

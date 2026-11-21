@@ -20,15 +20,17 @@ public enum Permissao {
     DEPARTAMENTO_VER,
     DEPARTAMENTO_GERENCIAR,     // criar, renomear, excluir
     COLABORADOR_VER,
-    COLABORADOR_GERENCIAR;      // cadastrar, alterar, desativar, reativar
+    COLABORADOR_GERENCIAR,      // cadastrar, alterar, desativar, reativar
+    SOLICITACAO_APROVAR,        // aprovar e recusar pedidos de férias (da própria equipe, ou de todos se ADMIN)
+    SOLICITACAO_CONFIRMAR_RH;   // EMP-06: confirmar pedidos já aprovados pelo gestor
 
     /** O mapa perfil → permissões. */
     public static Set<Permissao> doPerfil(Perfil perfil) {
         return switch (perfil) {
             // Colaborador: vê os departamentos (para escolher datas, ver a equipe...).
             case COLABORADOR -> EnumSet.of(DEPARTAMENTO_VER);
-            // Gestor: também consulta colaboradores (a equipe dele, para aprovar férias).
-            case GESTOR -> EnumSet.of(DEPARTAMENTO_VER, COLABORADOR_VER);
+            // Gestor: consulta colaboradores e aprova os pedidos da própria equipe.
+            case GESTOR -> EnumSet.of(DEPARTAMENTO_VER, COLABORADOR_VER, SOLICITACAO_APROVAR);
             // Administrador (RH): tudo.
             case ADMIN -> EnumSet.allOf(Permissao.class);
         };

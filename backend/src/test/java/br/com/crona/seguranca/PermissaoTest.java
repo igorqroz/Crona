@@ -20,11 +20,12 @@ class PermissaoTest {
     }
 
     @Test
-    @DisplayName("GESTOR consulta, mas não gerencia nada")
+    @DisplayName("GESTOR consulta e aprova férias, mas não gerencia cadastros nem confirma pelo RH")
     void gestor() {
         assertThat(Permissao.doPerfil(Perfil.GESTOR))
-                .contains(Permissao.DEPARTAMENTO_VER, Permissao.COLABORADOR_VER)
-                .doesNotContain(Permissao.DEPARTAMENTO_GERENCIAR, Permissao.COLABORADOR_GERENCIAR);
+                .contains(Permissao.DEPARTAMENTO_VER, Permissao.COLABORADOR_VER, Permissao.SOLICITACAO_APROVAR)
+                .doesNotContain(Permissao.DEPARTAMENTO_GERENCIAR, Permissao.COLABORADOR_GERENCIAR,
+                        Permissao.SOLICITACAO_CONFIRMAR_RH);
     }
 
     @Test
