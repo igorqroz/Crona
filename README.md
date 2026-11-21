@@ -54,7 +54,7 @@ Todas as regras estão detalhadas em [docs/regras-de-negocio.md](docs/regras-de-
 | Persistência | Spring Data JPA / Hibernate | Mapeamento entre objetos Java e tabelas |
 | Segurança | Spring Security + JWT | Login e permissões por perfil |
 | Testes | JUnit 5 + Mockito | Cada regra de negócio vira um teste |
-| Front-end | Angular + TypeScript | Interface web |
+| Front-end | Angular 22 + TypeScript | Interface web (signals, componentes standalone, testes com Vitest) |
 | Relatórios | JasperReports | Recibo de férias em PDF |
 
 ## Roadmap
@@ -69,6 +69,10 @@ O projeto é construído em fases, e cada fase entrega algo que funciona.
 - [x] **Fase 5 — Solicitação e aprovação:** fluxo completo do pedido até a aprovação do gestor
 - [x] **Fase 6 — Negociação:** proposta de troca entre colegas, contraproposta e aprovação
 - [ ] **Fase 7 — Front-end Angular:** telas do [redesign](docs/redesign.md), versão para computador (celular fica para depois)
+  - [x] 7a: projeto Angular 22, login e tela Início do colaborador
+  - [ ] 7b: solicitar férias (calendário)
+  - [ ] 7c: trocas de período
+  - [ ] 7d: aprovações do gestor
 - [ ] **Fase 8 — Extras:** recibo em PDF, notificações e calendário do departamento
 - [ ] **Fase 9 — Entrega:** Docker, CI com GitHub Actions e deploy
 
@@ -92,6 +96,20 @@ O projeto é construído em fases, e cada fase entrega algo que funciona.
    ```
 
 Para rodar os testes automatizados: `./mvnw test` (dentro de `backend/`).
+
+### Front-end (Angular)
+
+**Pré-requisito:** Node.js 24.15 ou mais novo.
+
+Com a API rodando (passo 2 acima), em outro terminal:
+```bash
+cd frontend
+npm install     # só na primeira vez
+npm start       # abre em http://localhost:4200
+```
+Entre com um dos usuários dos dados de exemplo (por exemplo `ana.lima@demo.crona` / `crona123`). Em desenvolvimento, o Angular repassa as chamadas `/api/...` para a API na porta 8080 ([`proxy.conf.json`](frontend/proxy.conf.json)), então não é preciso configurar CORS.
+
+Testes do front (Vitest): `npm test` (dentro de `frontend/`).
 
 **Dados de exemplo** (só no perfil `dev`): a *Empresa Demo*, 5 departamentos e 6 colaboradores com os nomes do redesign, cada um com os seus períodos aquisitivos. Todos usam a senha `crona123`: Rafael Costa (ADMIN), Roberto Neves (GESTOR), Ana Lima, Bruno Teles, Marina Jorge e Lucas Prado (COLABORADOR). Os e-mails seguem o padrão `nome.sobrenome@demo.crona`.
 

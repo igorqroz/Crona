@@ -1,0 +1,169 @@
+/*
+ * Estilos globais do Crona.
+ *
+ * Os TOKENS (variáveis CSS) vêm do redesign (docs/redesign.md, seção 3): mudar uma cor aqui
+ * muda o sistema inteiro. Os componentes usam var(--cor-...) em vez de escrever a cor de novo.
+ * Aqui ficam só as peças usadas em várias telas (botão, cartão, selo); o resto fica no CSS
+ * de cada componente.
+ */
+:root {
+  /* Marca */
+  --cor-primaria: #1B6FD4;
+  --cor-primaria-escura: #14569F;
+  --cor-primaria-clara: #EAF2FD;
+  --cor-foco: #9DBDEB;
+
+  /* Texto */
+  --cor-texto: #0D1B3E;
+  --cor-texto-secundario: #3D4A66;
+  --cor-texto-suave: #5B6680;
+
+  /* Superfícies */
+  --cor-fundo: #F4F6FA;
+  --cor-superficie: #FFFFFF;
+  --cor-borda: #E3E8F0;
+  --cor-borda-forte: #CDD5E1;
+  --cor-hover: #EEF2F8;
+
+  /* Estados */
+  --cor-alerta: #E8792B;
+  --cor-alerta-texto: #A84B07;
+  --cor-alerta-fundo: #FFF1E5;
+  --cor-sucesso: #067A57;
+  --cor-sucesso-texto: #067A57;
+  --cor-sucesso-fundo: #E6F5EE;
+
+  /* Forma */
+  --raio-pequeno: 8px;
+  --raio: 12px;
+  --raio-cartao: 16px;
+  --raio-pilula: 999px;
+  --altura-toque: 44px;       /* todo botão tem pelo menos 44px: bom para o dedo */
+
+  /* Fontes */
+  --fonte-titulo: 'Manrope', 'Segoe UI', system-ui, sans-serif;
+  --fonte-texto: 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  font-family: var(--fonte-texto);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--cor-primaria);
+}
+
+a:hover {
+  color: var(--cor-primaria-escura);
+}
+
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------- botões */
+
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--altura-toque);
+  padding: 0 18px;
+  border: none;
+  border-radius: var(--raio);
+  font-family: var(--fonte-texto);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.botao:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.botao-primario {
+  background: var(--cor-primaria);
+  color: #FFFFFF;
+}
+
+.botao-primario:hover:not(:disabled) {
+  background: var(--cor-primaria-escura);
+  color: #FFFFFF;
+}
+
+.botao-secundario {
+  border: 1px solid var(--cor-borda-forte);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+}
+
+.botao-secundario:hover:not(:disabled) {
+  border-color: #B9CBE6;
+  color: var(--cor-texto);
+}
+
+/* ---------------------------------------------------------------- cartão */
+
+.cartao {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+}
+
+.cartao-titulo {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  color: var(--cor-texto);
+}
+
+.texto-suave {
+  font-size: 13px;
+  color: var(--cor-texto-suave);
+}
+
+/* ---------------------------------------------------------------- selo ("Nova", "Pendente") */
+
+.selo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-primaria-clara);
+  color: var(--cor-primaria-escura);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------- aviso (fundo laranja) */
+
+.aviso {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--raio);
+  background: var(--cor-alerta-fundo);
+  color: #6E3105;
+  font-size: 13px;
+}

@@ -1,0 +1,191 @@
+<header class="topo">
+  <div class="saudacao">
+    <span class="data">{{ hoje }}</span>
+    <h1>Olá, {{ primeiroNome() }}</h1>
+  </div>
+  <a class="botao botao-primario" routerLink="/solicitar">
+    <crona-icone nome="sol" [tamanho]="18" />
+    <span>Solicitar férias</span>
+  </a>
+</header>
+
+@switch (estado()) {
+  @case ('carregando') {
+    <p class="texto-suave">Carregando…</p>
+  }
+
+  @case ('erro') {
+    <div class="aviso" role="alert">
+      <crona-icone nome="alerta" [tamanho]="18" [espessura]="2" />
+      <span>Não foi possível carregar as suas férias. <a href="" (click)="$event.preventDefault(); carregar()">Tentar de novo</a></span>
+    </div>
+  }
+
+  @case ('pronto') {
+    <div class="linha">
+      <!-- ============================================================ saldo -->
+      <section class="saldo" aria-labelledby="titulo-saldo">
+        <svg class="ondas" aria-hidden="true" width="420" height="120" viewBox="0 0 420 120" fill="none">
+          <path d="M0 40c35-24 70-24 105 0s70 24 105 0 70-24 105 0 70 24 105 0" stroke="#7FB2F0" stroke-width="10" stroke-linecap="round" />
+          <path d="M0 80c35-24 70-24 105 0s70 24 105 0 70-24 105 0 70 24 105 0" stroke="#7FB2F0" stroke-width="10" stroke-linecap="round" />
+        </svg>
+
+        @if (periodo(); as p) {
+          <div class="saldo-topo">
+            <div class="saldo-numero">
+              <h2 id="titulo-saldo">Seu saldo de férias</h2>
+              <div><strong>{{ saldo() }}</strong> <span class="dias">dias</span></div>
+              @if (p.situacao === 'A_VENCER') {
+                <span class="selo selo-alerta">Vence em breve</span>
+              } @else if (p.situacao === 'VENCIDO') {
+                <span class="selo selo-alerta">Vencido: marque o quanto antes</span>
+              } @else if (p.situacao === 'EM_AQUISICAO') {
+                <span class="selo selo-claro">Em aquisição</span>
+              }
+            </div>
+            <div class="saldo-datas">
+              <span>Período aquisitivo</span>
+              <strong>{{ diaMesAno(p.inicio) }} – {{ diaMesAno(p.fim) }}</strong>
+              @if (p.situacao === 'EM_AQUISICAO') {
+                <span class="espaco">Completa em</span>
+                <strong>{{ diaMesAno(p.fim) }}</strong>
+              } @else {
+                <span class="espaco">Tire até</span>
+                <strong>{{ diaMesAno(p.tirarAte) }}</strong>
+              }
+            </div>
+          </div>
+
+          <div class="saldo-barra">
+            <div class="blocos" aria-hidden="true">
+              @for (bloco of blocos(); track $index) {
+                <span [class]="bloco"></span>
+              }
+            </div>
+            <div class="legenda">
+              @if (p.aprovados > 0) {
+                <span><i class="aprovado"></i>{{ p.aprovados }} já aprovados</span>
+              }
+              @if (p.emPedido > 0) {
+                <span><i class="pedido"></i>{{ p.emPedido }} em pedido</span>
+              }
+              <span><i class="livre"></i>{{ p.livres }} livres para planejar</span>
+            </div>
+          </div>
+        } @else {
+          <h2 id="titulo-saldo">Seu saldo de férias</h2>
+          <p>Você ainda não tem período aquisitivo. Ele começa a contar na data de admissão.</p>
+        }
+      </section>
+
+      <!-- ============================================================ pedido -->
+      <section class="cartao cartao-pedido" aria-labelledby="titulo-pedido">
+        @if (pedido(); as ped) {
+          <div class="cartao-cabecalho">
+            <h2 class="cartao-titulo" id="titulo-pedido">Seu pedido</h2>
+            <span class="intervalo">{{ intervalo(ped.inicio, ped.fim) }} · {{ ped.diasGozo }} dias</span>
+          </div>
+          <ol class="passos">
+            @for (passo of passos(); track passo.titulo; let ultimo = $last) {
+              <li [class]="passo.estado">
+                <div class="marcador">
+                  <span class="bolinha">
+                    @if (passo.estado === 'feito') {
+                      <crona-icone nome="check" [tamanho]="15" [espessura]="2.6" />
+                    }
+                  </span>
+                  @if (!ultimo) {
+                    <span class="traco"></span>
+                  }
+                </div>
+                <div class="passo-texto">
+                  <span class="passo-titulo">{{ passo.titulo }}</span>
+                  <span class="passo-detalhe">{{ passo.detalhe }}</span>
+                </div>
+              </li>
+            }
+          </ol>
+          @if (ped.mensagemDecisao) {
+            <p class="recado">“{{ ped.mensagemDecisao }}”</p>
+          }
+        } @else {
+          <h2 class="cartao-titulo" id="titulo-pedido">Seu pedido</h2>
+          <p class="texto-suave vazio">Nenhum pedido em andamento.</p>
+          <a class="botao botao-secundario" routerLink="/solicitar">Planejar férias</a>
+        }
+      </section>
+    </div>
+
+    <div class="grade">
+      <!-- ============================================================ proposta de troca -->
+      @if (proposta(); as troca) {
+        <section class="cartao" aria-labelledby="titulo-troca">
+          <div class="cartao-cabecalho em-linha">
+            <h2 class="cartao-titulo" id="titulo-troca">Proposta de troca</h2>
+            <span class="selo">{{ troca.contraproposta ? 'Contraproposta' : 'Nova' }}</span>
+          </div>
+
+          <div class="pessoa">
+            <crona-avatar [nome]="troca.autor.nome" [tamanho]="40" />
+            <div class="pessoa-texto">
+              <span class="pessoa-nome">{{ troca.autor.nome }}</span>
+              <span class="texto-suave">{{ haQuanto(troca.feitaEm) }}</span>
+            </div>
+          </div>
+
+          <div class="comparacao">
+            <div class="caixa">
+              <span>Você hoje</span>
+              <strong>{{ troca.minhasHoje ?? 'Sem férias marcadas' }}</strong>
+            </div>
+            <crona-icone nome="troca" [tamanho]="20" class="seta" />
+            <div class="caixa caixa-nova">
+              <span>Você ficaria com</span>
+              <strong>{{ troca.minhasNovas }}</strong>
+            </div>
+          </div>
+
+          @if (troca.mensagem) {
+            <p class="recado">“{{ troca.mensagem }}”</p>
+          }
+
+          @if (erroDaTroca(); as mensagem) {
+            <div class="aviso" role="alert">{{ mensagem }}</div>
+          }
+
+          <div class="acoes">
+            <button class="botao botao-primario" type="button" [disabled]="respondendo()" (click)="aceitarTroca(troca.negociacao.id)">
+              Aceitar troca
+            </button>
+            <button class="botao botao-secundario" type="button" [disabled]="respondendo()" (click)="recusarTroca(troca.negociacao.id)">
+              Recusar
+            </button>
+          </div>
+        </section>
+      }
+
+      <!-- ============================================================ equipe -->
+      <section class="cartao equipe" aria-labelledby="titulo-equipe">
+        <div class="cartao-cabecalho">
+          <h2 class="cartao-titulo" id="titulo-equipe">Férias marcadas na equipe</h2>
+          <span class="texto-suave">Colegas com o mesmo gestor</span>
+        </div>
+        @if (equipe().length > 0) {
+          <ul>
+            @for (ferias of equipe(); track ferias.pedidoId) {
+              <li>
+                <crona-avatar [nome]="ferias.colaborador.nome" />
+                <div class="pessoa-texto">
+                  <span class="pessoa-nome">{{ ferias.colaborador.nome }}</span>
+                  <span class="intervalo">{{ intervalo(ferias.inicio, ferias.fim) }}</span>
+                </div>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="texto-suave vazio">Ninguém da equipe tem férias marcadas.</p>
+        }
+      </section>
+    </div>
+  }
+}
