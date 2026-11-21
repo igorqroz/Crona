@@ -1,61 +1,21 @@
 package br.com.crona.ferias;
 
-import br.com.crona.ApiTestBase;
-import br.com.crona.compartilhado.RelogioConfig;
-import com.jayway.jsonpath.JsonPath;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.ResultActions;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * A simulação de ponta a ponta, com o banco de verdade.
- *
- * Para os testes não dependerem da data em que rodam, cada um cria a "Bia": uma colaboradora
- * da Engenharia admitida há 18 meses. Assim ela sempre tem 1 período completo, com 30 dias
- * livres e 6 meses de prazo, não importa o dia de hoje.
- */
-class SimulacaoApiTest extends ApiTestBase {
-
-    @Autowired
-    private JdbcTemplate jdbc;
-    @Autowired
-    private FeriadoRepository feriadoRepository;
-
-    private Long biaId;
-    private LocalDate segunda;      // uma segunda-feira daqui a uns 45 dias, longe de feriados
-
-    @BeforeEach
-    void criarBia() throws Exception {
-        LocalDate hoje = LocalDate.now(RelogioConfig.FUSO);
-        Long engenharia = jdbc.queryForObject("SELECT id FROM departamento WHERE nome = 'Engenharia' AND empresa_id = ?",
-                Long.class, empresaDemo);
-
-        var json = mockMvc.perform(post("/colaboradores").contentType(MediaType.APPLICATION_JSON).content("""
-                        {"nome": "Bia Teste", "email": "bia.teste@demo.crona", "senha": "segredo123",
-                         "perfil": "COLABORADOR", "dataAdmissao": "%s", "departamentoId": %d}
-                        """.formatted(hoje.minusMonths(18), engenharia)))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
-        biaId = ((Number) JsonPath.read(json, "$.id")).longValue();
-
-        segunda = hoje.plusDays(45).with(TemporalAdjusters.next(DayOfWeek.MONDAY));
-        while (!feriadoRepository.datasEntre(empresaDemo, segunda, segunda.plusDays(2)).isEmpty()) {
-            segunda = segunda.plusWeeks(1);
-        }
-    }
+/** A simulação de ponta a ponta, com o banco de verdade e a Bia (ver ComBiaTestBase). */
+class SimulacaoApiTest extends ComBiaTestBase {
 
     private ResultActions simular(LocalDate inicio, int diasGozo) throws Exception {
         return mockMvc.perform(post("/minhas-ferias/simulacao").with(como(biaId, "COLABORADOR"))
@@ -126,8 +86,8 @@ class SimulacaoApiTest extends ApiTestBase {
 
         simular(segunda, 15)
                 .andExpect(jsonPath("$.podeEnviar").value(false))
-                .andExpect(jsonPath("$.verificacoes[?(@.regra == 'EMP-05')].mensagem").value(
-                        org.hamcrest.Matchers.hasItem(org.hamcrest.Matchers.containsString("Inventário anual"))));
+                .andExpect(jsonPath("$.verificacoes[?(@.regra == 'EMP-05')].mensagem")
+                        .value(hasItem(containsString("Inventário anual"))));
     }
 
     @Test

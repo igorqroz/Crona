@@ -16,13 +16,16 @@ public interface SolicitacaoFeriasRepository extends JpaRepository<SolicitacaoFe
      */
     @Query("""
             select new br.com.crona.ferias.ConsumoPorPeriodo(
-                       s.periodoAquisitivo.id, s.diasGozo + s.diasAbono, s.status)
+                       s.id, s.periodoAquisitivo.id, s.diasGozo + s.diasAbono, s.status)
             from SolicitacaoFerias s
             where s.colaborador.id = :colaboradorId
             """)
     List<ConsumoPorPeriodo> consumosDoColaborador(@Param("colaboradorId") Long colaboradorId);
 
     boolean existsByPeriodoAquisitivoId(Long periodoAquisitivoId);
+
+    // Os pedidos de quem está logado, do mais recente para o mais antigo.
+    List<SolicitacaoFerias> findByColaboradorIdOrderByDataInicioDesc(Long colaboradorId);
 
     List<SolicitacaoFerias> findByPeriodoAquisitivoIdAndStatusIn(Long periodoAquisitivoId,
                                                                  Collection<StatusSolicitacao> status);

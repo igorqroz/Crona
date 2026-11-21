@@ -130,7 +130,16 @@ public class PeriodoAquisitivoService {
 
     @Transactional(readOnly = true)
     List<PeriodoComSaldo> periodosComSaldo(Long colaboradorId) {
-        var consumos = consumosPorPeriodo(colaboradorId);
+        return periodosComSaldo(colaboradorId, null);
+    }
+
+    /**
+     * @param ignorarSolicitacaoId um pedido para NÃO contar no saldo. Ao reavaliar um pedido que já
+     *                             existe (ex.: na aprovação), os dias dele não podem contar duas vezes.
+     */
+    @Transactional(readOnly = true)
+    List<PeriodoComSaldo> periodosComSaldo(Long colaboradorId, Long ignorarSolicitacaoId) {
+        var consumos = consumosPorPeriodo(colaboradorId, ignorarSolicitacaoId);
         return periodoRepository.findByColaboradorIdOrderByNumeroAsc(colaboradorId).stream()
                 .map(periodo -> new PeriodoComSaldo(periodo, saldo(periodo, consumos)))
                 .toList();
@@ -149,7 +158,12 @@ public class PeriodoAquisitivoService {
 
     /** Uma consulta só para todos os pedidos do colaborador, agrupados por período. */
     private Map<Long, List<Consumo>> consumosPorPeriodo(Long colaboradorId) {
+        return consumosPorPeriodo(colaboradorId, null);
+    }
+
+    private Map<Long, List<Consumo>> consumosPorPeriodo(Long colaboradorId, Long ignorarSolicitacaoId) {
         return solicitacaoRepository.consumosDoColaborador(colaboradorId).stream()
+                .filter(c -> !c.solicitacaoId().equals(ignorarSolicitacaoId))
                 .collect(Collectors.groupingBy(ConsumoPorPeriodo::periodoId,
                         Collectors.mapping(c -> new Consumo(c.dias(), c.status()), Collectors.toList())));
     }
