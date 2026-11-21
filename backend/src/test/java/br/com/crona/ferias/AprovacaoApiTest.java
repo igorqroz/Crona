@@ -154,7 +154,10 @@ class AprovacaoApiTest extends ComBiaTestBase {
             Long pedido = biaPede(segunda, 15);
 
             mockMvc.perform(post("/aprovacoes/" + pedido + "/recusar").with(como(robertoId, "GESTOR"))
-                            .contentType(MediaType.APPLICATION_JSON).content(json(false, "Entrega do projeto nessa semana")))
+                            // Só a mensagem, como o README documenta (sem "mesmoAssim").
+                            .contentType(MediaType.APPLICATION_JSON).content("""
+                                    {"mensagem": "Entrega do projeto nessa semana"}
+                                    """))
                     .andExpect(jsonPath("$.status").value("RECUSADA"));
 
             mockMvc.perform(get("/minhas-ferias/solicitacoes").with(como(biaId, "COLABORADOR")))
