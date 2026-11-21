@@ -68,6 +68,12 @@ public final class ValidadorDeFerias {
 
     private static Verificacao prazoDeConcessao(DadosParaValidar dados, LocalDate fim) {
         LocalDate limite = dados.periodo().limiteConcessao();
+        // Período que JÁ venceu: as férias continuam devidas (a lei manda conceder, pagando em dobro).
+        // Bloquear aqui deixaria esses dias presos para sempre; o certo é avisar e incentivar a tirar logo.
+        if (dados.periodo().situacao() == Situacao.VENCIDO) {
+            return atencao("CLT-03", "Este período venceu em " + limite.format(DATA)
+                    + ": as férias serão pagas em dobro. O ideal é tirar o quanto antes.");
+        }
         if (fim.isAfter(limite)) {
             return impedimento("CLT-03", "As férias iriam até " + fim.format(DATA)
                     + ", depois do prazo deste período (" + limite.format(DATA)

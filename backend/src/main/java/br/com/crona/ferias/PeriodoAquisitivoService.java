@@ -124,10 +124,21 @@ public class PeriodoAquisitivoService {
 
     // ------------------------------------------------------------------ auxiliares
 
-    private List<PeriodoAquisitivoResposta> comSaldo(Long colaboradorId) {
+    /** Um período com o saldo calculado, para uso dentro do pacote (ex.: a simulação). */
+    record PeriodoComSaldo(PeriodoAquisitivo periodo, SaldoDoPeriodo saldo) {
+    }
+
+    @Transactional(readOnly = true)
+    List<PeriodoComSaldo> periodosComSaldo(Long colaboradorId) {
         var consumos = consumosPorPeriodo(colaboradorId);
         return periodoRepository.findByColaboradorIdOrderByNumeroAsc(colaboradorId).stream()
-                .map(periodo -> PeriodoAquisitivoResposta.de(periodo, saldo(periodo, consumos)))
+                .map(periodo -> new PeriodoComSaldo(periodo, saldo(periodo, consumos)))
+                .toList();
+    }
+
+    private List<PeriodoAquisitivoResposta> comSaldo(Long colaboradorId) {
+        return periodosComSaldo(colaboradorId).stream()
+                .map(p -> PeriodoAquisitivoResposta.de(p.periodo(), p.saldo()))
                 .toList();
     }
 

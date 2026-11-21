@@ -15,4 +15,8 @@ public enum StatusSolicitacao {
     public boolean consomeSaldo() {
         return this == AGUARDANDO_GESTOR || this == AGUARDANDO_RH || this == APROVADA;
     }
+
+    /** Os status que "ocupam" dias: valem para saldo, divisão e pessoas fora. */
+    public static final java.util.Set<StatusSolicitacao> EM_ANDAMENTO_OU_APROVADA =
+            java.util.EnumSet.of(AGUARDANDO_GESTOR, AGUARDANDO_RH, APROVADA);
 }

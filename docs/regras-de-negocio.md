@@ -51,6 +51,7 @@ Ao conferir um pedido, cada regra quebrada gera um de dois resultados:
 |---|---|---|
 | Saldo insuficiente no período aquisitivo | Impedimento | Não existe dia para tirar |
 | CLT-03 Fim das férias depois do prazo de concessão | Impedimento | Gera pagamento em dobro |
+| CLT-03 Período que **já venceu** | Ponto de atenção | As férias continuam devidas (pagas em dobro); bloquear deixaria os dias presos para sempre |
 | CLT-04 Divisão inválida (menos de 5 dias, mais de 3 partes, sem uma parte de 14+) | Impedimento | Proibido pela CLT |
 | CLT-05 Início nos 2 dias antes de folga ou feriado | Impedimento | Proibido pela CLT |
 | CLT-06 Abono acima de 1/3 do direito | Impedimento | Proibido pela CLT |

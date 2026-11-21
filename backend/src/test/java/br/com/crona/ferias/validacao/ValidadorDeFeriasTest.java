@@ -112,6 +112,17 @@ class ValidadorDeFeriasTest {
         assertThat(verificacao.mensagem()).contains("01/04/2026");
     }
 
+    @Test
+    @DisplayName("CLT-03: período JÁ vencido continua podendo ser tirado (e deve!), com aviso de pagamento em dobro")
+    void periodoJaVencido() {
+        periodo = new Periodo(1, LocalDate.of(2025, 1, 31), LocalDate.of(2026, 1, 31), 30, 30, Situacao.VENCIDO);
+
+        var resultado = validar();
+        assertThat(resultado.daRegra("CLT-03").resultado()).isEqualTo(Resultado.ATENCAO);
+        assertThat(resultado.daRegra("CLT-03").mensagem()).contains("dobro");
+        assertThat(resultado.podeEnviar()).isTrue();
+    }
+
     // ------------------------------------------------------------------ CLT-04: divisão
 
     @Nested
