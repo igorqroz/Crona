@@ -65,7 +65,7 @@ O projeto é construído em fases, e cada fase entrega algo que funciona.
 - [x] **Fase 1 — Modelo de domínio:** entidades, relacionamentos e banco PostgreSQL com Flyway
 - [x] **Fase 2 — Primeira API:** projeto Spring Boot, cadastro de departamentos e colaboradores, primeiros testes
 - [x] **Fase 3 — Autenticação:** login com Spring Security + JWT e permissões por perfil
-- [ ] **Fase 4 — Regras de férias:** períodos aquisitivos, saldo, divisão das férias e regras da empresa (com TDD)
+- [x] **Fase 4 — Regras de férias:** períodos aquisitivos, saldo, divisão das férias e regras da empresa (com TDD)
 - [ ] **Fase 5 — Solicitação e aprovação:** fluxo completo do pedido até a aprovação do gestor
 - [ ] **Fase 6 — Negociação:** proposta de troca entre colegas, contraproposta e aprovação
 - [ ] **Fase 7 — Front-end Angular:** telas do [redesign](docs/redesign.md), versão para computador (celular fica para depois)
@@ -85,11 +85,15 @@ O projeto é construído em fases, e cada fase entrega algo que funciona.
    cd backend
    ./mvnw spring-boot:run
    ```
-3. Teste: abra `http://localhost:8080/colaboradores` no navegador.
+3. Teste fazendo login e usando o token (exemplo no PowerShell):
+   ```powershell
+   $login = Invoke-RestMethod -Method Post -Uri http://localhost:8080/auth/login -ContentType "application/json" -Body '{"email":"ana.lima@demo.crona","senha":"crona123"}'
+   Invoke-RestMethod -Uri http://localhost:8080/minhas-ferias/periodos-aquisitivos -Headers @{ Authorization = "Bearer $($login.token)" }
+   ```
 
 Para rodar os testes automatizados: `./mvnw test` (dentro de `backend/`).
 
-**Dados de exemplo** (só no perfil `dev`): a *Empresa Demo*, 5 departamentos e 6 colaboradores com os nomes do redesign. Todos usam a senha `crona123`.
+**Dados de exemplo** (só no perfil `dev`): a *Empresa Demo*, 5 departamentos e 6 colaboradores com os nomes do redesign, cada um com os seus períodos aquisitivos. Todos usam a senha `crona123`: Rafael Costa (ADMIN), Roberto Neves (GESTOR), Ana Lima, Bruno Teles, Marina Jorge e Lucas Prado (COLABORADOR). Os e-mails seguem o padrão `nome.sobrenome@demo.crona`.
 
 ### Endpoints
 
@@ -104,6 +108,12 @@ Toda rota, menos o login, exige o cabeçalho `Authorization: Bearer <token>`. O 
 | `GET` | `/colaboradores/{id}` | Busca | `COLABORADOR_VER` |
 | `POST` `PUT` | `/colaboradores`, `/colaboradores/{id}` | Cadastra e altera | `COLABORADOR_GERENCIAR` |
 | `POST` | `/colaboradores/{id}/desativar`, `/colaboradores/{id}/reativar` | Desativa e reativa (colaborador nunca é apagado) | `COLABORADOR_GERENCIAR` |
+| `GET` | `/minhas-ferias/periodos-aquisitivos` | Os meus períodos, com saldo e situação | Estar logado |
+| `POST` | `/minhas-ferias/simulacao` | Confere um pedido (`{"inicio", "diasGozo", "diasAbono"}`) sem gravar e devolve o checklist das regras | Estar logado |
+| `GET` | `/colaboradores/{id}/periodos-aquisitivos` | Os períodos de um colaborador | `COLABORADOR_VER` |
+| `PUT` | `/colaboradores/{id}/periodos-aquisitivos/{numero}/faltas` | Lança faltas injustificadas (CLT-02) | `COLABORADOR_GERENCIAR` |
+
+As regras de férias ficam em classes de domínio puras, testadas com TDD: [`CalendarioAquisitivo`](backend/src/main/java/br/com/crona/ferias/CalendarioAquisitivo.java), [`SaldoDoPeriodo`](backend/src/main/java/br/com/crona/ferias/SaldoDoPeriodo.java), [`ValidadorDeFerias`](backend/src/main/java/br/com/crona/ferias/validacao/ValidadorDeFerias.java) (CLT) e [`ValidadorDaEquipe`](backend/src/main/java/br/com/crona/ferias/validacao/ValidadorDaEquipe.java) (regras da empresa). Cada verificação cita o código da regra em [regras-de-negocio.md](docs/regras-de-negocio.md).
 
 **Permissões de cada perfil** (definidas em [`Permissao.java`](backend/src/main/java/br/com/crona/seguranca/Permissao.java)):
 
