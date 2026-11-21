@@ -6,6 +6,7 @@ import { forkJoin } from 'rxjs';
 import { Avatar } from '../../compartilhado/avatar';
 import { Icone } from '../../compartilhado/icone';
 import { FeriasApi } from '../../ferias/ferias-api';
+import { Pendencias } from '../../ferias/pendencias';
 import { dataPorExtenso, diaMesAno, haQuanto, intervalo } from '../../nucleo/datas';
 import { FeriasDoColega, PeriodoAquisitivo, Problema, Solicitacao } from '../../nucleo/modelos';
 import { Sessao } from '../../nucleo/sessao';
@@ -28,6 +29,7 @@ import { blocos, passosDoPedido, pedidoEmFoco, periodoEmFoco, PropostaParaMim, p
 export class Inicio {
   private readonly api = inject(FeriasApi);
   private readonly sessao = inject(Sessao);
+  private readonly pendencias = inject(Pendencias);
 
   protected readonly hoje = dataPorExtenso(new Date());
   protected readonly primeiroNome = computed(() => this.sessao.usuario()?.nome.split(' ')[0] ?? '');
@@ -101,6 +103,7 @@ export class Inicio {
       next: () => {
         this.respondendo.set(false);
         this.carregar(); // a tela inteira muda (a proposta some, o saldo pode mudar)
+        this.pendencias.atualizar(); // e o número do menu também
       },
       error: (resposta: HttpErrorResponse) => {
         this.respondendo.set(false);

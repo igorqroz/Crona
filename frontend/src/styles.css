@@ -115,6 +115,27 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   color: var(--cor-texto);
 }
 
+/* Para ações que encerram algo (recusar, cancelar): vermelho, para não ser clicado sem querer. */
+.botao-perigo {
+  background: #B42318;
+  color: #FFFFFF;
+}
+
+.botao-perigo:hover:not(:disabled) {
+  background: #912018;
+}
+
+/* Botão com cara de link, para ações secundárias. */
+.botao-texto {
+  padding: 0 8px;
+  background: transparent;
+  color: var(--cor-primaria-escura);
+}
+
+.botao-texto:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
 /* ---------------------------------------------------------------- cartão */
 
 .cartao {

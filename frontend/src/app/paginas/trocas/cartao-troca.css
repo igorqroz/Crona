@@ -1,0 +1,173 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+}
+
+.cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.quem {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.titulo {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* As cores do selo de status. */
+.selo.acao {
+  background: var(--cor-primaria);
+  color: #FFFFFF;
+}
+
+.selo.espera {
+  background: var(--cor-primaria-clara);
+  color: var(--cor-primaria-escura);
+}
+
+.selo.sucesso {
+  background: var(--cor-sucesso-fundo);
+  color: var(--cor-sucesso-texto);
+}
+
+.selo.encerrada {
+  background: var(--cor-fundo);
+  color: var(--cor-texto-suave);
+}
+
+/* ---------------------------------------------------------------- datas */
+
+.datas {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: var(--raio);
+  background: var(--cor-fundo);
+}
+
+.lado {
+  display: grid;
+  grid-template-columns: 80px max-content max-content max-content;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.rotulo {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--cor-texto-suave);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hoje {
+  color: var(--cor-texto-secundario);
+}
+
+.seta {
+  color: var(--cor-texto-suave);
+}
+
+.nova {
+  color: var(--cor-primaria-escura);
+}
+
+.recado {
+  margin: 0;
+  font-size: 13px;
+  color: var(--cor-texto-secundario);
+}
+
+.decisao {
+  font-weight: 500;
+}
+
+/* ---------------------------------------------------------------- histórico */
+
+details {
+  font-size: 13px;
+  color: var(--cor-texto-secundario);
+}
+
+summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--cor-primaria-escura);
+}
+
+details ol {
+  margin: 8px 0 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ---------------------------------------------------------------- formulários e ações */
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--cor-borda);
+}
+
+.formulario p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.campos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cor-texto-secundario);
+}
+
+input,
+textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio);
+  font-family: var(--fonte-texto);
+  font-size: 14px;
+  color: var(--cor-texto);
+}
+
+input {
+  min-height: var(--altura-toque);
+}
+
+textarea {
+  resize: vertical;
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

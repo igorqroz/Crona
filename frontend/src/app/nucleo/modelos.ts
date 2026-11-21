@@ -96,6 +96,23 @@ export interface Negociacao {
   criadaEm: string;
 }
 
+/** POST /minhas-ferias/negociacoes. Os nomes são do ponto de vista da negociação (solicitante = quem propõe). */
+export interface PropostaDeTroca {
+  pedidoDoColegaId: number;
+  pedidoDoSolicitanteId?: number;
+  inicioSolicitante: string;
+  /** Só quando quem propõe não tem férias marcadas. */
+  diasSolicitante?: number;
+  inicioColega: string;
+  mensagem?: string;
+}
+
+export interface Contraproposta {
+  inicioSolicitante: string;
+  inicioColega: string;
+  mensagem?: string;
+}
+
 export interface FeriasDoColega {
   pedidoId: number;
   colaborador: Referencia;

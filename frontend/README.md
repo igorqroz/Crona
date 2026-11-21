@@ -22,3 +22,7 @@ npm test      # testes com Vitest
 | `src/styles.css` | Os tokens visuais do redesign (cores, raios, fontes) e as peças comuns (botão, cartão, selo) |
 
 Em desenvolvimento, as chamadas para `/api/...` são repassadas para `http://localhost:8080` pelo [`proxy.conf.json`](proxy.conf.json).
+
+## Problemas comuns
+
+- **Erro `NG0203 ... takeUntilDestroyed() can only be used within an injection context`** (ou outro erro estranho de injeção) logo depois de adicionar um import novo: o cache do Vite ficou com duas cópias do Angular. Pare o `npm start`, apague a pasta `.angular/cache` e rode de novo.

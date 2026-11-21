@@ -6,6 +6,9 @@
       <a class="link" [routerLink]="item.rota" routerLinkActive="ativo" ariaCurrentWhenActive="page">
         <crona-icone [nome]="item.icone" />
         <span>{{ item.texto }}</span>
+        @if (item.contador && item.contador() > 0) {
+          <span class="contador" [attr.aria-label]="item.contador() + ' esperando você'">{{ item.contador() }}</span>
+        }
       </a>
     }
   </nav>

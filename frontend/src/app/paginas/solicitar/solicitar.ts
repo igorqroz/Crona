@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
+import { Checklist } from '../../compartilhado/checklist';
 import { Icone } from '../../compartilhado/icone';
 import { FeriasApi } from '../../ferias/ferias-api';
 import { abonoMaximo, periodoEmFoco } from '../../ferias/periodos';
@@ -26,7 +27,7 @@ const MAXIMO_DE_DIAS = 30;
  */
 @Component({
   selector: 'crona-solicitar',
-  imports: [RouterLink, Icone, Calendario],
+  imports: [RouterLink, Icone, Calendario, Checklist],
   templateUrl: './solicitar.html',
   styleUrl: './solicitar.css',
 })
