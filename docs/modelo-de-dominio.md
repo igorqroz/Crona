@@ -94,6 +94,7 @@ erDiagram
         bigint solicitacao_solicitante_id FK "opcional"
         varchar status
         bigint decidido_por_id FK
+        varchar mensagem_decisao "V3: motivo de quem recusou"
     }
     PROPOSTA_NEGOCIACAO {
         bigint id PK

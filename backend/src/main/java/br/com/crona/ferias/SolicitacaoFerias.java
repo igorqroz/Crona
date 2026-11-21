@@ -149,6 +149,20 @@ public class SolicitacaoFerias extends EntidadeBase {
         this.status = StatusSolicitacao.CANCELADA;
     }
 
+    /**
+     * Fase 6: o gestor aprovou uma troca, e estas férias mudam de data. Só datas: os dias
+     * continuam os mesmos, então o saldo não muda e o pedido continua aprovado.
+     */
+    public void remarcarPorTroca(LocalDate novoInicio, LocalDate novoFim) {
+        exigirStatus(StatusSolicitacao.APROVADA, "remarcado por troca");
+        long dias = novoFim.toEpochDay() - novoInicio.toEpochDay() + 1;
+        if (dias != diasGozo) {
+            throw new RegraVioladaException("Na troca, as férias mantêm os " + diasGozo + " dias (vieram " + dias + ").");
+        }
+        this.dataInicio = novoInicio;
+        this.dataFim = novoFim;
+    }
+
     private void exigirStatus(StatusSolicitacao esperado, String acao) {
         if (status != esperado) {
             throw new RegraVioladaException("Este pedido está " + status + " e não pode ser " + acao + ".");

@@ -171,6 +171,40 @@ class SolicitacaoFeriasTest {
         }
     }
 
+    @Nested
+    @DisplayName("remarcação por troca (Fase 6)")
+    class RemarcacaoPorTroca {
+
+        @Test
+        @DisplayName("um pedido aprovado muda de data, com os mesmos dias, e continua aprovado")
+        void remarca() {
+            pedido.aprovarPeloGestor(roberto, null, false, AGORA);
+
+            pedido.remarcarPorTroca(LocalDate.of(2026, 5, 4), LocalDate.of(2026, 5, 18));
+
+            assertThat(pedido.getDataInicio()).isEqualTo(LocalDate.of(2026, 5, 4));
+            assertThat(pedido.getDataFim()).isEqualTo(LocalDate.of(2026, 5, 18));
+            assertThat(pedido.getStatus()).isEqualTo(StatusSolicitacao.APROVADA);
+        }
+
+        @Test
+        @DisplayName("a troca não muda a quantidade de dias")
+        void mesmosDias() {
+            pedido.aprovarPeloGestor(roberto, null, false, AGORA);
+
+            assertThatThrownBy(() -> pedido.remarcarPorTroca(LocalDate.of(2026, 5, 4), LocalDate.of(2026, 5, 13)))
+                    .isInstanceOf(RegraVioladaException.class)
+                    .hasMessageContaining("15");
+        }
+
+        @Test
+        @DisplayName("só pedido aprovado é remarcado por troca")
+        void soAprovado() {
+            assertThatThrownBy(() -> pedido.remarcarPorTroca(LocalDate.of(2026, 5, 4), LocalDate.of(2026, 5, 18)))
+                    .isInstanceOf(RegraVioladaException.class);
+        }
+    }
+
     private static Colaborador pessoa(Long id, String nome, Perfil perfil) {
         var c = new Colaborador(mock(Empresa.class), nome, id + "@x.com", "hash", perfil, null, LocalDate.of(2020, 1, 1));
         ReflectionTestUtils.setField(c, "id", id);

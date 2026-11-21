@@ -52,7 +52,7 @@ public interface SolicitacaoFeriasRepository extends JpaRepository<SolicitacaoFe
      * "left join" no departamento: quem não tem departamento também conta para a empresa (EMP-04).
      */
     @Query("""
-            select new br.com.crona.ferias.AusenciaRegistrada(c.nome, s.dataInicio, s.dataFim, s.status, d.id)
+            select new br.com.crona.ferias.AusenciaRegistrada(s.id, c.nome, s.dataInicio, s.dataFim, s.status, d.id)
             from SolicitacaoFerias s
                 join s.colaborador c
                 left join c.departamento d
@@ -67,4 +67,23 @@ public interface SolicitacaoFeriasRepository extends JpaRepository<SolicitacaoFe
                                                  @Param("status") Collection<StatusSolicitacao> status,
                                                  @Param("inicio") LocalDate inicio,
                                                  @Param("fim") LocalDate fim);
+
+    /**
+     * Fase 6: as férias aprovadas que ainda vão começar, dos colegas que têm o mesmo gestor.
+     * São as férias que podem entrar numa proposta de troca.
+     * "join fetch" traz o colaborador na mesma consulta (evita o N+1).
+     */
+    @Query("""
+            select s from SolicitacaoFerias s
+                join fetch s.colaborador c
+            where c.gestor.id = :gestorId
+              and c.id <> :colaboradorId
+              and s.status = :status
+              and s.dataInicio > :hoje
+            order by s.dataInicio
+            """)
+    List<SolicitacaoFerias> feriasDaEquipe(@Param("gestorId") Long gestorId,
+                                           @Param("colaboradorId") Long colaboradorId,
+                                           @Param("status") StatusSolicitacao status,
+                                           @Param("hoje") LocalDate hoje);
 }

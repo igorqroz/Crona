@@ -20,9 +20,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -84,6 +86,23 @@ public class SimulacaoService {
      */
     @Transactional(readOnly = true)
     Avaliacao avaliar(Colaborador colaborador, SimulacaoRequisicao pedido, Long ignorarSolicitacaoId) {
+        return avaliar(colaborador, pedido, ignorarSolicitacaoId, CenarioDaTroca.NENHUM);
+    }
+
+    /**
+     * Fase 6: numa troca, cada lado é avaliado no cenário DEPOIS da troca.
+     *
+     * @param pedidosQueSaem     as férias que estão sendo trocadas: deixam de contar como "colega fora"
+     *                           (senão a Ana, ao pegar março do Bruno, "conflitaria" com o próprio Bruno)
+     * @param ausenciasQueEntram as datas novas do outro lado da troca, que passam a contar
+     */
+    record CenarioDaTroca(Set<Long> pedidosQueSaem, List<AusenciaRegistrada> ausenciasQueEntram) {
+        static final CenarioDaTroca NENHUM = new CenarioDaTroca(Set.of(), List.of());
+    }
+
+    @Transactional(readOnly = true)
+    Avaliacao avaliar(Colaborador colaborador, SimulacaoRequisicao pedido, Long ignorarSolicitacaoId,
+                      CenarioDaTroca troca) {
         Long empresaId = empresaAtual.id();
         LocalDate hoje = LocalDate.now(relogio);
         var config = configuracaoRepository.findByEmpresaId(empresaId).orElseGet(ConfiguracaoFerias::padrao);
@@ -95,7 +114,7 @@ public class SimulacaoService {
 
         // 2. Regras da equipe e da empresa (EMP), nas datas já calculadas
         var resultadoEquipe = ValidadorDaEquipe.validar(
-                dadosDaEquipe(colaborador, empresaId, config, resultadoIndividual.inicio(), resultadoIndividual.fim()));
+                dadosDaEquipe(colaborador, empresaId, config, resultadoIndividual.inicio(), resultadoIndividual.fim(), troca));
 
         // 3. Um checklist só, com as duas listas juntas
         var resultado = new ResultadoDaValidacao(resultadoIndividual.inicio(), resultadoIndividual.fim(),
@@ -160,9 +179,15 @@ public class SimulacaoService {
     }
 
     private DadosDaEquipe dadosDaEquipe(Colaborador colaborador, Long empresaId, ConfiguracaoFerias config,
-                                        LocalDate inicio, LocalDate fim) {
-        var ausencias = solicitacaoRepository.ausenciasDosColegas(
+                                        LocalDate inicio, LocalDate fim, CenarioDaTroca troca) {
+        var doBanco = solicitacaoRepository.ausenciasDosColegas(
                 empresaId, colaborador.getId(), StatusSolicitacao.EM_ANDAMENTO_OU_APROVADA, inicio, fim);
+        var ausencias = Stream.concat(
+                        doBanco.stream().filter(a -> !troca.pedidosQueSaem().contains(a.solicitacaoId())),
+                        troca.ausenciasQueEntram().stream()
+                                .filter(a -> !a.inicio().isAfter(fim) && !a.fim().isBefore(inicio)))
+                .sorted(Comparator.comparing(AusenciaRegistrada::inicio))
+                .toList();
         var departamento = colaborador.getDepartamento();
         Long departamentoId = departamento == null ? null : departamento.getId();
 

@@ -87,6 +87,18 @@ O RH lança no Crona as faltas injustificadas de cada período aquisitivo, e o s
 
 Status: `AGUARDANDO_COLEGA` ⇄ `AGUARDANDO_SOLICITANTE` (enquanto houver contrapropostas) → `AGUARDANDO_GESTOR` → `APROVADA` | `RECUSADA` | `CANCELADA`. Detalhes em [modelo-de-dominio.md](modelo-de-dominio.md#37-negociação-com-rodadas).
 
+Regras da troca (decididas na Fase 6):
+
+| Regra | Decisão |
+|---|---|
+| O que pode ser trocado | Só férias do colega já **aprovadas** e que ainda não começaram. Um pedido em análise pode mudar ou ser recusado no meio da conversa. |
+| Quantidade de dias | **Cada um mantém os seus dias**: é uma troca de datas, não de saldo. Quem ainda não tem férias marcadas informa quantos dias quer, e o pedido dele nasce na aprovação da troca. |
+| Com quem | Só entre colegas com o **mesmo gestor**, que é quem aprova (ou o ADMIN). Quem participa da troca não pode aprová-la. |
+| Rodadas | **Sem limite.** Responde quem está na vez (ninguém aceita a própria proposta), e qualquer um pode recusar e encerrar. Quem propôs pode cancelar até o gestor decidir. |
+| Regras de férias | As datas novas passam pelas mesmas verificações do pedido, para os dois lados, no cenário **depois** da troca. Impedimento bloqueia a proposta; ponto de atenção vai para o gestor, que pode "aprovar mesmo assim" com motivo. |
+| Uma por vez | As mesmas férias não podem estar em duas negociações em aberto ao mesmo tempo. |
+| Depois de aprovada | As férias trocadas continuam aprovadas, só mudam as datas (não passam de novo pelo RH, porque os dias não mudam). O pedido novo, de quem não tinha férias marcadas, segue a EMP-06 como qualquer pedido. |
+
 ## 5. Perfis
 
 | Perfil | Pode |
@@ -101,7 +113,7 @@ Para responder com quem conhece o processo na empresa antes da Fase 4:
 
 - [ ] **EMP-04:** o limite financeiro é por **número de pessoas** de férias ao mesmo tempo ou por **valor total** a pagar no mês?
 - [ ] O Financeiro precisa de algum papel no sistema (ex.: ver a previsão de pagamentos do mês)?
-- [ ] Quantas vezes uma negociação pode ir e voltar com contraproposta?
+- [x] Quantas vezes uma negociação pode ir e voltar com contraproposta? **Sem limite** (decidido na Fase 6): qualquer um dos dois pode recusar e encerrar. Ver "Regras da troca" na seção 4.
 - [x] Para cada regra, ela é **impedimento** ou **ponto de atenção**? Decidido na Fase 4: ver a tabela na seção 3.
 - [x] O gestor pode aprovar uma solicitação que passa do limite do departamento? **Sim** (decidido no redesign): o pedido chega com ponto de atenção e o gestor pode "aprovar mesmo assim". Ver EMP-01.
 - [x] Faltas injustificadas (CLT-02) vão ser lançadas no Crona ou vêm de outro sistema? **O RH lança no Crona** (ver seção 3).
