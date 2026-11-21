@@ -74,7 +74,7 @@ public final class ValidadorDaEquipe {
      * Nunca menos que 1: num departamento de 2 pessoas, 2 x 30% = 0,6, e arredondar para 0
      * significaria que ninguém nunca tira férias.
      */
-    static int limiteDoDepartamento(DadosDaEquipe.Departamento departamento) {
+    public static int limiteDoDepartamento(DadosDaEquipe.Departamento departamento) {
         int podeFicarFora = departamento.pessoas() * (100 - departamento.percentualMinimoTrabalhando()) / 100;
         return Math.max(1, podeFicarFora);
     }

@@ -1,0 +1,215 @@
+:host {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.topo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.voltar {
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+h1 {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+}
+
+.topo p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--cor-texto-secundario);
+}
+
+.linha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.calendario {
+  flex: 999 1 560px;
+  min-width: 0;
+}
+
+.resumo {
+  flex: 1 1 340px;
+  min-width: 0;
+}
+
+.resumo-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dica {
+  margin: 0;
+}
+
+/* ---------------------------------------------------------------- linhas do resumo */
+
+.linhas {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.linhas div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--cor-borda);
+  font-size: 14px;
+}
+
+dt {
+  color: var(--cor-texto-suave);
+}
+
+dd {
+  margin: 0;
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------- abono */
+
+.abono {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--raio);
+  background: var(--cor-fundo);
+  cursor: pointer;
+}
+
+.abono input {
+  width: 20px;
+  height: 20px;
+  margin: 1px 0 0;
+  flex-shrink: 0;
+  accent-color: var(--cor-primaria);
+}
+
+.abono span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.abono strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.abono small {
+  font-size: 12.5px;
+  color: var(--cor-texto-suave);
+}
+
+/* ---------------------------------------------------------------- checklist das regras */
+
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.checklist-resumo {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.checklist ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.checklist li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--cor-texto-secundario);
+}
+
+.marca {
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.OK .marca {
+  background: var(--cor-sucesso-fundo);
+  color: var(--cor-sucesso);
+}
+
+.ATENCAO .marca {
+  background: var(--cor-alerta-fundo);
+  color: var(--cor-alerta-texto);
+}
+
+.IMPEDIMENTO .marca {
+  background: #FDECEC;
+  color: #B42318;
+}
+
+.IMPEDIMENTO .texto {
+  color: #B42318;
+  font-weight: 600;
+}
+
+.texto {
+  padding-top: 3px;
+}
+
+/* ---------------------------------------------------------------- recado e envio */
+
+.recado {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cor-texto-secundario);
+}
+
+textarea {
+  resize: vertical;
+  padding: 10px 12px;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio);
+  font-family: var(--fonte-texto);
+  font-size: 14px;
+  color: var(--cor-texto);
+}
+
+.enviar {
+  width: 100%;
+  min-height: 48px;
+  font-size: 15px;
+}

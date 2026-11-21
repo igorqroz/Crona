@@ -16,6 +16,9 @@ const TRACOS = {
   sair: ['M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4', 'm16 17 5-5-5-5', 'M21 12H9'],
   check: ['m5 12.5 4.5 4.5L19 7.5'],
   alerta: ['M12 3.5 2.8 19.5h18.4L12 3.5Z', 'M12 10v4', 'M12 17h.01'],
+  x: ['M18 6 6 18', 'm6 6 12 12'],
+  anterior: ['m15 18-6-6 6-6'],
+  proximo: ['m9 18 6-6-6-6'],
 } as const;
 
 export type NomeDoIcone = keyof typeof TRACOS;
