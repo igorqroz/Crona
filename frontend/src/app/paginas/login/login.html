@@ -1,0 +1,44 @@
+<main class="pagina">
+  <form class="cartao formulario" [formGroup]="formulario" (ngSubmit)="entrar()" novalidate>
+    <crona-logo />
+
+    <div class="cabecalho">
+      <h1>Entrar</h1>
+      <span class="texto-suave">Use o e-mail e a senha da sua empresa.</span>
+    </div>
+
+    <label class="campo">
+      <span>E-mail</span>
+      <input type="email" formControlName="email" autocomplete="username" [class.invalido]="campoInvalido('email')" />
+      @if (campoInvalido('email')) {
+        <small>Informe um e-mail válido.</small>
+      }
+    </label>
+
+    <label class="campo">
+      <span>Senha</span>
+      <input type="password" formControlName="senha" autocomplete="current-password" [class.invalido]="campoInvalido('senha')" />
+      @if (campoInvalido('senha')) {
+        <small>Informe a senha.</small>
+      }
+    </label>
+
+    @if (erro(); as mensagem) {
+      <div class="aviso" role="alert">
+        <crona-icone nome="alerta" [tamanho]="18" [espessura]="2" />
+        <span>{{ mensagem }}</span>
+      </div>
+    }
+
+    <button class="botao botao-primario" type="submit" [disabled]="enviando()">
+      {{ enviando() ? 'Entrando…' : 'Entrar' }}
+    </button>
+
+    @if (emDesenvolvimento) {
+      <p class="texto-suave dica">
+        Dados de exemplo: <strong>ana.lima&#64;demo.crona</strong> (colaboradora) ou
+        <strong>roberto.neves&#64;demo.crona</strong> (gestor), senha <strong>crona123</strong>.
+      </p>
+    }
+  </form>
+</main>

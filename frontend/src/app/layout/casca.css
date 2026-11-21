@@ -1,0 +1,100 @@
+/* O mesmo "flex com quebra" do redesign: em tela estreita, o menu sobe e o conteúdo desce. */
+:host {
+  min-height: 100vh;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.lateral {
+  flex: 1 1 248px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px 16px;
+  background: var(--cor-superficie);
+  border-right: 1px solid var(--cor-borda);
+}
+
+.marca {
+  padding: 0 8px;
+}
+
+nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--altura-toque);
+  padding: 0 12px;
+  border-radius: 10px;
+  color: var(--cor-texto-secundario);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.link:hover {
+  background: var(--cor-hover);
+  color: var(--cor-texto);
+}
+
+.link.ativo {
+  background: var(--cor-primaria-clara);
+  color: var(--cor-primaria-escura);
+  font-weight: 600;
+}
+
+.rodape {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--cor-borda);
+}
+
+.eu {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px;
+}
+
+.eu-texto {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.eu-nome {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.eu-perfil {
+  font-size: 12px;
+  color: var(--cor-texto-suave);
+}
+
+.sair {
+  justify-content: flex-start;
+  padding: 0 12px;
+  background: transparent;
+  color: var(--cor-primaria-escura);
+  font-size: 13px;
+}
+
+.sair:hover {
+  background: var(--cor-hover);
+}
+
+.conteudo {
+  flex: 999 1 560px;
+  min-width: 0;
+  padding: 32px clamp(16px, 3vw, 40px) 48px;
+}

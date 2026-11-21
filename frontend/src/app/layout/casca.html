@@ -1,0 +1,32 @@
+<aside class="lateral">
+  <div class="marca"><crona-logo /></div>
+
+  <nav aria-label="Principal">
+    @for (item of menu; track item.rota) {
+      <a class="link" [routerLink]="item.rota" routerLinkActive="ativo" ariaCurrentWhenActive="page">
+        <crona-icone [nome]="item.icone" />
+        <span>{{ item.texto }}</span>
+      </a>
+    }
+  </nav>
+
+  @if (usuario(); as eu) {
+    <div class="rodape">
+      <div class="eu">
+        <crona-avatar [nome]="eu.nome" [tamanho]="34" />
+        <div class="eu-texto">
+          <span class="eu-nome">{{ eu.nome }}</span>
+          <span class="eu-perfil">{{ perfil() }}</span>
+        </div>
+      </div>
+      <button class="botao sair" type="button" (click)="sair()">
+        <crona-icone nome="sair" [tamanho]="17" />
+        <span>Sair</span>
+      </button>
+    </div>
+  }
+</aside>
+
+<main class="conteudo">
+  <router-outlet />
+</main>

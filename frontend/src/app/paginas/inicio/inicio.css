@@ -1,0 +1,401 @@
+:host {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ---------------------------------------------------------------- topo */
+
+.topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.saudacao {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.data {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cor-texto-suave);
+}
+
+h1 {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+}
+
+.linha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: stretch;
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+  gap: 24px;
+  align-items: start;
+}
+
+.cartao-cabecalho {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cartao-cabecalho.em-linha {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.intervalo {
+  font-size: 13.5px;
+  color: var(--cor-texto-secundario);
+  font-variant-numeric: tabular-nums;
+}
+
+.vazio {
+  margin: 0;
+}
+
+.recado {
+  margin: 0;
+  font-size: 13px;
+  color: var(--cor-texto-secundario);
+}
+
+/* ---------------------------------------------------------------- saldo (cartão azul-marinho) */
+
+.saldo {
+  flex: 999 1 520px;
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 28px;
+  border-radius: 20px;
+  background: var(--cor-texto);
+  color: #FFFFFF;
+}
+
+.ondas {
+  position: absolute;
+  right: -40px;
+  bottom: -36px;
+  opacity: 0.18;
+}
+
+.saldo h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #C9D5EA;
+}
+
+.saldo-topo {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.saldo-numero {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.saldo-numero strong {
+  font-family: var(--fonte-titulo);
+  font-size: 64px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -2px;
+}
+
+.saldo-numero .dias {
+  font-size: 16px;
+  font-weight: 600;
+  color: #DCE5F3;
+}
+
+.saldo .selo {
+  font-size: 12px;
+}
+
+.selo-alerta {
+  background: var(--cor-alerta-fundo);
+  color: var(--cor-alerta-texto);
+}
+
+.selo-claro {
+  background: rgba(255, 255, 255, 0.14);
+  color: #FFFFFF;
+}
+
+.saldo-datas {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: right;
+  font-size: 13px;
+  color: #C9D5EA;
+}
+
+.saldo-datas strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.saldo-datas .espaco {
+  margin-top: 6px;
+}
+
+.saldo-barra {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.blocos {
+  display: flex;
+  gap: 3px;
+}
+
+.blocos span {
+  flex: 1;
+  height: 28px;
+  border-radius: 4px;
+}
+
+/* Os 3 tipos de dia: aprovado (translúcido), em pedido (listrado) e livre (branco). */
+.aprovado {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.pedido {
+  background: repeating-linear-gradient(135deg, #FFFFFF 0 3px, #BCD3F3 3px 6px);
+  box-shadow: inset 0 0 0 1px #FFFFFF;
+}
+
+.livre {
+  background: #FFFFFF;
+}
+
+.legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  font-size: 13px;
+  color: #DCE5F3;
+}
+
+.legenda span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legenda i {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+}
+
+/* ---------------------------------------------------------------- seu pedido (linha do tempo) */
+
+.cartao-pedido {
+  flex: 1 1 340px;
+  min-width: 0;
+}
+
+.passos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.passos li {
+  display: flex;
+  gap: 14px;
+}
+
+.marcador {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.bolinha {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #FFFFFF;
+  box-shadow: inset 0 0 0 2px #C5CEDC;
+}
+
+.traco {
+  flex: 1;
+  width: 2px;
+  min-height: 18px;
+  background: var(--cor-borda);
+}
+
+.feito .bolinha {
+  background: var(--cor-sucesso);
+  box-shadow: none;
+  color: #FFFFFF;
+}
+
+.feito .traco {
+  background: var(--cor-sucesso);
+}
+
+.atual .bolinha {
+  box-shadow: inset 0 0 0 2.5px var(--cor-primaria);
+}
+
+.atual .bolinha::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--cor-primaria);
+}
+
+.passo-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 14px;
+}
+
+.passo-titulo {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pendente .passo-titulo {
+  color: var(--cor-texto-suave);
+}
+
+.passo-detalhe {
+  font-size: 12.5px;
+  color: var(--cor-texto-suave);
+}
+
+/* ---------------------------------------------------------------- proposta de troca */
+
+.pessoa {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pessoa-texto {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.pessoa-nome {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.comparacao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.caixa {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px;
+  border-radius: var(--raio);
+  background: var(--cor-fundo);
+}
+
+.caixa span {
+  font-size: 12px;
+  color: var(--cor-texto-suave);
+}
+
+.caixa strong {
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.caixa-nova {
+  background: var(--cor-primaria-clara);
+}
+
+.caixa-nova span,
+.caixa-nova strong {
+  color: var(--cor-primaria-escura);
+}
+
+.seta {
+  color: var(--cor-texto-suave);
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.acoes .botao-primario {
+  flex: 1 1 140px;
+}
+
+.acoes .botao-secundario {
+  flex: 1 1 100px;
+}
+
+/* ---------------------------------------------------------------- equipe */
+
+.equipe {
+  gap: 8px;
+}
+
+.equipe ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.equipe li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-top: 1px solid var(--cor-borda);
+}
