@@ -70,7 +70,7 @@ O projeto é construído em fases, e cada fase entrega algo que funciona.
 - [x] **Fase 6 — Negociação:** proposta de troca entre colegas, contraproposta e aprovação
 - [ ] **Fase 7 — Front-end Angular:** telas do [redesign](docs/redesign.md), versão para computador (celular fica para depois)
   - [x] 7a: projeto Angular 22, login e tela Início do colaborador
-  - [ ] 7b: solicitar férias (calendário)
+  - [x] 7b: solicitar férias (calendário com os colegas fora, checklist das regras e envio)
   - [ ] 7c: trocas de período
   - [ ] 7d: aprovações do gestor
 - [ ] **Fase 8 — Extras:** recibo em PDF, notificações e calendário do departamento
@@ -128,6 +128,7 @@ Toda rota, menos o login, exige o cabeçalho `Authorization: Bearer <token>`. O 
 | `POST` | `/colaboradores/{id}/desativar`, `/colaboradores/{id}/reativar` | Desativa e reativa (colaborador nunca é apagado) | `COLABORADOR_GERENCIAR` |
 | `GET` | `/minhas-ferias/periodos-aquisitivos` | Os meus períodos, com saldo e situação | Estar logado |
 | `POST` | `/minhas-ferias/simulacao` | Confere um pedido (`{"inicio", "diasGozo", "diasAbono"}`) sem gravar e devolve o checklist das regras | Estar logado |
+| `GET` | `/minhas-ferias/calendario?de=&ate=` | Para o calendário: quem do meu departamento está fora, o limite (EMP-01), o meu gestor e os feriados (até ~4 meses por vez) | Estar logado |
 | `GET` | `/colaboradores/{id}/periodos-aquisitivos` | Os períodos de um colaborador | `COLABORADOR_VER` |
 | `PUT` | `/colaboradores/{id}/periodos-aquisitivos/{numero}/faltas` | Lança faltas injustificadas (CLT-02) | `COLABORADOR_GERENCIAR` |
 | `POST` | `/minhas-ferias/solicitacoes` | Envia um pedido (`{"inicio", "diasGozo", "diasAbono", "recado"}`). Com impedimento, responde `422` com o checklist e nada é gravado | Estar logado |

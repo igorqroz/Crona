@@ -1,0 +1,184 @@
+:host {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.navegacao {
+  position: absolute;
+  top: -4px;
+  right: 0;
+  display: flex;
+  gap: 4px;
+}
+
+.seta {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-pequeno);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  cursor: pointer;
+}
+
+.seta:hover {
+  border-color: #B9CBE6;
+}
+
+.meses {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: 28px;
+}
+
+.mes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+h3 {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.letra {
+  padding-bottom: 4px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--cor-texto-suave);
+}
+
+/* ---------------------------------------------------------------- um dia */
+
+.dia {
+  width: 100%;
+  height: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  border-radius: 10px;
+  background: var(--cor-superficie);
+  box-shadow: inset 0 0 0 1px var(--cor-borda);
+  color: var(--cor-texto);
+  font-family: var(--fonte-texto);
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.dia:hover:not(:disabled) {
+  outline: 2px solid var(--cor-foco);
+}
+
+.dia:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.fim-de-semana {
+  color: var(--cor-texto-suave);
+}
+
+/* Feriado: um pontinho laranja no canto. */
+.feriado {
+  position: relative;
+}
+
+.feriado::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cor-alerta);
+}
+
+.intervalo {
+  background: var(--cor-primaria-clara);
+  box-shadow: none;
+  color: var(--cor-primaria-escura);
+}
+
+.ponta {
+  background: var(--cor-primaria);
+  box-shadow: none;
+  color: #FFFFFF;
+}
+
+/* ---------------------------------------------------------------- barrinha de colegas fora */
+
+.barra {
+  height: 4px;
+  border-radius: 2px;
+}
+
+.um {
+  background: #AEB8C9;
+}
+
+.varios {
+  background: #7D889E;
+}
+
+.limite {
+  background: var(--cor-alerta);
+}
+
+.ponta .barra {
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.ponta .barra.limite {
+  background: #FFC79E;
+}
+
+/* ---------------------------------------------------------------- legenda */
+
+.legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  font-size: 12.5px;
+  color: var(--cor-texto-secundario);
+}
+
+.legenda span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legenda i {
+  width: 22px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.legenda .marca-feriado {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cor-alerta);
+}

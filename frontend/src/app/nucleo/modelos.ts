@@ -104,9 +104,53 @@ export interface FeriasDoColega {
   diasGozo: number;
 }
 
+/** Uma linha do checklist das regras (CLT-03, EMP-01...). */
+export interface Verificacao {
+  regra: string;
+  resultado: 'OK' | 'ATENCAO' | 'IMPEDIMENTO';
+  mensagem: string;
+}
+
+/** O pedido que a tela Solicitar monta (o mesmo corpo serve para simular e para enviar). */
+export interface PedidoDeFerias {
+  inicio: string;
+  diasGozo: number;
+  diasAbono: number;
+  recado?: string;
+}
+
+export interface Simulacao {
+  inicio: string;
+  fim: string;
+  voltaAoTrabalho: string;
+  periodo: number;
+  livresNoPeriodo: number;
+  podeEnviar: boolean;
+  resumo: string;
+  verificacoes: Verificacao[];
+  colegasNoPeriodo: { nome: string; inicio: string; fim: string; pendente: boolean }[];
+}
+
+export interface AusenciaNoCalendario {
+  nome: string;
+  inicio: string;
+  fim: string;
+  pendente: boolean;
+}
+
+export interface CalendarioDaEquipe {
+  departamento: string | null;
+  limite: number | null;
+  gestor: Referencia | null;
+  ausencias: AusenciaNoCalendario[];
+  feriados: string[];
+}
+
 /** O corpo dos erros da API (ProblemDetail, RFC 9457). */
 export interface Problema {
   title?: string;
   status?: number;
   detail?: string;
+  /** Só nos 422 de pedido com impedimento: o checklist das regras. */
+  verificacoes?: Verificacao[];
 }

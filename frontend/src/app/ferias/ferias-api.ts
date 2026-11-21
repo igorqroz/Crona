@@ -1,7 +1,15 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
-import { FeriasDoColega, Negociacao, PeriodoAquisitivo, Solicitacao } from '../nucleo/modelos';
+import {
+  CalendarioDaEquipe,
+  FeriasDoColega,
+  Negociacao,
+  PedidoDeFerias,
+  PeriodoAquisitivo,
+  Simulacao,
+  Solicitacao,
+} from '../nucleo/modelos';
 
 /**
  * As chamadas da API de férias do colaborador (/minhas-ferias/...).
@@ -28,6 +36,20 @@ export class FeriasApi {
 
   feriasDaEquipe() {
     return this.http.get<FeriasDoColega[]>('/api/minhas-ferias/equipe');
+  }
+
+  /** As "barrinhas" do calendário: quem do meu departamento está fora, o limite e os feriados. */
+  calendario(de: string, ate: string) {
+    return this.http.get<CalendarioDaEquipe>('/api/minhas-ferias/calendario', { params: { de, ate } });
+  }
+
+  /** Confere o pedido com as regras, sem gravar nada. */
+  simular(pedido: PedidoDeFerias) {
+    return this.http.post<Simulacao>('/api/minhas-ferias/simulacao', pedido);
+  }
+
+  enviar(pedido: PedidoDeFerias) {
+    return this.http.post<Solicitacao>('/api/minhas-ferias/solicitacoes', pedido);
   }
 
   aceitarTroca(id: number) {

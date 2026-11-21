@@ -1,0 +1,108 @@
+<header class="topo">
+  <a routerLink="/inicio" class="voltar">← Início</a>
+  <h1>Solicitar férias</h1>
+  <p>
+    Clique no primeiro e no último dia.
+    @if (calendario()?.departamento; as departamento) {
+      As barrinhas mostram quantos colegas de {{ departamento }} já estarão fora.
+    }
+  </p>
+</header>
+
+<div class="linha">
+  <!-- ============================================================ calendário -->
+  <section class="cartao calendario" aria-label="Calendário">
+    <crona-calendario
+      [meses]="meses()"
+      [inicio]="selecao().inicio"
+      [fim]="selecao().fim"
+      [limite]="calendario()?.limite ?? null"
+      (escolheu)="escolher($event)"
+      (navegou)="navegar($event)"
+    />
+  </section>
+
+  <!-- ============================================================ resumo -->
+  <section class="cartao resumo" aria-labelledby="titulo-resumo">
+    <div class="resumo-topo">
+      <h2 class="cartao-titulo" id="titulo-resumo">Resumo</h2>
+      @if (periodo(); as p) {
+        <span class="texto-suave">Saldo: {{ p.livres }} dias</span>
+      }
+    </div>
+
+    @if (selecao().inicio; as inicio) {
+      <dl class="linhas">
+        <div><dt>Início</dt><dd>{{ comDiaDaSemana(inicio) }}</dd></div>
+        <div><dt>Último dia</dt><dd>{{ selecao().fim ? comDiaDaSemana(selecao().fim!) : 'escolha no calendário' }}</dd></div>
+        @if (dias() > 0) {
+          <div><dt>Duração</dt><dd>{{ dias() }} dias</dd></div>
+        }
+        @if (simulacao(); as s) {
+          <div><dt>Volta ao trabalho</dt><dd>{{ comDiaDaSemana(s.voltaAoTrabalho) }}</dd></div>
+          <div><dt>Saldo depois</dt><dd>{{ saldoDepois() }} dias</dd></div>
+        }
+      </dl>
+    } @else {
+      <p class="texto-suave dica">Escolha o primeiro dia das férias no calendário.</p>
+    }
+
+    @if (abonoMaximo() > 0) {
+      <label class="abono">
+        <input type="checkbox" [checked]="venderAbono()" (change)="alternarAbono($any($event.target).checked)" />
+        <span>
+          <strong>Vender {{ abonoMaximo() }} dias (abono pecuniário)</strong>
+          <small>Até 1/3 das férias pode ser vendido.</small>
+        </span>
+      </label>
+    }
+
+    @if (erro(); as mensagem) {
+      <div class="aviso" role="alert">
+        <crona-icone nome="alerta" [tamanho]="18" [espessura]="2" />
+        <span>{{ mensagem }}</span>
+      </div>
+    }
+
+    @if (simulando()) {
+      <p class="texto-suave dica">Conferindo as regras…</p>
+    }
+
+    @if (verificacoes().length > 0) {
+      <div class="checklist">
+        @if (simulacao(); as s) {
+          <strong class="checklist-resumo">{{ s.resumo }}</strong>
+        }
+        <ul>
+          @for (v of verificacoes(); track $index) {
+            <li [class]="v.resultado">
+              <span class="marca">
+                @switch (v.resultado) {
+                  @case ('OK') { <crona-icone nome="check" [tamanho]="14" [espessura]="2.6" /> }
+                  @case ('ATENCAO') { <crona-icone nome="alerta" [tamanho]="14" [espessura]="2.2" /> }
+                  @case ('IMPEDIMENTO') { <crona-icone nome="x" [tamanho]="14" [espessura]="2.6" /> }
+                }
+              </span>
+              <span class="texto">{{ v.mensagem }}</span>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+
+    <label class="recado">
+      Recado para o gestor (opcional)
+      <textarea
+        rows="2"
+        maxlength="500"
+        placeholder="Ex.: viagem já comprada para essas datas"
+        [value]="recado()"
+        (input)="recado.set($any($event.target).value)"
+      ></textarea>
+    </label>
+
+    <button class="botao botao-primario enviar" type="button" [disabled]="!podeEnviar()" (click)="enviar()">
+      {{ enviando() ? 'Enviando…' : 'Enviar para ' + paraQuem() }}
+    </button>
+  </section>
+</div>

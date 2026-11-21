@@ -1,0 +1,58 @@
+<div class="navegacao">
+  <button class="seta" type="button" aria-label="Mês anterior" (click)="navegou.emit(-1)">
+    <crona-icone nome="anterior" [tamanho]="18" />
+  </button>
+  <button class="seta" type="button" aria-label="Próximo mês" (click)="navegou.emit(1)">
+    <crona-icone nome="proximo" [tamanho]="18" />
+  </button>
+</div>
+
+<div class="meses">
+  @for (mes of meses(); track mes.titulo) {
+    <div class="mes">
+      <h3>{{ mes.titulo }}</h3>
+      <div class="grade">
+        @for (letra of diasDaSemana; track $index) {
+          <div class="letra" aria-hidden="true">{{ letra }}</div>
+        }
+        @for (vazio of vazios(mes); track $index) {
+          <div></div>
+        }
+        @for (dia of mes.dias; track dia.iso) {
+          @let b = barra(dia);
+          <button
+            type="button"
+            class="dia"
+            [class.fim-de-semana]="dia.fimDeSemana || dia.feriado"
+            [class.feriado]="dia.feriado"
+            [class.ponta]="ehPonta(dia)"
+            [class.intervalo]="noIntervalo(dia)"
+            [disabled]="dia.passado"
+            [attr.aria-label]="descricao(dia, mes)"
+            [attr.aria-pressed]="ehPonta(dia)"
+            [title]="dia.fora.length ? dia.fora.join(', ') : ''"
+            (click)="escolheu.emit(dia.iso)"
+          >
+            <span>{{ dia.numero }}</span>
+            <span [class]="'barra ' + b.tom" [style.width.%]="b.largura" aria-hidden="true"></span>
+          </button>
+        }
+      </div>
+    </div>
+  }
+</div>
+
+<div class="legenda">
+  <!-- Só as cores que podem aparecer: com limite 1, qualquer colega fora já é laranja. -->
+  @let l = limite();
+  @if (l === null || l > 1) {
+    <span><i class="um"></i>1 colega fora</span>
+  }
+  @if (l === null || l > 2) {
+    <span><i class="varios"></i>2 ou mais</span>
+  }
+  @if (l !== null) {
+    <span><i class="limite"></i>{{ l }} {{ l === 1 ? 'colega' : 'colegas' }} ou mais: você passaria do limite</span>
+  }
+  <span><i class="marca-feriado"></i>feriado</span>
+</div>
