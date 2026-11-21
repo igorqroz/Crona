@@ -41,6 +41,31 @@ Essas regras variam de empresa para empresa. Cada uma pode ser **ligada, desliga
 | EMP-05 | **Períodos restritos:** datas sensíveis para a empresa toda ou para um departamento, como fechamento do mês ou alta temporada. Ao cadastrar, a empresa escolhe o tipo: **alerta** (o pedido pode ser enviado e o gestor vê o aviso) ou **bloqueio** (o pedido nem pode ser enviado). | **Não existe no protótipo** |
 | EMP-06 | **Confirmação do RH:** depois da aprovação do gestor, o pedido ainda passa pelo RH antes de ser aprovado de vez e gerar o aviso de férias. Desligada, a aprovação do gestor já é a final. | **Não existe no protótipo** |
 
+### Impedimento ou ponto de atenção
+
+Ao conferir um pedido, cada regra quebrada gera um de dois resultados:
+- **Impedimento:** o pedido não pode ser enviado.
+- **Ponto de atenção:** o pedido é enviado e o gestor vê o aviso, podendo "aprovar mesmo assim".
+
+| Regra | Tipo | Por quê |
+|---|---|---|
+| Saldo insuficiente no período aquisitivo | Impedimento | Não existe dia para tirar |
+| CLT-03 Fim das férias depois do prazo de concessão | Impedimento | Gera pagamento em dobro |
+| CLT-03 Período que **já venceu** | Ponto de atenção | As férias continuam devidas (pagas em dobro); bloquear deixaria os dias presos para sempre |
+| CLT-04 Divisão inválida (menos de 5 dias, mais de 3 partes, sem uma parte de 14+) | Impedimento | Proibido pela CLT |
+| CLT-05 Início nos 2 dias antes de folga ou feriado | Impedimento | Proibido pela CLT |
+| CLT-06 Abono acima de 1/3 do direito | Impedimento | Proibido pela CLT |
+| CLT-06 Abono pedido a menos de 15 dias do fim do período aquisitivo | Ponto de atenção | A empresa pode aceitar mesmo fora do prazo |
+| CLT-07 / EMP-03 Antecedência menor que a mínima | Ponto de atenção | O gestor ou o RH podem aceitar uma exceção |
+| EMP-01 Acima do limite do departamento | Ponto de atenção | Decidido no redesign |
+| EMP-02 Colegas de férias no período, dentro do limite | Informativo | Só mostra quem estará fora |
+| EMP-04 Acima do limite da empresa toda | Ponto de atenção | Igual à EMP-01 |
+| EMP-05 Período restrito | Conforme o tipo cadastrado (alerta ou bloqueio) | A empresa escolhe |
+
+### Faltas (CLT-02)
+
+O RH lança no Crona as faltas injustificadas de cada período aquisitivo, e o sistema recalcula os dias de direito. Uma integração com a folha de pagamento pode substituir isso no futuro.
+
 ## 4. Fluxos
 
 ### Solicitação de férias
@@ -77,9 +102,9 @@ Para responder com quem conhece o processo na empresa antes da Fase 4:
 - [ ] **EMP-04:** o limite financeiro é por **número de pessoas** de férias ao mesmo tempo ou por **valor total** a pagar no mês?
 - [ ] O Financeiro precisa de algum papel no sistema (ex.: ver a previsão de pagamentos do mês)?
 - [ ] Quantas vezes uma negociação pode ir e voltar com contraproposta?
-- [ ] Para cada regra, ela é **impedimento** ou **ponto de atenção**? No redesign, até regras da CLT (início antes da folga, antecedência de 30 dias) aparecem como ponto de atenção. Decidir na Fase 4.
+- [x] Para cada regra, ela é **impedimento** ou **ponto de atenção**? Decidido na Fase 4: ver a tabela na seção 3.
 - [x] O gestor pode aprovar uma solicitação que passa do limite do departamento? **Sim** (decidido no redesign): o pedido chega com ponto de atenção e o gestor pode "aprovar mesmo assim". Ver EMP-01.
-- [ ] Faltas injustificadas (CLT-02) vão ser lançadas no Crona ou vêm de outro sistema?
+- [x] Faltas injustificadas (CLT-02) vão ser lançadas no Crona ou vêm de outro sistema? **O RH lança no Crona** (ver seção 3).
 - [ ] Criar a **EMP-07** (não permitir cancelar férias aprovadas a menos de N dias do início)? Proposta em [padroes-de-referencia.md](padroes-de-referencia.md#pad-05--bloqueio-por-prazo-e-confirmação-em-ação-sensível).
 - [ ] Feriados móveis e estaduais/municipais para a CLT-05: como cadastrar? Ver [PAD-11](padroes-de-referencia.md#pad-11--feriados-recorrentes-e-móveis).
 

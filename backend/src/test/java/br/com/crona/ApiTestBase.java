@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
@@ -36,9 +37,24 @@ public abstract class ApiTestBase {
     @Autowired
     private EmpresaRepository empresaRepository;
 
+    protected Long empresaDemo;
+
+    /**
+     * Para um teste agir como OUTRA pessoa, e não como o ADMIN padrão:
+     *     mockMvc.perform(get("/minhas-ferias/...").with(como(anaId, "COLABORADOR")))
+     */
+    protected RequestPostProcessor como(Long colaboradorId, String perfil) {
+        return jwt()
+                .jwt(token -> token
+                        .subject(colaboradorId.toString())
+                        .claim("empresa_id", empresaDemo)
+                        .claim("perfil", perfil))
+                .authorities(new ConversorDePermissoes());
+    }
+
     @BeforeEach
     void montarMockMvcComUsuarioLogado(WebApplicationContext contexto) {
-        Long empresaDemo = empresaRepository.findByCnpj(CNPJ_EMPRESA_DEMO).orElseThrow().getId();
+        empresaDemo = empresaRepository.findByCnpj(CNPJ_EMPRESA_DEMO).orElseThrow().getId();
 
         mockMvc = MockMvcBuilders.webAppContextSetup(contexto)
                 .apply(springSecurity())                        // liga os filtros do Spring Security

@@ -45,6 +45,9 @@ public interface ColaboradorRepository extends JpaRepository<Colaborador, Long> 
 
     boolean existsByEmailIgnoreCaseAndIdNot(String email, Long id);
 
+    // Quantas pessoas ativas o departamento tem (para o limite da EMP-01).
+    long countByDepartamentoIdAndAtivoTrue(Long departamentoId);
+
     // Este colaborador é gestor de alguém ativo?
     boolean existsByGestorIdAndAtivoTrue(Long gestorId);
 }

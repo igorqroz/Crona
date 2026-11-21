@@ -9,6 +9,7 @@ import br.com.crona.departamento.Departamento;
 import br.com.crona.departamento.DepartamentoRepository;
 import br.com.crona.empresa.EmpresaAtual;
 import br.com.crona.empresa.EmpresaRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,17 +30,20 @@ public class ColaboradorService {
     private final EmpresaRepository empresaRepository;
     private final EmpresaAtual empresaAtual;
     private final PasswordEncoder passwordEncoder;
+    private final ApplicationEventPublisher eventos;
 
     public ColaboradorService(ColaboradorRepository colaboradorRepository,
                               DepartamentoRepository departamentoRepository,
                               EmpresaRepository empresaRepository,
                               EmpresaAtual empresaAtual,
-                              PasswordEncoder passwordEncoder) {
+                              PasswordEncoder passwordEncoder,
+                              ApplicationEventPublisher eventos) {
         this.colaboradorRepository = colaboradorRepository;
         this.departamentoRepository = departamentoRepository;
         this.empresaRepository = empresaRepository;
         this.empresaAtual = empresaAtual;
         this.passwordEncoder = passwordEncoder;
+        this.eventos = eventos;
     }
 
     // Campos pelos quais o front pode ordenar a lista. Lista fechada: o resto vira 400.
@@ -83,7 +87,11 @@ public class ColaboradorService {
                 dados.dataAdmissao());
 
         colaborador.alocar(departamentoDaEmpresa(dados.departamentoId()), gestorValido(dados.gestorId(), null));
-        return ColaboradorResposta.de(colaboradorRepository.save(colaborador));
+        var salvo = colaboradorRepository.save(colaborador);
+        // Avisa quem gera os períodos aquisitivos. Roda na mesma transação: se der erro lá,
+        // o cadastro inteiro é desfeito.
+        eventos.publishEvent(new AdmissaoDefinida(salvo.getId()));
+        return ColaboradorResposta.de(salvo);
     }
 
     @Transactional
@@ -101,9 +109,13 @@ public class ColaboradorService {
                     + " é gestor de outras pessoas. Transfira a equipe antes de mudar o perfil.");
         }
 
+        boolean admissaoMudou = !dados.dataAdmissao().equals(colaborador.getDataAdmissao());
         colaborador.atualizarDados(dados.nome().trim(), email, dados.perfil(),
                 textoOuNulo(dados.cargo()), dados.dataAdmissao());
         colaborador.alocar(departamentoDaEmpresa(dados.departamentoId()), gestorValido(dados.gestorId(), colaborador));
+        if (admissaoMudou) {
+            eventos.publishEvent(new AdmissaoDefinida(id));
+        }
         return ColaboradorResposta.de(colaborador);
     }
 
