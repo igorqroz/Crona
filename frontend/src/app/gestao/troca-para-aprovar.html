@@ -1,0 +1,52 @@
+@let n = troca().negociacao;
+
+<div class="cabecalho">
+  <h3>{{ n.solicitante.nome }} ⇄ {{ n.colega.nome }}</h3>
+  <span class="selo" [class]="'selo ' + selo().tom">{{ selo().texto }}</span>
+</div>
+
+<div class="lados">
+  @for (lado of lados(); track lado.nome) {
+    <div class="lado">
+      <div class="datas">
+        <span class="nome">{{ lado.nome }}</span>
+        <span class="hoje">{{ lado.hoje }}</span>
+        <span class="seta" aria-hidden="true">→</span>
+        <strong>{{ lado.nova }}</strong>
+      </div>
+      @if (lado.alertas.length > 0) {
+        <crona-checklist [verificacoes]="lado.alertas" />
+      }
+    </div>
+  }
+</div>
+
+@for (recado of recados(); track $index) {
+  <p class="recado">“{{ recado.texto }}” <span class="texto-suave">— {{ recado.autor }}</span></p>
+}
+
+<label class="mensagem">
+  Mensagem para os dois {{ acao() === 'aprovar' ? '(obrigatória só para recusar)' : '(obrigatória)' }}
+  <textarea rows="2" maxlength="500" [value]="mensagem()" (input)="mensagem.set(valor($event))"></textarea>
+</label>
+
+@if (aviso(); as texto) {
+  <div class="aviso" role="alert">{{ texto }}</div>
+}
+@if (erro(); as e) {
+  <div class="aviso" role="alert">{{ e.mensagem }}</div>
+  @if (e.verificacoes.length > 0) {
+    <crona-checklist [verificacoes]="e.verificacoes" />
+  }
+}
+
+<div class="acoes">
+  <button class="botao botao-texto recusar" type="button" [disabled]="ocupado()" (click)="recusar()">Recusar troca</button>
+  @if (acao() === 'bloqueado') {
+    <span class="bloqueado">Não dá para aprovar: há impedimento.</span>
+  } @else {
+    <button class="botao botao-primario" type="button" [disabled]="ocupado()" (click)="aprovar()">
+      {{ acao() === 'aprovar' ? 'Aprovar troca' : 'Aprovar mesmo assim' }}
+    </button>
+  }
+</div>

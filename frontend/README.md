@@ -18,7 +18,8 @@ npm test      # testes com Vitest
 | `src/app/compartilhado/` | Componentes reutilizáveis: ícone, logo, avatar |
 | `src/app/layout/` | A "casca" das telas logadas: menu lateral + área da página |
 | `src/app/ferias/` | Serviço que chama a API de férias |
-| `src/app/paginas/` | Uma pasta por tela (login, início...). As regras de cada tela ficam em funções puras (`*.regras.ts`), testadas sem navegador |
+| `src/app/paginas/` | Uma pasta por tela do colaborador (login, início, solicitar, trocas). As regras de cada tela ficam em funções puras (`*.regras.ts`), testadas sem navegador |
+| `src/app/gestao/` | As telas do gestor e do RH (aprovações), protegidas pelo `perfilGuard` |
 | `src/styles.css` | Os tokens visuais do redesign (cores, raios, fontes) e as peças comuns (botão, cartão, selo) |
 
 Em desenvolvimento, as chamadas para `/api/...` são repassadas para `http://localhost:8080` pelo [`proxy.conf.json`](proxy.conf.json).

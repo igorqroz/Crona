@@ -1,0 +1,138 @@
+<header class="topo">
+  <div>
+    <h1>Aprovações</h1>
+    <p class="texto-suave">
+      {{ pedidos().length }} {{ pedidos().length === 1 ? 'pedido aguardando' : 'pedidos aguardando' }} · em ordem de início
+    </p>
+  </div>
+  @if (aba() === 'pedidos' && contagens().SEM_CONFLITO > 0) {
+    <button class="botao botao-secundario" type="button" [disabled]="ocupado() === 'lote'" (click)="aprovarSemConflito()">
+      <crona-icone nome="check" [tamanho]="16" [espessura]="2.4" />
+      Aprovar {{ contagens().SEM_CONFLITO === 1 ? 'o 1 sem conflito' : 'os ' + contagens().SEM_CONFLITO + ' sem conflito' }}
+    </button>
+  }
+</header>
+
+<nav class="abas" aria-label="O que aprovar">
+  <button type="button" [class.ativa]="aba() === 'pedidos'" (click)="mudarAba('pedidos')">Pedidos · {{ pedidos().length }}</button>
+  <button type="button" [class.ativa]="aba() === 'trocas'" (click)="mudarAba('trocas')">Trocas · {{ trocas().length }}</button>
+  @if (ehRh) {
+    <button type="button" [class.ativa]="aba() === 'rh'" (click)="mudarAba('rh')">Confirmação do RH · {{ filaDoRh().length }}</button>
+  }
+</nav>
+
+@if (feito(); as mensagem) {
+  <div class="feito" role="status">
+    <crona-icone nome="check" [tamanho]="16" [espessura]="2.4" /> {{ mensagem }}
+  </div>
+}
+
+@switch (estado()) {
+  @case ('carregando') {
+    <p class="texto-suave">Carregando…</p>
+  }
+  @case ('erro') {
+    <div class="aviso" role="alert">
+      Não foi possível carregar a fila. <a href="" (click)="$event.preventDefault(); carregar()">Tentar de novo</a>
+    </div>
+  }
+  @case ('pronto') {
+    @switch (aba()) {
+      <!-- ============================================================ pedidos -->
+      @case ('pedidos') {
+        <div class="mestre-detalhe">
+          <section class="lista" aria-label="Pedidos">
+            <div class="filtros" role="tablist">
+              @for (f of filtros; track f.valor) {
+                <button type="button" role="tab" [attr.aria-selected]="filtro() === f.valor" [class.ativo]="filtro() === f.valor" (click)="mudarFiltro(f.valor)">
+                  {{ f.texto }} · {{ contagens()[f.valor] }}
+                </button>
+              }
+            </div>
+            @for (p of visiveis(); track p.id) {
+              @let s = selo(p.situacao, p.alertas);
+              <button type="button" class="item" [class.escolhido]="selecionado() === p.id" (click)="escolher(p.id)">
+                <crona-avatar [nome]="p.colaborador.nome" [tamanho]="38" />
+                <span class="item-texto">
+                  <span class="item-topo">
+                    <strong>{{ p.colaborador.nome }}</strong>
+                    <span class="texto-suave">{{ p.departamento }}</span>
+                  </span>
+                  <span class="texto-suave">{{ intervalo(p.inicio, p.fim) }} · {{ p.diasGozo }} dias</span>
+                  <span class="selo" [class]="'selo ' + s.tom">{{ s.texto }}</span>
+                </span>
+              </button>
+            } @empty {
+              <p class="texto-suave vazio">Nenhum pedido aqui. 🎉</p>
+            }
+          </section>
+
+          <section class="cartao detalhe" aria-label="Detalhe do pedido">
+            @if (detalhe(); as d) {
+              <crona-detalhe-pedido
+                [detalhe]="d"
+                [ocupado]="ocupado() === 'pedido-' + d.pedido.id"
+                [erro]="erroDe('pedido-' + d.pedido.id)"
+                (aprovou)="aprovarPedido(d.pedido.id, $event)"
+                (recusou)="recusarPedido(d.pedido.id, $event)"
+              />
+            } @else {
+              <p class="texto-suave">{{ visiveis().length ? 'Carregando o pedido…' : 'Nada para decidir agora.' }}</p>
+            }
+          </section>
+        </div>
+      }
+
+      <!-- ============================================================ trocas -->
+      @case ('trocas') {
+        <div class="coluna">
+          @for (t of trocas(); track t.negociacao.id) {
+            <crona-troca-para-aprovar
+              [troca]="t"
+              [ocupado]="ocupado() === 'troca-' + t.negociacao.id"
+              [erro]="erroDe('troca-' + t.negociacao.id)"
+              (aprovou)="aprovarTroca(t.negociacao.id, $event)"
+              (recusou)="recusarTroca(t.negociacao.id, $event)"
+            />
+          } @empty {
+            <div class="cartao"><p class="texto-suave vazio">Nenhuma troca esperando você.</p></div>
+          }
+        </div>
+      }
+
+      <!-- ============================================================ RH (EMP-06) -->
+      @case ('rh') {
+        <div class="coluna">
+          <p class="texto-suave">Pedidos que o gestor já aprovou e que esperam a confirmação do RH (EMP-06).</p>
+          @for (p of filaDoRh(); track p.id) {
+            <div class="cartao rh">
+              <div class="rh-linha">
+                <crona-avatar [nome]="p.colaborador.nome" [tamanho]="38" />
+                <span class="item-texto">
+                  <strong>{{ p.colaborador.nome }}</strong>
+                  <span class="texto-suave">{{ p.departamento }} · {{ intervalo(p.inicio, p.fim) }} · {{ p.diasGozo }} dias{{ p.diasAbono ? ' + ' + p.diasAbono + ' de abono' : '' }}</span>
+                </span>
+                @if (recusandoNoRh() !== p.id) {
+                  <button class="botao botao-texto recusar" type="button" (click)="recusandoNoRh.set(p.id); motivoDoRh.set('')">Recusar</button>
+                  <button class="botao botao-primario" type="button" [disabled]="ocupado() === 'rh-' + p.id" (click)="confirmarNoRh(p.id)">Confirmar</button>
+                }
+              </div>
+              @if (recusandoNoRh() === p.id) {
+                <textarea rows="2" maxlength="500" placeholder="Motivo da recusa" [value]="motivoDoRh()" (input)="motivoDoRh.set(valor($event))"></textarea>
+                <div class="rh-acoes">
+                  <button class="botao botao-secundario" type="button" (click)="recusandoNoRh.set(null)">Voltar</button>
+                  <button class="botao botao-perigo" type="button" [disabled]="ocupado() === 'rh-' + p.id" (click)="recusarNoRh(p.id)">Recusar pedido</button>
+                </div>
+              }
+              @if (erroDe('rh-' + p.id); as e) {
+                <div class="aviso" role="alert">{{ e.mensagem }}</div>
+              }
+            </div>
+          } @empty {
+            <div class="cartao"><p class="texto-suave vazio">Nada esperando o RH.</p></div>
+          }
+        </div>
+      }
+    }
+  }
+}

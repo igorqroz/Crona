@@ -1,0 +1,124 @@
+@let p = pedido();
+@let d = detalhe();
+
+<div class="cabecalho">
+  <crona-avatar [nome]="p.colaborador.nome" [tamanho]="44" />
+  <div class="quem">
+    <h2>{{ p.colaborador.nome }}</h2>
+    <span class="texto-suave">{{ p.departamento ?? 'Sem departamento' }} · pediu {{ haQuanto(p.enviadoEm) }}</span>
+  </div>
+</div>
+
+@if (p.recado) {
+  <p class="recado">“{{ p.recado }}”</p>
+}
+
+<!-- ============================================================ os 4 quadros -->
+<div class="quadros">
+  <div class="quadro">
+    <span class="rotulo">Período</span>
+    <strong>{{ diaMes(p.inicio) }} → {{ diaMes(p.fim) }}</strong>
+    <span class="texto-suave">volta em {{ diaMes(d.voltaAoTrabalho) }}</span>
+  </div>
+  <div class="quadro">
+    <span class="rotulo">Duração</span>
+    <strong>{{ p.diasGozo }} dias</strong>
+    <span class="texto-suave">{{ p.diasAbono > 0 ? '+ ' + p.diasAbono + ' vendidos (abono)' : 'sem abono' }}</span>
+  </div>
+  <div class="quadro">
+    <span class="rotulo">Saldo depois</span>
+    <strong>{{ saldoDepois() }} dias</strong>
+    <span class="texto-suave">de {{ d.livresNoPeriodo }} disponíveis</span>
+  </div>
+  <div class="quadro">
+    <span class="rotulo">Conceder até</span>
+    <strong>{{ diaMesAno(d.concederAte) }}</strong>
+    <span class="texto-suave">período {{ p.periodo }}</span>
+  </div>
+</div>
+
+<!-- ============================================================ linha do tempo da equipe -->
+@let l = linha();
+<section class="equipe" aria-label="Quem da equipe estará fora">
+  <div class="equipe-topo">
+    <h3>{{ p.departamento ?? 'Equipe' }} de {{ diaMes(p.inicio) }} a {{ diaMes(p.fim) }}</h3>
+    @if (d.limiteDoDepartamento !== null) {
+      <span class="texto-suave">limite: {{ d.limiteDoDepartamento }} {{ d.limiteDoDepartamento === 1 ? 'pessoa' : 'pessoas' }} fora por dia</span>
+    }
+  </div>
+
+  <div class="grade" [style.grid-template-columns]="'110px repeat(' + l.dias.length + ', minmax(14px, 1fr))'">
+    <span></span>
+    @for (dia of l.dias; track dia) {
+      <span class="numero">{{ numeroDoDia(dia) }}</span>
+    }
+
+    @for (linha of l.linhas; track $index) {
+      <span class="nome" [class.destaque]="linha.destaque">{{ linha.nome }}</span>
+      <span
+        class="barra"
+        [class.pendente]="linha.pendente && !linha.destaque"
+        [class.destaque]="linha.destaque"
+        [style.grid-column]="colunas(linha.de, linha.ate)"
+        [title]="linha.pendente && !linha.destaque ? 'Pedido ainda em análise' : ''"
+      ></span>
+    }
+
+    <span class="nome rotulo-fora">Fora no dia</span>
+    @for (fora of l.foraNoDia; track $index) {
+      <span class="fora" [class.acima]="fora.acima">{{ fora.total }}</span>
+    }
+  </div>
+</section>
+
+<!-- ============================================================ regras -->
+@if (alertas().length > 0) {
+  <div class="alertas">
+    <crona-checklist [verificacoes]="alertas()" />
+  </div>
+}
+@if (regrasOk().length > 0) {
+  <details>
+    <summary>Regras que passaram ({{ regrasOk().length }})</summary>
+    <crona-checklist [verificacoes]="regrasOk()" />
+  </details>
+}
+
+<!-- ============================================================ decisão -->
+<label class="mensagem">
+  Mensagem para {{ primeiroNome() }}
+  {{ acao() === 'aprovar' ? '(opcional para aprovar, obrigatória para recusar)' : '(obrigatória)' }}
+  <textarea rows="2" maxlength="500" [value]="mensagem()" (input)="mensagem.set(valor($event))"
+            placeholder="Ex.: pode começar em 24/03? A equipe fica no limite na semana do dia 17."></textarea>
+</label>
+
+@if (aviso(); as texto) {
+  <div class="aviso" role="alert">{{ texto }}</div>
+}
+@if (erro(); as e) {
+  <div class="aviso" role="alert">{{ e.mensagem }}</div>
+  @if (e.verificacoes.length > 0) {
+    <crona-checklist [verificacoes]="e.verificacoes" />
+  }
+}
+
+<div class="acoes">
+  <button class="botao botao-texto recusar" type="button" [disabled]="ocupado()" (click)="recusar()">
+    <crona-icone nome="x" [tamanho]="16" /> Recusar
+  </button>
+  @switch (acao()) {
+    @case ('aprovar') {
+      <button class="botao botao-primario" type="button" [disabled]="ocupado()" (click)="aprovar()">
+        <crona-icone nome="check" [tamanho]="16" [espessura]="2.4" /> Aprovar
+      </button>
+    }
+    @case ('aprovar-mesmo-assim') {
+      <button class="botao botao-primario" type="button" [disabled]="ocupado()" (click)="aprovar()">
+        <crona-icone nome="check" [tamanho]="16" [espessura]="2.4" /> Aprovar mesmo assim
+      </button>
+    }
+    @case ('bloqueado') {
+      <span class="bloqueado">Não dá para aprovar: há impedimento. Recuse explicando o motivo.</span>
+    }
+  }
+</div>

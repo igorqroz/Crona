@@ -79,7 +79,11 @@ class AprovacaoApiTest extends ComBiaTestBase {
 
             mockMvc.perform(get("/aprovacoes/" + pedido).with(como(robertoId, "GESTOR")))
                     .andExpect(jsonPath("$.pedido.situacao").value("COM_ATENCAO"))
-                    .andExpect(jsonPath("$.colegasNoPeriodo[0].nome").value("Ana Lima"));
+                    .andExpect(jsonPath("$.colegasNoPeriodo[0].nome").value("Ana Lima"))
+                    // Fase 7d: o que a tela do gestor precisa para a linha do tempo e os quadros do topo
+                    .andExpect(jsonPath("$.limiteDoDepartamento").value(org.hamcrest.Matchers.greaterThanOrEqualTo(1)))
+                    .andExpect(jsonPath("$.voltaAoTrabalho").exists())
+                    .andExpect(jsonPath("$.concederAte").exists());
 
             mockMvc.perform(post(url).with(como(robertoId, "GESTOR")))
                     .andExpect(status().isUnprocessableContent())

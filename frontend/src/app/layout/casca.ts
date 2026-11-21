@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
@@ -11,6 +12,13 @@ import { Logo } from '../compartilhado/logo';
 import { Perfil } from '../nucleo/modelos';
 import { Sessao } from '../nucleo/sessao';
 
+interface ItemDoMenu {
+  rota: string;
+  texto: string;
+  icone: NomeDoIcone;
+  contador?: () => number;
+}
+
 const NOME_DO_PERFIL: Record<Perfil, string> = {
   COLABORADOR: 'Colaborador',
   GESTOR: 'Gestor',
@@ -23,7 +31,7 @@ const NOME_DO_PERFIL: Record<Perfil, string> = {
  */
 @Component({
   selector: 'crona-casca',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Logo, Icone, Avatar],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, NgTemplateOutlet, Logo, Icone, Avatar],
   templateUrl: './casca.html',
   styleUrl: './casca.css',
 })
@@ -38,22 +46,31 @@ export class Casca {
     return usuario ? NOME_DO_PERFIL[usuario.perfil] : '';
   });
 
-  protected readonly menu: { rota: string; texto: string; icone: NomeDoIcone; contador?: () => number }[] = [
+  protected readonly menu: ItemDoMenu[] = [
     { rota: '/inicio', texto: 'Início', icone: 'inicio' },
     { rota: '/solicitar', texto: 'Solicitar férias', icone: 'sol' },
     { rota: '/trocas', texto: 'Trocas de período', icone: 'troca', contador: this.pendencias.trocas },
     { rota: '/historico', texto: 'Histórico e avisos', icone: 'historico' },
   ];
 
+  /** A seção "Gestão" só existe para gestor e RH. O gestor também é colaborador: vê as duas. */
+  protected readonly menuDeGestao = computed<ItemDoMenu[]>(() => {
+    const perfil = this.usuario()?.perfil;
+    return perfil === 'GESTOR' || perfil === 'ADMIN'
+      ? [{ rota: '/aprovacoes', texto: 'Aprovações', icone: 'aprovacoes', contador: this.pendencias.aprovacoes }]
+      : [];
+  });
+
   constructor() {
-    // A cada troca de tela, confere de novo se há troca esperando resposta (o número do menu).
+    // A cada troca de tela, confere de novo o que está esperando a pessoa (os números do menu).
+    // Não precisa chamar também aqui no construtor: a casca nasce DURANTE a primeira navegação,
+    // então o primeiro NavigationEnd já chega a esta inscrição.
     this.router.events
       .pipe(
         filter((evento) => evento instanceof NavigationEnd),
         takeUntilDestroyed(),
       )
       .subscribe(() => this.pendencias.atualizar());
-    this.pendencias.atualizar();
   }
 
   protected sair(): void {

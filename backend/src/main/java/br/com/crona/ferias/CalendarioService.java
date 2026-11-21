@@ -3,6 +3,7 @@ package br.com.crona.ferias;
 import br.com.crona.colaborador.ColaboradorRepository;
 import br.com.crona.compartilhado.ReferenciaResposta;
 import br.com.crona.compartilhado.erro.ParametroInvalidoException;
+import br.com.crona.departamento.Departamento;
 import br.com.crona.empresa.ConfiguracaoFerias;
 import br.com.crona.empresa.ConfiguracaoFeriasRepository;
 import br.com.crona.empresa.EmpresaAtual;
@@ -76,12 +77,26 @@ public class CalendarioService {
                         a.status() != StatusSolicitacao.APROVADA))
                 .toList();
 
-        var config = configuracaoRepository.findByEmpresaId(empresaId).orElseGet(ConfiguracaoFerias::padrao);
-        Integer limite = config.getPercentualMinimoTrabalhando() == null ? null
-                : ValidadorDaEquipe.limiteDoDepartamento(new DadosDaEquipe.Departamento(departamento.getNome(),
+        return new CalendarioDaEquipe(departamento.getNome(), limiteDoDepartamento(departamento), gestor,
+                ausencias, feriados);
+    }
+
+    /**
+     * EMP-01: quantas pessoas do departamento podem estar fora ao mesmo tempo.
+     * Nulo se não há departamento ou a regra está desligada na empresa.
+     * Usado aqui e no detalhe da aprovação (Fase 7d).
+     */
+    @Transactional(readOnly = true)
+    public Integer limiteDoDepartamento(Departamento departamento) {
+        if (departamento == null) {
+            return null;
+        }
+        var config = configuracaoRepository.findByEmpresaId(empresaAtual.id()).orElseGet(ConfiguracaoFerias::padrao);
+        if (config.getPercentualMinimoTrabalhando() == null) {
+            return null;
+        }
+        return ValidadorDaEquipe.limiteDoDepartamento(new DadosDaEquipe.Departamento(departamento.getNome(),
                 (int) colaboradorRepository.countByDepartamentoIdAndAtivoTrue(departamento.getId()),
                 config.getPercentualMinimoTrabalhando()));
-
-        return new CalendarioDaEquipe(departamento.getNome(), limite, gestor, ausencias, feriados);
     }
 }

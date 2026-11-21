@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 
 import { Casca } from './layout/casca';
 import { logadoGuard } from './nucleo/logado.guard';
+import { perfilGuard } from './nucleo/perfil.guard';
 
 /**
  * As rotas do Crona.
@@ -37,6 +38,13 @@ export const routes: Routes = [
         path: 'trocas',
         title: 'Trocas de período · Crona',
         loadComponent: () => import('./paginas/trocas/trocas').then((m) => m.Trocas),
+      },
+      {
+        // Só gestor e RH. O perfilGuard manda os outros de volta para o Início.
+        path: 'aprovacoes',
+        title: 'Aprovações · Crona',
+        canActivate: [perfilGuard('GESTOR', 'ADMIN')],
+        loadComponent: () => import('./gestao/aprovacoes').then((m) => m.Aprovacoes),
       },
       // As próximas telas. Por enquanto, um aviso de "em breve".
       {

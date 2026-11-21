@@ -39,6 +39,7 @@ public class AprovacaoService {
     private final PeriodoAquisitivoRepository periodoRepository;
     private final ConfiguracaoFeriasRepository configuracaoRepository;
     private final SimulacaoService simulacaoService;
+    private final CalendarioService calendarioService;
     private final EmpresaAtual empresaAtual;
     private final Clock relogio;
 
@@ -46,12 +47,14 @@ public class AprovacaoService {
                             PeriodoAquisitivoRepository periodoRepository,
                             ConfiguracaoFeriasRepository configuracaoRepository,
                             SimulacaoService simulacaoService,
+                            CalendarioService calendarioService,
                             EmpresaAtual empresaAtual,
                             Clock relogio) {
         this.solicitacaoRepository = solicitacaoRepository;
         this.periodoRepository = periodoRepository;
         this.configuracaoRepository = configuracaoRepository;
         this.simulacaoService = simulacaoService;
+        this.calendarioService = calendarioService;
         this.empresaAtual = empresaAtual;
         this.relogio = relogio;
     }
@@ -78,6 +81,8 @@ public class AprovacaoService {
         var pedido = pedidoQueEuPossoDecidir(id, simulacaoService.colaboradorLogado());
         var avaliacao = avaliar(pedido);
         return new ItemDeAprovacao.Detalhe(paraItem(pedido, avaliacao), avaliacao.periodo().saldo().livres(),
+                avaliacao.resultado().voltaAoTrabalho(), avaliacao.periodo().periodo().getDataLimiteConcessao(),
+                calendarioService.limiteDoDepartamento(pedido.getColaborador().getDepartamento()),
                 avaliacao.resultado().verificacoes(), simulacaoService.paraResposta(avaliacao).colegasNoPeriodo());
     }
 
