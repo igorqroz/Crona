@@ -30,6 +30,8 @@ abstract class ComBiaTestBase extends ApiTestBase {
     protected FeriadoRepository feriadoRepository;
 
     protected Long biaId;
+    /** O gestor da Bia (o Roberto Neves dos dados de desenvolvimento). */
+    protected Long robertoId;
     /** Uma segunda-feira daqui a uns 45 dias, sem feriado nela nem nos 2 dias seguintes. */
     protected LocalDate segunda;
 
@@ -38,16 +40,21 @@ abstract class ComBiaTestBase extends ApiTestBase {
         LocalDate hoje = LocalDate.now(RelogioConfig.FUSO);
         Long engenharia = jdbc.queryForObject("SELECT id FROM departamento WHERE nome = 'Engenharia' AND empresa_id = ?",
                 Long.class, empresaDemo);
+        robertoId = idDoColaborador("roberto.neves@demo.crona");
 
         var json = mockMvc.perform(post("/colaboradores").contentType(MediaType.APPLICATION_JSON).content("""
                         {"nome": "Bia Teste", "email": "bia.teste@demo.crona", "senha": "segredo123",
-                         "perfil": "COLABORADOR", "dataAdmissao": "%s", "departamentoId": %d}
-                        """.formatted(hoje.minusMonths(18), engenharia)))
+                         "perfil": "COLABORADOR", "dataAdmissao": "%s", "departamentoId": %d, "gestorId": %d}
+                        """.formatted(hoje.minusMonths(18), engenharia, robertoId)))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
         biaId = ((Number) JsonPath.read(json, "$.id")).longValue();
 
         segunda = segundaLivreDepoisDe(hoje.plusDays(45));
+    }
+
+    protected Long idDoColaborador(String email) {
+        return jdbc.queryForObject("SELECT id FROM colaborador WHERE email = ?", Long.class, email);
     }
 
     /** A primeira segunda-feira a partir de {@code data} sem feriado nela nem nos 2 dias seguintes. */

@@ -1,5 +1,6 @@
 package br.com.crona.ferias;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -7,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface SolicitacaoFeriasRepository extends JpaRepository<SolicitacaoFerias, Long> {
 
@@ -26,6 +28,21 @@ public interface SolicitacaoFeriasRepository extends JpaRepository<SolicitacaoFe
 
     // Os pedidos de quem está logado, do mais recente para o mais antigo.
     List<SolicitacaoFerias> findByColaboradorIdOrderByDataInicioDesc(Long colaboradorId);
+
+    // ---- aprovações: já trazem colaborador, departamento e período juntos (evita o N+1)
+
+    /** Pedidos num status, da empresa toda (visão do ADMIN/RH). */
+    @EntityGraph(attributePaths = {"colaborador", "colaborador.departamento", "periodoAquisitivo"})
+    List<SolicitacaoFerias> findByStatusAndColaboradorEmpresaIdOrderByDataInicioAsc(StatusSolicitacao status,
+                                                                                   Long empresaId);
+
+    /** Pedidos num status, só da equipe de um gestor. */
+    @EntityGraph(attributePaths = {"colaborador", "colaborador.departamento", "periodoAquisitivo"})
+    List<SolicitacaoFerias> findByStatusAndColaboradorGestorIdOrderByDataInicioAsc(StatusSolicitacao status,
+                                                                                  Long gestorId);
+
+    @EntityGraph(attributePaths = {"colaborador", "colaborador.departamento", "colaborador.gestor", "periodoAquisitivo"})
+    Optional<SolicitacaoFerias> findByIdAndColaboradorEmpresaId(Long id, Long empresaId);
 
     List<SolicitacaoFerias> findByPeriodoAquisitivoIdAndStatusIn(Long periodoAquisitivoId,
                                                                  Collection<StatusSolicitacao> status);
