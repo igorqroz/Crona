@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -54,13 +55,15 @@ class ColaboradorServiceTest {
     private EmpresaAtual empresaAtual;
     @Mock
     private PasswordEncoder passwordEncoder;
+    @Mock
+    private ApplicationEventPublisher eventos;
 
     private ColaboradorService service;
 
     @BeforeEach
     void preparar() {
         service = new ColaboradorService(colaboradorRepository, departamentoRepository,
-                empresaRepository, empresaAtual, passwordEncoder);
+                empresaRepository, empresaAtual, passwordEncoder, eventos);
         lenient().when(empresaAtual.id()).thenReturn(EMPRESA_ID);
         lenient().when(empresaRepository.getReferenceById(EMPRESA_ID)).thenReturn(mock(Empresa.class));
         lenient().when(passwordEncoder.encode(any())).thenReturn("$2a$10$hashFalsoParaTeste");
@@ -83,6 +86,8 @@ class ColaboradorServiceTest {
             assertThat(ReflectionTestUtils.getField(gravado.getValue(), "senhaHash"))
                     .isEqualTo("$2a$10$hashFalsoParaTeste")
                     .isNotEqualTo("segredo123");
+            // E avisa que a admissão foi definida (para gerar os períodos aquisitivos).
+            verify(eventos).publishEvent(any(AdmissaoDefinida.class));
         }
 
         @Test
