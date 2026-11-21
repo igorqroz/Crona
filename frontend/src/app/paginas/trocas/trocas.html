@@ -1,0 +1,120 @@
+<header class="topo">
+  <h1>Trocas de período</h1>
+  <p>Combine com um colega da sua equipe para trocar as datas das férias. Quando os dois concordam, a troca vai para o gestor.</p>
+</header>
+
+@switch (estado()) {
+  @case ('carregando') {
+    <p class="texto-suave">Carregando…</p>
+  }
+
+  @case ('erro') {
+    <div class="aviso" role="alert">
+      Não foi possível carregar as trocas. <a href="" (click)="$event.preventDefault(); carregar()">Tentar de novo</a>
+    </div>
+  }
+
+  @case ('pronto') {
+    <div class="linha">
+      <!-- ============================================================ minhas negociações -->
+      <section class="coluna negociacoes" aria-labelledby="titulo-negociacoes">
+        <h2 class="cartao-titulo" id="titulo-negociacoes">Suas negociações</h2>
+        @for (troca of trocas(); track troca.id) {
+          <crona-cartao-troca
+            [visao]="troca"
+            [ocupado]="ocupado() === troca.id"
+            [erro]="erroDe(troca.id)"
+            (aceitou)="aceitar(troca.id)"
+            (recusou)="recusar(troca.id, $event)"
+            (cancelou)="cancelar(troca.id)"
+            (contrapropos)="contrapropor(troca.id, $event)"
+          />
+        } @empty {
+          <div class="cartao vazio">
+            <p class="texto-suave">Nenhuma troca ainda. Para propor uma, escolha férias de um colega ao lado.</p>
+          </div>
+        }
+      </section>
+
+      <!-- ============================================================ propor uma troca -->
+      <section class="cartao propor" aria-labelledby="titulo-propor">
+        <div class="cartao-cabecalho">
+          <h2 class="cartao-titulo" id="titulo-propor">Propor uma troca</h2>
+          <span class="texto-suave">Férias aprovadas de colegas com o mesmo gestor</span>
+        </div>
+
+        @if (equipe().length === 0) {
+          <p class="texto-suave">Ninguém da equipe tem férias aprovadas para trocar.</p>
+        } @else {
+          <ul class="equipe">
+            @for (ferias of equipe(); track ferias.pedidoId) {
+              <li [class.escolhida]="alvo()?.pedidoId === ferias.pedidoId">
+                <crona-avatar [nome]="ferias.colaborador.nome" />
+                <div class="pessoa">
+                  <span class="nome">{{ ferias.colaborador.nome }}</span>
+                  <span class="texto-suave">{{ intervalo(ferias.inicio, ferias.fim) }} · {{ ferias.diasGozo }} dias</span>
+                </div>
+                <button class="botao botao-secundario pequeno" type="button" (click)="escolher(ferias)">Quero essas</button>
+              </li>
+            }
+          </ul>
+        }
+
+        @if (alvo(); as a) {
+          <form class="formulario" (submit)="$event.preventDefault(); propor()">
+            <h3>Propor a {{ a.colaborador.nome.split(' ')[0] }}</h3>
+
+            <label>
+              O que você oferece em troca
+              <select (change)="oferecer(valor($event) ? +valor($event) : null)">
+                @for (minha of minhasFerias(); track minha.id) {
+                  <option [value]="minha.id" [selected]="oferecida() === minha.id">
+                    Minhas férias de {{ intervalo(minha.inicio, minha.fim) }} ({{ minha.diasGozo }} dias)
+                  </option>
+                }
+                <option value="" [selected]="oferecida() === null">Ainda não tenho férias marcadas</option>
+              </select>
+            </label>
+
+            <div class="campos">
+              <label>
+                Suas férias começam em
+                <input type="date" [min]="amanha" [value]="meuInicio()" (input)="meuInicio.set(valor($event))" />
+              </label>
+              @if (oferecida() === null) {
+                <label>
+                  Quantos dias
+                  <input type="number" min="5" max="30" [value]="meusDias()" (input)="meusDias.set(+valor($event))" />
+                </label>
+              }
+              <label>
+                As de {{ a.colaborador.nome.split(' ')[0] }} passam para
+                <input type="date" [min]="amanha" [value]="inicioDoColega()" (input)="inicioDoColega.set(valor($event))" />
+              </label>
+            </div>
+            <p class="texto-suave">{{ a.colaborador.nome.split(' ')[0] }} mantém os {{ a.diasGozo }} dias dele: só as datas mudam.</p>
+
+            <label>
+              Recado (opcional)
+              <textarea rows="2" maxlength="500" placeholder="Ex.: casamento da minha irmã nessa semana" [value]="mensagem()" (input)="mensagem.set(valor($event))"></textarea>
+            </label>
+
+            @if (erroDaProposta(); as e) {
+              <div class="aviso" role="alert">{{ e.mensagem }}</div>
+              @if (e.verificacoes.length > 0) {
+                <crona-checklist [verificacoes]="e.verificacoes" />
+              }
+            }
+
+            <div class="acoes">
+              <button class="botao botao-primario" type="submit" [disabled]="!podePropor()">
+                {{ enviando() ? 'Enviando…' : 'Enviar proposta' }}
+              </button>
+              <button class="botao botao-secundario" type="button" (click)="fecharProposta()">Desistir</button>
+            </div>
+          </form>
+        }
+      </section>
+    </div>
+  }
+}

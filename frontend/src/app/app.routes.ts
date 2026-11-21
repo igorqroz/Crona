@@ -33,13 +33,12 @@ export const routes: Routes = [
         title: 'Solicitar férias · Crona',
         loadComponent: () => import('./paginas/solicitar/solicitar').then((m) => m.Solicitar),
       },
-      // As próximas telas da Fase 7 (7c, 7d). Por enquanto, um aviso de "em breve".
       {
         path: 'trocas',
         title: 'Trocas de período · Crona',
-        loadComponent: () => import('./paginas/em-breve').then((m) => m.EmBreve),
-        data: { titulo: 'Trocas de período' },
+        loadComponent: () => import('./paginas/trocas/trocas').then((m) => m.Trocas),
       },
+      // As próximas telas. Por enquanto, um aviso de "em breve".
       {
         path: 'historico',
         title: 'Histórico · Crona',

@@ -1,0 +1,163 @@
+:host {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.topo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+h1 {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+}
+
+.topo p {
+  margin: 0;
+  max-width: 720px;
+  font-size: 14px;
+  color: var(--cor-texto-secundario);
+}
+
+.linha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.coluna {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.negociacoes {
+  flex: 999 1 520px;
+  min-width: 0;
+}
+
+.vazio p {
+  margin: 0;
+}
+
+/* ---------------------------------------------------------------- propor */
+
+.propor {
+  flex: 1 1 360px;
+  min-width: 0;
+}
+
+.cartao-cabecalho {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.equipe {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.equipe li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 8px;
+  border-top: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pequeno);
+}
+
+.equipe li.escolhida {
+  background: var(--cor-primaria-clara);
+}
+
+.pessoa {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.nome {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pequeno {
+  min-height: 36px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+/* ---------------------------------------------------------------- formulário */
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--cor-borda);
+}
+
+h3 {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.formulario p {
+  margin: 0;
+}
+
+.campos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cor-texto-secundario);
+}
+
+input,
+select,
+textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio);
+  background: var(--cor-superficie);
+  font-family: var(--fonte-texto);
+  font-size: 14px;
+  color: var(--cor-texto);
+}
+
+input,
+select {
+  min-height: var(--altura-toque);
+}
+
+textarea {
+  resize: vertical;
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

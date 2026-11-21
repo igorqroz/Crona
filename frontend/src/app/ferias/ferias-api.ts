@@ -3,10 +3,12 @@ import { inject, Injectable } from '@angular/core';
 
 import {
   CalendarioDaEquipe,
+  Contraproposta,
   FeriasDoColega,
   Negociacao,
   PedidoDeFerias,
   PeriodoAquisitivo,
+  PropostaDeTroca,
   Simulacao,
   Solicitacao,
 } from '../nucleo/modelos';
@@ -58,5 +60,17 @@ export class FeriasApi {
 
   recusarTroca(id: number, mensagem?: string) {
     return this.http.post<Negociacao>(`/api/minhas-ferias/negociacoes/${id}/recusar`, { mensagem });
+  }
+
+  proporTroca(proposta: PropostaDeTroca) {
+    return this.http.post<Negociacao>('/api/minhas-ferias/negociacoes', proposta);
+  }
+
+  contrapropor(id: number, contraproposta: Contraproposta) {
+    return this.http.post<Negociacao>(`/api/minhas-ferias/negociacoes/${id}/contrapropor`, contraproposta);
+  }
+
+  cancelarTroca(id: number) {
+    return this.http.post<Negociacao>(`/api/minhas-ferias/negociacoes/${id}/cancelar`, null);
   }
 }

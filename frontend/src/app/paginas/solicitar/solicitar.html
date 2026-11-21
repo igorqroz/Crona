@@ -69,25 +69,7 @@
     }
 
     @if (verificacoes().length > 0) {
-      <div class="checklist">
-        @if (simulacao(); as s) {
-          <strong class="checklist-resumo">{{ s.resumo }}</strong>
-        }
-        <ul>
-          @for (v of verificacoes(); track $index) {
-            <li [class]="v.resultado">
-              <span class="marca">
-                @switch (v.resultado) {
-                  @case ('OK') { <crona-icone nome="check" [tamanho]="14" [espessura]="2.6" /> }
-                  @case ('ATENCAO') { <crona-icone nome="alerta" [tamanho]="14" [espessura]="2.2" /> }
-                  @case ('IMPEDIMENTO') { <crona-icone nome="x" [tamanho]="14" [espessura]="2.6" /> }
-                }
-              </span>
-              <span class="texto">{{ v.mensagem }}</span>
-            </li>
-          }
-        </ul>
-      </div>
+      <crona-checklist [verificacoes]="verificacoes()" [resumo]="simulacao()?.resumo ?? null" />
     }
 
     <label class="recado">

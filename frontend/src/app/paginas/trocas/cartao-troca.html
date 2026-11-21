@@ -1,0 +1,121 @@
+@let v = visao();
+
+<div class="cabecalho">
+  <crona-avatar [nome]="v.outro.nome" [tamanho]="40" />
+  <div class="quem">
+    <span class="titulo">Troca com {{ v.outro.nome }}</span>
+    <span class="texto-suave">{{ v.souQuemPropos ? 'Você propôs' : v.outro.nome + ' propôs' }} · {{ haQuanto(v.rodadas[0].feitaEm) }}</span>
+  </div>
+  <span class="selo" [class]="'selo ' + v.tom">{{ v.rotulo }}</span>
+</div>
+
+<div class="datas">
+  <div class="lado">
+    <span class="rotulo">Você</span>
+    <span class="hoje">{{ v.minhasHoje ?? 'sem férias marcadas' }}</span>
+    <span class="seta" aria-hidden="true">→</span>
+    <strong class="nova">{{ v.minhasNovas }}</strong>
+  </div>
+  <div class="lado">
+    <span class="rotulo">{{ v.outro.nome.split(' ')[0] }}</span>
+    <span class="hoje">{{ v.deleHoje ?? 'sem férias marcadas' }}</span>
+    <span class="seta" aria-hidden="true">→</span>
+    <strong class="nova">{{ v.delesNovas }}</strong>
+  </div>
+</div>
+
+@if (v.rodadas[v.rodadas.length - 1].mensagem; as recado) {
+  <p class="recado">“{{ recado }}” <span class="texto-suave">— {{ v.rodadas[v.rodadas.length - 1].autor }}</span></p>
+}
+
+@if (v.mensagemDecisao && v.decididoPor) {
+  <p class="recado decisao">{{ v.rotulo }} por {{ v.decididoPor }}: “{{ v.mensagemDecisao }}”</p>
+}
+
+@if (v.rodadas.length > 1) {
+  <details>
+    <summary>Histórico ({{ v.rodadas.length }} propostas)</summary>
+    <ol>
+      @for (r of v.rodadas; track $index) {
+        <li>
+          <strong>{{ r.autor }}</strong>, {{ haQuanto(r.feitaEm) }}: você {{ r.minhas }}, {{ v.outro.nome.split(' ')[0] }} {{ r.deles }}
+          @if (r.mensagem) {
+            <span class="texto-suave">— “{{ r.mensagem }}”</span>
+          }
+        </li>
+      }
+    </ol>
+  </details>
+}
+
+@if (erro(); as e) {
+  <div class="aviso" role="alert">{{ e.mensagem }}</div>
+  @if (e.verificacoes.length > 0) {
+    <crona-checklist [verificacoes]="e.verificacoes" />
+  }
+}
+
+<!-- ============================================================ formulários pequenos -->
+@switch (modo()) {
+  @case ('contrapropor') {
+    <div class="formulario">
+      <div class="campos">
+        <label>
+          Suas férias começam em
+          <input type="date" [min]="amanha" [value]="meuInicio()" (input)="meuInicio.set(valor($event))" />
+        </label>
+        <label>
+          As de {{ v.outro.nome.split(' ')[0] }} começam em
+          <input type="date" [min]="amanha" [value]="inicioDoOutro()" (input)="inicioDoOutro.set(valor($event))" />
+        </label>
+      </div>
+      <label>
+        Recado (opcional)
+        <textarea rows="2" maxlength="500" [value]="mensagem()" (input)="mensagem.set(valor($event))"></textarea>
+      </label>
+      <p class="texto-suave">Os dias de cada um continuam os mesmos: só as datas mudam.</p>
+      <div class="acoes">
+        <button class="botao botao-primario" type="button" [disabled]="ocupado()" (click)="enviarContraproposta()">Enviar contraproposta</button>
+        <button class="botao botao-secundario" type="button" (click)="fechar()">Voltar</button>
+      </div>
+    </div>
+  }
+
+  @case ('recusar') {
+    <div class="formulario">
+      <label>
+        Recado para {{ v.outro.nome.split(' ')[0] }} (opcional)
+        <textarea rows="2" maxlength="500" [value]="mensagem()" (input)="mensagem.set(valor($event))"></textarea>
+      </label>
+      <div class="acoes">
+        <button class="botao botao-perigo" type="button" [disabled]="ocupado()" (click)="confirmarRecusa()">Recusar a troca</button>
+        <button class="botao botao-secundario" type="button" (click)="fechar()">Voltar</button>
+      </div>
+    </div>
+  }
+
+  @case ('cancelar') {
+    <div class="formulario">
+      <p>Cancelar esta proposta? A troca deixa de valer, e as férias dos dois continuam como estão hoje.</p>
+      <div class="acoes">
+        <button class="botao botao-perigo" type="button" [disabled]="ocupado()" (click)="cancelou.emit()">Sim, cancelar</button>
+        <button class="botao botao-secundario" type="button" (click)="fechar()">Voltar</button>
+      </div>
+    </div>
+  }
+
+  @default {
+    @if (v.minhaVez || v.possoCancelar) {
+      <div class="acoes">
+        @if (v.minhaVez) {
+          <button class="botao botao-primario" type="button" [disabled]="ocupado()" (click)="aceitou.emit()">Aceitar troca</button>
+          <button class="botao botao-secundario" type="button" [disabled]="ocupado()" (click)="abrir('contrapropor')">Contrapropor</button>
+          <button class="botao botao-secundario" type="button" [disabled]="ocupado()" (click)="abrir('recusar')">Recusar</button>
+        }
+        @if (v.possoCancelar) {
+          <button class="botao botao-texto" type="button" [disabled]="ocupado()" (click)="abrir('cancelar')">Cancelar proposta</button>
+        }
+      </div>
+    }
+  }
+}

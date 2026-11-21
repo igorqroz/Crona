@@ -71,7 +71,7 @@ O projeto é construído em fases, e cada fase entrega algo que funciona.
 - [ ] **Fase 7 — Front-end Angular:** telas do [redesign](docs/redesign.md), versão para computador (celular fica para depois)
   - [x] 7a: projeto Angular 22, login e tela Início do colaborador
   - [x] 7b: solicitar férias (calendário com os colegas fora, checklist das regras e envio)
-  - [ ] 7c: trocas de período
+  - [x] 7c: trocas de período (propor, contrapropor, aceitar, recusar e cancelar, com o histórico das rodadas)
   - [ ] 7d: aprovações do gestor
 - [ ] **Fase 8 — Extras:** recibo em PDF, notificações e calendário do departamento
 - [ ] **Fase 9 — Entrega:** Docker, CI com GitHub Actions e deploy
