@@ -87,25 +87,34 @@ public class AprovacaoService {
         var pedido = pedidoQueEuPossoDecidir(id, eu);
         periodoRepository.travarDoColaborador(pedido.getColaborador().getId());
 
-        var resultado = avaliar(pedido).resultado();
-        if (!resultado.podeEnviar()) {
+        exigirQuePossaAprovar(avaliar(pedido).resultado().verificacoes(), decisao, "Este pedido");
+
+        pedido.aprovarPeloGestor(eu, decisao.mensagem(), configuracao().isExigeConfirmacaoRh(), agora());
+        return SolicitacaoResposta.de(pedido);
+    }
+
+    /**
+     * A regra do botão "Aprovar mesmo assim", usada no pedido (Fase 5) e na troca (Fase 6):
+     * - com impedimento, não aprova (o cenário mudou desde o envio);
+     * - com ponto de atenção, só aprova se o gestor confirmar (mesmoAssim) e escrever o motivo.
+     */
+    static void exigirQuePossaAprovar(List<Verificacao> verificacoes, DecisaoRequisicao decisao, String oQue) {
+        boolean temImpedimento = verificacoes.stream().anyMatch(v -> v.resultado() == Verificacao.Resultado.IMPEDIMENTO);
+        if (temImpedimento) {
             throw new PedidoComImpedimentosException(
-                    "Este pedido não pode mais ser aprovado: o cenário mudou desde o envio.", resultado.verificacoes());
+                    oQue + " não pode mais ser aprovado: o cenário mudou desde o envio.", verificacoes);
         }
-        var atencoes = resultado.com(Verificacao.Resultado.ATENCAO);
-        if (!atencoes.isEmpty()) {
+        long atencoes = verificacoes.stream().filter(v -> v.resultado() == Verificacao.Resultado.ATENCAO).count();
+        if (atencoes > 0) {
             if (!decisao.mesmoAssim()) {
-                throw new PedidoComImpedimentosException("O pedido tem " + atencoes.size()
-                        + (atencoes.size() == 1 ? " ponto" : " pontos") + " de atenção. Para aprovar mesmo assim, "
-                        + "confirme (mesmoAssim) e informe o motivo.", resultado.verificacoes());
+                throw new PedidoComImpedimentosException(oQue + " tem " + atencoes
+                        + (atencoes == 1 ? " ponto" : " pontos") + " de atenção. Para aprovar mesmo assim, "
+                        + "confirme (mesmoAssim) e informe o motivo.", verificacoes);
             }
             if (decisao.mensagem() == null || decisao.mensagem().isBlank()) {
                 throw new RegraVioladaException("Para aprovar mesmo assim, informe o motivo: ele fica registrado.");
             }
         }
-
-        pedido.aprovarPeloGestor(eu, decisao.mensagem(), configuracao().isExigeConfirmacaoRh(), agora());
-        return SolicitacaoResposta.de(pedido);
     }
 
     @Transactional
