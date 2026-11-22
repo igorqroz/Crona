@@ -380,6 +380,38 @@ h1 {
   flex: 1 1 100px;
 }
 
+/* ---------------------------------------------------------------- avisos de férias */
+
+.avisos {
+  gap: 12px;
+}
+
+.aviso-linha {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+}
+
+.icone-doc {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--cor-fundo);
+  color: var(--cor-texto-suave);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.baixar {
+  width: 40px;
+  min-height: 40px;
+  padding: 0;
+}
+
 /* ---------------------------------------------------------------- equipe */
 
 .equipe {

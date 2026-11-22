@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Aviso de férias (CLT, art. 135): o comunicado que a empresa entrega ao colaborador,
+  com pelo menos 30 dias de antecedência, e que ele assina dando ciência.
+
+  Modelo do JasperReports 7. Os textos com $P{...} são PARÂMETROS que o GeradorDeAviso preenche.
+  Dá para abrir e editar este arquivo visualmente no Jaspersoft Studio.
+  Página A4 (595 x 842 pontos), margens de 40.
+-->
+<jasperReport name="aviso-de-ferias" language="java" pageWidth="595" pageHeight="842" columnWidth="515"
+              leftMargin="40" rightMargin="40" topMargin="40" bottomMargin="40">
+	<!-- A fonte padrão de todos os textos: DejaVu Sans, do pacote jasperreports-fonts (vai embutida no PDF). -->
+	<style name="Padrao" default="true" fontName="DejaVu Sans" fontSize="10.0" pdfEmbedded="true"/>
+	<parameter name="razaoSocial" class="java.lang.String"/>
+	<parameter name="cnpj" class="java.lang.String"/>
+	<parameter name="colaborador" class="java.lang.String"/>
+	<parameter name="cargo" class="java.lang.String"/>
+	<parameter name="departamento" class="java.lang.String"/>
+	<parameter name="admissao" class="java.lang.String"/>
+	<parameter name="periodoAquisitivo" class="java.lang.String"/>
+	<parameter name="gozo" class="java.lang.String"/>
+	<parameter name="dias" class="java.lang.String"/>
+	<parameter name="abono" class="java.lang.String"/>
+	<parameter name="voltaAoTrabalho" class="java.lang.String"/>
+	<parameter name="aprovadoPor" class="java.lang.String"/>
+	<parameter name="emitidoEm" class="java.lang.String"/>
+	<title height="760">
+		<!-- ===================================================== cabeçalho -->
+		<element kind="staticText" x="0" y="0" width="200" height="24" forecolor="#1B6FD4" fontSize="18.0" bold="true">
+			<text><![CDATA[CRONA]]></text>
+		</element>
+		<element kind="staticText" x="0" y="22" width="200" height="14" forecolor="#5B6680" fontSize="9.0">
+			<text><![CDATA[Gestão de Férias]]></text>
+		</element>
+		<element kind="textField" x="215" y="0" width="300" height="16" forecolor="#5B6680" fontSize="9.0" hTextAlign="Right">
+			<expression><![CDATA["Emitido em " + $P{emitidoEm}]]></expression>
+		</element>
+		<element kind="line" x="0" y="46" width="515" height="1" forecolor="#E3E8F0"/>
+
+		<element kind="staticText" x="0" y="64" width="515" height="28" forecolor="#0D1B3E" fontSize="20.0" bold="true" hTextAlign="Center">
+			<text><![CDATA[AVISO DE FÉRIAS]]></text>
+		</element>
+		<element kind="staticText" x="0" y="92" width="515" height="16" forecolor="#5B6680" fontSize="9.0" hTextAlign="Center">
+			<text><![CDATA[Artigo 135 da Consolidação das Leis do Trabalho (CLT)]]></text>
+		</element>
+
+		<!-- ===================================================== empresa e colaborador -->
+		<element kind="staticText" x="0" y="130" width="515" height="16" forecolor="#1B6FD4" fontSize="10.0" bold="true">
+			<text><![CDATA[EMPRESA]]></text>
+		</element>
+		<element kind="textField" x="0" y="148" width="515" height="16" fontSize="11.0">
+			<expression><![CDATA[$P{razaoSocial} + "  ·  CNPJ " + $P{cnpj}]]></expression>
+		</element>
+
+		<element kind="staticText" x="0" y="180" width="515" height="16" forecolor="#1B6FD4" fontSize="10.0" bold="true">
+			<text><![CDATA[COLABORADOR]]></text>
+		</element>
+		<element kind="textField" x="0" y="198" width="515" height="18" fontSize="13.0" bold="true">
+			<expression><![CDATA[$P{colaborador}]]></expression>
+		</element>
+		<element kind="textField" x="0" y="216" width="515" height="16" forecolor="#3D4A66" fontSize="10.0">
+			<expression><![CDATA[$P{cargo} + "  ·  " + $P{departamento} + "  ·  admitido(a) em " + $P{admissao}]]></expression>
+		</element>
+
+		<!-- ===================================================== as férias -->
+		<element kind="staticText" x="0" y="252" width="515" height="16" forecolor="#1B6FD4" fontSize="10.0" bold="true">
+			<text><![CDATA[FÉRIAS]]></text>
+		</element>
+		<element kind="rectangle" x="0" y="272" width="515" height="128" forecolor="#E3E8F0" backcolor="#F4F6FA" radius="6"/>
+
+		<element kind="staticText" x="16" y="284" width="180" height="16" forecolor="#5B6680" fontSize="10.0">
+			<text><![CDATA[Período aquisitivo]]></text>
+		</element>
+		<element kind="textField" x="200" y="284" width="300" height="16" fontSize="11.0" bold="true">
+			<expression><![CDATA[$P{periodoAquisitivo}]]></expression>
+		</element>
+		<element kind="staticText" x="16" y="306" width="180" height="16" forecolor="#5B6680" fontSize="10.0">
+			<text><![CDATA[Período de gozo]]></text>
+		</element>
+		<element kind="textField" x="200" y="306" width="300" height="16" fontSize="11.0" bold="true">
+			<expression><![CDATA[$P{gozo}]]></expression>
+		</element>
+		<element kind="staticText" x="16" y="328" width="180" height="16" forecolor="#5B6680" fontSize="10.0">
+			<text><![CDATA[Dias de descanso]]></text>
+		</element>
+		<element kind="textField" x="200" y="328" width="300" height="16" fontSize="11.0" bold="true">
+			<expression><![CDATA[$P{dias}]]></expression>
+		</element>
+		<element kind="staticText" x="16" y="350" width="180" height="16" forecolor="#5B6680" fontSize="10.0">
+			<text><![CDATA[Abono pecuniário]]></text>
+		</element>
+		<element kind="textField" x="200" y="350" width="300" height="16" fontSize="11.0" bold="true">
+			<expression><![CDATA[$P{abono}]]></expression>
+		</element>
+		<element kind="staticText" x="16" y="372" width="180" height="16" forecolor="#5B6680" fontSize="10.0">
+			<text><![CDATA[Retorno ao trabalho]]></text>
+		</element>
+		<element kind="textField" x="200" y="372" width="300" height="16" fontSize="11.0" bold="true">
+			<expression><![CDATA[$P{voltaAoTrabalho}]]></expression>
+		</element>
+
+		<!-- ===================================================== texto do aviso -->
+		<element kind="textField" x="0" y="420" width="515" height="70" forecolor="#3D4A66" fontSize="10.5">
+			<expression><![CDATA["Comunicamos que, nos termos do art. 135 da CLT, as suas férias relativas ao período aquisitivo de "
++ $P{periodoAquisitivo} + " serão gozadas de " + $P{gozo} + ", devendo o retorno ao trabalho ocorrer em "
++ $P{voltaAoTrabalho} + ". Solicitamos que assine abaixo, dando ciência deste aviso."]]></expression>
+		</element>
+		<element kind="textField" x="0" y="494" width="515" height="16" forecolor="#5B6680" fontSize="9.0">
+			<expression><![CDATA["Férias aprovadas por " + $P{aprovadoPor} + "."]]></expression>
+		</element>
+
+		<!-- ===================================================== assinaturas -->
+		<element kind="line" x="0" y="600" width="230" height="1" forecolor="#0D1B3E"/>
+		<element kind="textField" x="0" y="606" width="230" height="16" fontSize="10.0" hTextAlign="Center">
+			<expression><![CDATA[$P{razaoSocial}]]></expression>
+		</element>
+		<element kind="staticText" x="0" y="622" width="230" height="14" forecolor="#5B6680" fontSize="9.0" hTextAlign="Center">
+			<text><![CDATA[Empregador]]></text>
+		</element>
+
+		<element kind="line" x="285" y="600" width="230" height="1" forecolor="#0D1B3E"/>
+		<element kind="textField" x="285" y="606" width="230" height="16" fontSize="10.0" hTextAlign="Center">
+			<expression><![CDATA[$P{colaborador}]]></expression>
+		</element>
+		<element kind="staticText" x="285" y="622" width="230" height="14" forecolor="#5B6680" fontSize="9.0" hTextAlign="Center">
+			<text><![CDATA[Ciente em ____/____/________]]></text>
+		</element>
+
+		<element kind="staticText" x="0" y="730" width="515" height="14" forecolor="#9AA3B5" fontSize="8.0" hTextAlign="Center">
+			<text><![CDATA[Documento gerado pelo Crona. O aviso deve ser entregue com pelo menos 30 dias de antecedência (CLT, art. 135).]]></text>
+		</element>
+	</title>
+</jasperReport>

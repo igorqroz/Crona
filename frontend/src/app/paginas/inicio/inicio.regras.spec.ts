@@ -1,5 +1,13 @@
 import { Negociacao, PeriodoAquisitivo, Solicitacao } from '../../nucleo/modelos';
-import { blocos, passosDoPedido, pedidoEmFoco, periodoEmFoco, propostaParaMim, saldo } from './inicio.regras';
+import {
+  avisosDisponiveis,
+  blocos,
+  passosDoPedido,
+  pedidoEmFoco,
+  periodoEmFoco,
+  propostaParaMim,
+  saldo,
+} from './inicio.regras';
 
 /*
  * Testes das regras da tela Início, com o Vitest. A estrutura é a mesma do JUnit:
@@ -120,6 +128,24 @@ describe('passosDoPedido', () => {
     const passos = passosDoPedido(pedido(1, { status: 'APROVADA' }));
 
     expect(passos.every((p) => p.estado === 'feito')).toBe(true);
+  });
+});
+
+describe('avisosDisponiveis', () => {
+  it('só as férias aprovadas, das mais recentes para as mais antigas', () => {
+    const avisos = avisosDisponiveis([
+      pedido(1, { status: 'APROVADA', inicio: '2026-07-06', fim: '2026-07-20' }),
+      pedido(2, { status: 'AGUARDANDO_GESTOR' }),
+      pedido(3, { status: 'APROVADA', inicio: '2027-01-11', fim: '2027-01-25' }),
+    ]);
+
+    expect(avisos.map((a) => a.solicitacaoId)).toEqual([3, 1]);
+    expect(avisos[0]).toEqual({
+      solicitacaoId: 3,
+      titulo: 'Janeiro 2027',
+      detalhe: '11/01 – 25/01 · 15 dias',
+      arquivo: 'aviso-de-ferias-2027-01-11.pdf',
+    });
   });
 });
 

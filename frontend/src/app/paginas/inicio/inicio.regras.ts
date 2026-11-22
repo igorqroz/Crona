@@ -70,6 +70,34 @@ export function passosDoPedido(pedido: Solicitacao): Passo[] {
   return passos;
 }
 
+// ------------------------------------------------------------------ avisos de férias (Fase 8a)
+
+export interface AvisoDisponivel {
+  solicitacaoId: number;
+  /** "Janeiro 2027" */
+  titulo: string;
+  detalhe: string;
+  /** O nome do arquivo baixado. */
+  arquivo: string;
+}
+
+/** As férias aprovadas têm aviso para baixar. As mais recentes primeiro. */
+export function avisosDisponiveis(solicitacoes: Solicitacao[]): AvisoDisponivel[] {
+  return solicitacoes
+    .filter((s) => s.status === 'APROVADA')
+    .sort((a, b) => b.inicio.localeCompare(a.inicio))
+    .map((s) => {
+      const [ano, mes] = s.inicio.split('-').map(Number);
+      const nomeDoMes = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date(ano, mes - 1, 1));
+      return {
+        solicitacaoId: s.id,
+        titulo: `${nomeDoMes.charAt(0).toUpperCase()}${nomeDoMes.slice(1)} ${ano}`,
+        detalhe: `${intervalo(s.inicio, s.fim)} · ${s.diasGozo} dias`,
+        arquivo: `aviso-de-ferias-${s.inicio}.pdf`,
+      };
+    });
+}
+
 // ------------------------------------------------------------------ proposta de troca
 
 export interface PropostaParaMim {

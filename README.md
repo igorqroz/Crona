@@ -55,7 +55,7 @@ Todas as regras estão detalhadas em [docs/regras-de-negocio.md](docs/regras-de-
 | Segurança | Spring Security + JWT | Login e permissões por perfil |
 | Testes | JUnit 5 + Mockito | Cada regra de negócio vira um teste |
 | Front-end | Angular 22 + TypeScript | Interface web (signals, componentes standalone, testes com Vitest) |
-| Relatórios | JasperReports | Recibo de férias em PDF |
+| Relatórios | JasperReports 7 | Aviso de férias em PDF (CLT, art. 135) |
 
 ## Roadmap
 
@@ -73,7 +73,10 @@ O projeto é construído em fases, e cada fase entrega algo que funciona.
   - [x] 7b: solicitar férias (calendário com os colegas fora, checklist das regras e envio)
   - [x] 7c: trocas de período (propor, contrapropor, aceitar, recusar e cancelar, com o histórico das rodadas)
   - [x] 7d: aprovações do gestor (fila com filtro, detalhe com a equipe no período, aprovar mesmo assim, aprovação em lote, trocas e confirmação do RH)
-- [ ] **Fase 8 — Extras:** recibo em PDF, notificações e calendário do departamento
+- [ ] **Fase 8 — Extras:** aviso de férias em PDF, notificações e calendário do departamento
+  - [x] 8a: aviso de férias em PDF (JasperReports), para baixar na tela Início
+  - [ ] 8b: notificações dentro do Crona
+  - [ ] 8c: calendário do departamento
 - [ ] **Fase 9 — Entrega:** Docker, CI com GitHub Actions e deploy
 
 ## Como rodar
@@ -134,6 +137,7 @@ Toda rota, menos o login, exige o cabeçalho `Authorization: Bearer <token>`. O 
 | `POST` | `/minhas-ferias/solicitacoes` | Envia um pedido (`{"inicio", "diasGozo", "diasAbono", "recado"}`). Com impedimento, responde `422` com o checklist e nada é gravado | Estar logado |
 | `GET` | `/minhas-ferias/solicitacoes` | Os meus pedidos, com status e decisão | Estar logado |
 | `POST` | `/minhas-ferias/solicitacoes/{id}/cancelar` | Desiste de um pedido ainda em análise | Estar logado |
+| `GET` | `/minhas-ferias/solicitacoes/{id}/aviso` | O aviso de férias em PDF (só de férias aprovadas) | Estar logado |
 | `GET` | `/aprovacoes?filtro=TODOS\|COM_CONFLITO\|SEM_CONFLITO` | A fila de aprovação (o gestor vê a própria equipe; o ADMIN, a empresa toda) | `SOLICITACAO_APROVAR` |
 | `GET` | `/aprovacoes/{id}` | O checklist completo de um pedido e quem estará fora | `SOLICITACAO_APROVAR` |
 | `POST` | `/aprovacoes/{id}/aprovar` | Aprova. Com pontos de atenção, exige `{"mesmoAssim": true, "mensagem": "motivo"}` | `SOLICITACAO_APROVAR` |

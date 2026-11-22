@@ -54,6 +54,11 @@ export class FeriasApi {
     return this.http.post<Solicitacao>('/api/minhas-ferias/solicitacoes', pedido);
   }
 
+  /** Fase 8a: o aviso de férias em PDF. responseType 'blob' = a resposta é um arquivo, não JSON. */
+  aviso(solicitacaoId: number) {
+    return this.http.get(`/api/minhas-ferias/solicitacoes/${solicitacaoId}/aviso`, { responseType: 'blob' });
+  }
+
   aceitarTroca(id: number) {
     return this.http.post<Negociacao>(`/api/minhas-ferias/negociacoes/${id}/aceitar`, null);
   }
