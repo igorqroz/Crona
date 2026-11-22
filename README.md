@@ -83,6 +83,12 @@ O projeto é construído em fases, e cada fase entrega algo que funciona.
 
 ## Como rodar
 
+### No ar (demonstração)
+
+O Crona está publicado no [Render](https://render.com) (o site e a API, que roda no Docker) com o banco no [Neon](https://neon.tech) (PostgreSQL). A configuração está em [`render.yaml`](render.yaml), e cada merge na `main` publica a versão nova.
+
+A versão no ar usa os mesmos dados de exemplo e os mesmos logins de exemplo da seção abaixo. Ela roda no plano grátis: depois de 15 minutos sem uso a API "dorme", e o primeiro login seguinte pode levar até um minuto.
+
 ### O jeito mais rápido: Docker
 
 Com o [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado, na pasta do projeto:
