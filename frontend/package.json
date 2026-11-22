@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "test:cobertura": "ng test --watch=false --coverage"
   },
   "private": true,
   "packageManager": "npm@11.19.1",
@@ -24,6 +25,7 @@
     "@angular/build": "^22.3.0",
     "@angular/cli": "^22.3.0",
     "@angular/compiler-cli": "^22.3.0",
+    "@vitest/coverage-v8": "^5.1.1",
     "jsdom": "^31.0.0",
     "prettier": "^3.8.1",
     "typescript": "~6.0.2",

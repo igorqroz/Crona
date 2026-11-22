@@ -23,7 +23,7 @@ concurrency:
 jobs:
   # ================================================================== API
   backend:
-    name: Back-end (228+ testes)
+    name: Back-end (testes e cobertura)
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -59,11 +59,31 @@ jobs:
           # Guarda as dependências do Maven entre uma execução e outra (fica bem mais rápido).
           cache: maven
 
-      - name: Testes
+      - name: Testes + cobertura (JaCoCo)
         # headless: a máquina do CI não tem tela (o JasperReports usa fontes do Java).
+        # verify (e não só test): roda os testes, gera a cobertura e confere o mínimo
+        # (a "catraca" do pom.xml). Cobertura abaixo do mínimo = CI vermelho.
         env:
           JAVA_TOOL_OPTIONS: -Djava.awt.headless=true
-        run: ./mvnw -B test
+        run: ./mvnw -B verify
+
+      - name: Resumo da cobertura (aparece na página da execução)
+        if: ${{ !cancelled() && hashFiles('backend/target/site/jacoco/jacoco.csv') != '' }}
+        # O jacoco.csv tem uma linha por classe; somamos tudo. Colunas: 6-7 = desvios
+        # (if/else) sem e com teste; 8-9 = linhas sem e com teste.
+        run: |
+          awk -F, 'NR > 1 { bs += $6; bc += $7; ls += $8; lc += $9 } END {
+            printf "### Cobertura do back-end (JaCoCo)\n\n| Linhas | Desvios (if/else) |\n|---|---|\n| %.1f%% (%d de %d) | %.1f%% (%d de %d) |\n",
+              100 * lc / (lc + ls), lc, lc + ls, 100 * bc / (bc + bs), bc, bc + bs
+          }' target/site/jacoco/jacoco.csv >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Guarda o relatório de cobertura (abra o index.html)
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-backend
+          path: backend/target/site/jacoco/
+          retention-days: 14
 
       - name: Guarda o relatório dos testes (se algum falhar)
         if: failure()
@@ -74,7 +94,7 @@ jobs:
 
   # ================================================================== front
   frontend:
-    name: Front-end (testes e build)
+    name: Front-end (testes, cobertura e build)
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -96,8 +116,23 @@ jobs:
         # npm ci: instala exatamente o que está no package-lock.json.
         run: npm ci
 
-      - name: Testes (Vitest)
-        run: npx ng test --watch=false
+      - name: Testes + cobertura (Vitest)
+        # --coverage também confere o mínimo (coverageThresholds no angular.json).
+        run: npx ng test --watch=false --coverage
+
+      - name: Resumo da cobertura (aparece na página da execução)
+        if: ${{ !cancelled() && hashFiles('frontend/coverage/crona/coverage-summary.json') != '' }}
+        run: |
+          jq -r '.total | "### Cobertura do front-end (Vitest)\n\n| Linhas | Desvios (if/else) | Funções |\n|---|---|---|\n| \(.lines.pct)% (\(.lines.covered) de \(.lines.total)) | \(.branches.pct)% | \(.functions.pct)% |"' \
+            coverage/crona/coverage-summary.json >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Guarda o relatório de cobertura (abra o index.html)
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-frontend
+          path: frontend/coverage/crona/
+          retention-days: 14
 
       - name: Build de produção
         run: npx ng build
