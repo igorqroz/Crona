@@ -75,7 +75,7 @@ O projeto é construído em fases, e cada fase entrega algo que funciona.
   - [x] 7d: aprovações do gestor (fila com filtro, detalhe com a equipe no período, aprovar mesmo assim, aprovação em lote, trocas e confirmação do RH)
 - [ ] **Fase 8 — Extras:** aviso de férias em PDF, notificações e calendário do departamento
   - [x] 8a: aviso de férias em PDF (JasperReports), para baixar na tela Início
-  - [ ] 8b: notificações dentro do Crona
+  - [x] 8b: notificações dentro do Crona (sino no menu, avisos do fluxo e rotina diária de férias a vencer)
   - [ ] 8c: calendário do departamento
 - [ ] **Fase 9 — Entrega:** Docker, CI com GitHub Actions e deploy
 
@@ -144,6 +144,10 @@ Toda rota, menos o login, exige o cabeçalho `Authorization: Bearer <token>`. O 
 | `POST` | `/aprovacoes/{id}/recusar` | Recusa, sempre com `{"mensagem"}` | `SOLICITACAO_APROVAR` |
 | `POST` | `/aprovacoes/aprovar-sem-conflito` | Aprova de uma vez os pedidos sem alerta | `SOLICITACAO_APROVAR` |
 | `GET` `POST` | `/confirmacoes-rh`, `/confirmacoes-rh/{id}/confirmar`, `/confirmacoes-rh/{id}/recusar` | A etapa do RH, quando a EMP-06 está ligada | `SOLICITACAO_CONFIRMAR_RH` |
+| `GET` | `/notificacoes` | As minhas notificações: o número de não lidas e as 30 mais recentes | Estar logado |
+| `POST` | `/notificacoes/{id}/lida`, `/notificacoes/lidas` | Marca uma, ou todas, como lidas | Estar logado |
+
+**Notificações:** cada passo do fluxo avisa quem precisa agir ou saber (o gestor recebe o pedido, o colaborador recebe a decisão, o colega recebe a proposta de troca...), e ninguém é avisado da própria ação. Uma rotina diária, às 7h, avisa quem tem férias para tirar quando faltam 90, 60 e 30 dias para o prazo (CLT-03), sem repetir o aviso. Ver [PAD-03](docs/padroes-de-referencia.md).
 | `GET` | `/minhas-ferias/equipe` | Férias aprovadas dos colegas da minha equipe que ainda vão começar (as que dá para propor trocar) | Estar logado |
 | `GET` | `/minhas-ferias/negociacoes` | As trocas que propus e as que recebi, com o histórico de propostas | Estar logado |
 | `POST` | `/minhas-ferias/negociacoes` | Propõe uma troca (`{"pedidoDoColegaId", "pedidoDoSolicitanteId", "inicioSolicitante", "diasSolicitante", "inicioColega", "mensagem"}`). Com impedimento, responde `422` com o checklist dos dois | Estar logado |

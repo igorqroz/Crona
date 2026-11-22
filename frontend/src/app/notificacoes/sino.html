@@ -1,0 +1,39 @@
+<button
+  class="botao-sino"
+  type="button"
+  [attr.aria-label]="naoLidas() === 0 ? 'Notificações' : naoLidas() === 1 ? 'Notificações: 1 não lida' : 'Notificações: ' + naoLidas() + ' não lidas'"
+  [attr.aria-expanded]="aberto()"
+  (click)="alternar()"
+>
+  <crona-icone nome="sino" [tamanho]="20" />
+  @if (naoLidas() > 0) {
+    <span class="contador" aria-hidden="true">{{ naoLidas() > 9 ? '9+' : naoLidas() }}</span>
+  }
+</button>
+
+@if (aberto()) {
+  <div class="painel" role="dialog" aria-label="Notificações">
+    <div class="topo">
+      <strong>Notificações</strong>
+      @if (naoLidas() > 0) {
+        <button class="marcar" type="button" (click)="marcarTodas()">Marcar todas como lidas</button>
+      }
+    </div>
+
+    <ul>
+      @for (n of notificacoes().itens; track n.id) {
+        <li>
+          <button type="button" class="item" [class.nao-lida]="!n.lida" (click)="abrir(n)">
+            <span class="ponto" aria-hidden="true"></span>
+            <span class="texto">
+              <span class="mensagem">{{ n.mensagem }}</span>
+              <span class="quando">{{ haQuanto(n.criadaEm) }}</span>
+            </span>
+          </button>
+        </li>
+      } @empty {
+        <li class="vazio">Nada por aqui. Quando algo acontecer com as suas férias, aparece aqui.</li>
+      }
+    </ul>
+  </div>
+}

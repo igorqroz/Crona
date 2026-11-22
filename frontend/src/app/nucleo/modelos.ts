@@ -207,6 +207,23 @@ export interface Decisao {
   mensagem?: string;
 }
 
+// ------------------------------------------------------------------ notificações (Fase 8b)
+
+export interface Notificacao {
+  id: number;
+  tipo: string;
+  mensagem: string;
+  /** A tela do Crona que a notificação abre (ex.: "/aprovacoes"). */
+  link: string | null;
+  lida: boolean;
+  criadaEm: string;
+}
+
+export interface Notificacoes {
+  naoLidas: number;
+  itens: Notificacao[];
+}
+
 /** O corpo dos erros da API (ProblemDetail, RFC 9457). */
 export interface Problema {
   title?: string;

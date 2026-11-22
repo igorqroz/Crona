@@ -2,6 +2,8 @@ import { inject, Injectable, signal } from '@angular/core';
 import { forkJoin, of } from 'rxjs';
 
 import { AprovacoesApi } from '../gestao/aprovacoes-api';
+import { Notificacoes } from '../nucleo/modelos';
+import { NotificacoesApi } from '../notificacoes/notificacoes-api';
 import { trocasEsperandoMim } from '../paginas/trocas/trocas.regras';
 import { Sessao } from '../nucleo/sessao';
 import { FeriasApi } from './ferias-api';
@@ -17,22 +19,30 @@ import { FeriasApi } from './ferias-api';
 export class Pendencias {
   private readonly ferias = inject(FeriasApi);
   private readonly aprovacoesApi = inject(AprovacoesApi);
+  private readonly notificacoesApi = inject(NotificacoesApi);
   private readonly sessao = inject(Sessao);
 
   /** Quantas trocas estão esperando a minha resposta (como colega). */
   readonly trocas = signal(0);
   /** Gestor e RH: pedidos + trocas da equipe esperando decisão (+ confirmações do RH, para o ADMIN). */
   readonly aprovacoes = signal(0);
+  /** Fase 8b: as notificações do sino. */
+  readonly notificacoes = signal<Notificacoes>({ naoLidas: 0, itens: [] });
 
   atualizar(): void {
     const eu = this.sessao.usuario();
     if (!eu) {
       this.trocas.set(0);
       this.aprovacoes.set(0);
+      this.notificacoes.set({ naoLidas: 0, itens: [] });
       return;
     }
 
     // Os números do menu são só um aviso: se a API falhar, a tela continua funcionando.
+    this.notificacoesApi.minhas().subscribe({
+      next: (notificacoes) => this.notificacoes.set(notificacoes),
+      error: () => {},
+    });
     this.ferias.negociacoes().subscribe({
       next: (negociacoes) => this.trocas.set(trocasEsperandoMim(negociacoes, eu.id)),
       error: () => {},
@@ -50,5 +60,25 @@ export class Pendencias {
       next: ({ pedidos, trocas, rh }) => this.aprovacoes.set(pedidos.length + trocas.length + rh.length),
       error: () => {},
     });
+  }
+
+  /** Marca uma notificação como lida já na tela (sem esperar a API) e avisa a API. */
+  marcarComoLida(id: number): void {
+    const atual = this.notificacoes();
+    const item = atual.itens.find((n) => n.id === id);
+    if (!item || item.lida) {
+      return;
+    }
+    this.notificacoes.set({
+      naoLidas: Math.max(0, atual.naoLidas - 1),
+      itens: atual.itens.map((n) => (n.id === id ? { ...n, lida: true } : n)),
+    });
+    this.notificacoesApi.marcarComoLida(id).subscribe({ error: () => this.atualizar() });
+  }
+
+  marcarTodasComoLidas(): void {
+    const atual = this.notificacoes();
+    this.notificacoes.set({ naoLidas: 0, itens: atual.itens.map((n) => ({ ...n, lida: true })) });
+    this.notificacoesApi.marcarTodasComoLidas().subscribe({ error: () => this.atualizar() });
   }
 }

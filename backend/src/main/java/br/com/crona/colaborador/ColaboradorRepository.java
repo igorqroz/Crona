@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ColaboradorRepository extends JpaRepository<Colaborador, Long> {
@@ -50,4 +51,10 @@ public interface ColaboradorRepository extends JpaRepository<Colaborador, Long> 
 
     // Este colaborador é gestor de alguém ativo?
     boolean existsByGestorIdAndAtivoTrue(Long gestorId);
+
+    // Fase 8b: quem é do RH (ADMIN) na empresa, para avisar dos pedidos que esperam a confirmação.
+    List<Colaborador> findByEmpresaIdAndPerfilAndAtivoTrue(Long empresaId, Perfil perfil);
+
+    // Fase 8b: a rotina diária percorre todos os colaboradores ativos.
+    List<Colaborador> findByAtivoTrue();
 }
