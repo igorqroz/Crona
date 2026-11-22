@@ -10,7 +10,18 @@ import { Pendencias } from '../../ferias/pendencias';
 import { dataPorExtenso, diaMesAno, haQuanto, intervalo } from '../../nucleo/datas';
 import { FeriasDoColega, PeriodoAquisitivo, Problema, Solicitacao } from '../../nucleo/modelos';
 import { Sessao } from '../../nucleo/sessao';
-import { blocos, passosDoPedido, pedidoEmFoco, periodoEmFoco, PropostaParaMim, propostaParaMim, saldo } from './inicio.regras';
+import { baixarArquivo } from '../../nucleo/download';
+import {
+  AvisoDisponivel,
+  avisosDisponiveis,
+  blocos,
+  passosDoPedido,
+  pedidoEmFoco,
+  periodoEmFoco,
+  PropostaParaMim,
+  propostaParaMim,
+  saldo,
+} from './inicio.regras';
 
 /**
  * A tela Início do colaborador (tela 3 do redesign):
@@ -39,6 +50,10 @@ export class Inicio {
   protected readonly pedido = signal<Solicitacao | null>(null);
   protected readonly proposta = signal<PropostaParaMim | null>(null);
   protected readonly equipe = signal<FeriasDoColega[]>([]);
+  protected readonly avisos = signal<AvisoDisponivel[]>([]);
+  /** O aviso que está sendo baixado agora, e o erro da última tentativa. */
+  protected readonly baixando = signal<number | null>(null);
+  protected readonly erroDoAviso = signal<string | null>(null);
 
   protected readonly saldo = computed(() => {
     const periodo = this.periodo();
@@ -82,9 +97,25 @@ export class Inicio {
         this.pedido.set(pedidoEmFoco(dados.solicitacoes, hoje));
         this.proposta.set(propostaParaMim(dados.negociacoes, meuId));
         this.equipe.set(dados.equipe);
+        this.avisos.set(avisosDisponiveis(dados.solicitacoes));
         this.estado.set('pronto');
       },
       error: () => this.estado.set('erro'),
+    });
+  }
+
+  protected baixarAviso(aviso: AvisoDisponivel): void {
+    this.baixando.set(aviso.solicitacaoId);
+    this.erroDoAviso.set(null);
+    this.api.aviso(aviso.solicitacaoId).subscribe({
+      next: (pdf) => {
+        this.baixando.set(null);
+        baixarArquivo(pdf, aviso.arquivo);
+      },
+      error: () => {
+        this.baixando.set(null);
+        this.erroDoAviso.set('Não foi possível baixar o aviso. Tente de novo.');
+      },
     });
   }
 

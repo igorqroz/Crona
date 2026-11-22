@@ -186,6 +186,34 @@
           <p class="texto-suave vazio">Ninguém da equipe tem férias marcadas.</p>
         }
       </section>
+
+      <!-- ============================================================ avisos de férias (Fase 8a) -->
+      <section class="cartao avisos" aria-labelledby="titulo-avisos">
+        <h2 class="cartao-titulo" id="titulo-avisos">Avisos de férias</h2>
+        @for (aviso of avisos(); track aviso.solicitacaoId) {
+          <div class="aviso-linha">
+            <span class="icone-doc"><crona-icone nome="documento" [tamanho]="20" /></span>
+            <div class="pessoa-texto">
+              <span class="pessoa-nome">{{ aviso.titulo }}</span>
+              <span class="texto-suave">{{ aviso.detalhe }}</span>
+            </div>
+            <button
+              class="botao botao-secundario baixar"
+              type="button"
+              [disabled]="baixando() === aviso.solicitacaoId"
+              [attr.aria-label]="'Baixar o aviso de ' + aviso.titulo"
+              (click)="baixarAviso(aviso)"
+            >
+              <crona-icone nome="baixar" [tamanho]="18" />
+            </button>
+          </div>
+        } @empty {
+          <p class="texto-suave vazio">O aviso aparece aqui quando as suas férias forem aprovadas.</p>
+        }
+        @if (erroDoAviso(); as mensagem) {
+          <div class="aviso" role="alert">{{ mensagem }}</div>
+        }
+      </section>
     </div>
   }
 }
