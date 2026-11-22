@@ -2,9 +2,10 @@ import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { filter } from 'rxjs';
+import { filter, interval } from 'rxjs';
 
 import { Pendencias } from '../ferias/pendencias';
+import { Sino } from '../notificacoes/sino';
 
 import { Avatar } from '../compartilhado/avatar';
 import { Icone, NomeDoIcone } from '../compartilhado/icone';
@@ -31,7 +32,7 @@ const NOME_DO_PERFIL: Record<Perfil, string> = {
  */
 @Component({
   selector: 'crona-casca',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, NgTemplateOutlet, Logo, Icone, Avatar],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, NgTemplateOutlet, Logo, Icone, Avatar, Sino],
   templateUrl: './casca.html',
   styleUrl: './casca.css',
 })
@@ -70,6 +71,11 @@ export class Casca {
         filter((evento) => evento instanceof NavigationEnd),
         takeUntilDestroyed(),
       )
+      .subscribe(() => this.pendencias.atualizar());
+
+    // Fase 8b: e a cada minuto, para uma notificação nova aparecer mesmo sem trocar de tela.
+    interval(60_000)
+      .pipe(takeUntilDestroyed())
       .subscribe(() => this.pendencias.atualizar());
   }
 

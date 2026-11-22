@@ -3,6 +3,7 @@ package br.com.crona.ferias;
 import br.com.crona.compartilhado.erro.PedidoComImpedimentosException;
 import br.com.crona.compartilhado.erro.RecursoNaoEncontradoException;
 import br.com.crona.ferias.validacao.Verificacao;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,13 +19,16 @@ public class SolicitacaoService {
     private final SimulacaoService simulacaoService;
     private final SolicitacaoFeriasRepository solicitacaoRepository;
     private final PeriodoAquisitivoRepository periodoRepository;
+    private final ApplicationEventPublisher eventos;
 
     public SolicitacaoService(SimulacaoService simulacaoService,
                               SolicitacaoFeriasRepository solicitacaoRepository,
-                              PeriodoAquisitivoRepository periodoRepository) {
+                              PeriodoAquisitivoRepository periodoRepository,
+                              ApplicationEventPublisher eventos) {
         this.simulacaoService = simulacaoService;
         this.solicitacaoRepository = solicitacaoRepository;
         this.periodoRepository = periodoRepository;
+        this.eventos = eventos;
     }
 
     /**
@@ -52,7 +56,10 @@ public class SolicitacaoService {
         var pedido = new SolicitacaoFerias(colaborador, avaliacao.periodo().periodo(), resultado.inicio(),
                 resultado.fim(), envio.diasGozo(), envio.diasAbono() == null ? 0 : envio.diasAbono(),
                 envio.recado() == null || envio.recado().isBlank() ? null : envio.recado().trim());
-        return SolicitacaoResposta.de(solicitacaoRepository.save(pedido));
+        var salvo = solicitacaoRepository.save(pedido);
+        // Avisa quem quiser saber (hoje: o Notificador, que avisa o gestor).
+        eventos.publishEvent(new SolicitacaoMudou(salvo.getId(), SolicitacaoMudou.Acao.ENVIADA, colaborador.getId()));
+        return SolicitacaoResposta.de(salvo);
     }
 
     @Transactional(readOnly = true)
@@ -71,6 +78,7 @@ public class SolicitacaoService {
                 .filter(s -> s.getColaborador().getId().equals(colaborador.getId()))
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Pedido " + id + " não encontrado."));
         pedido.cancelar();
+        eventos.publishEvent(new SolicitacaoMudou(pedido.getId(), SolicitacaoMudou.Acao.CANCELADA, colaborador.getId()));
         return SolicitacaoResposta.de(pedido);
     }
 }

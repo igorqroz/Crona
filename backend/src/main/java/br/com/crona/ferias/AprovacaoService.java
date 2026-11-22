@@ -14,6 +14,7 @@ import br.com.crona.ferias.aprovacao.DecisaoRequisicao;
 import br.com.crona.ferias.aprovacao.ItemDeAprovacao;
 import br.com.crona.ferias.aprovacao.ItemDeAprovacao.Situacao;
 import br.com.crona.ferias.validacao.Verificacao;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +43,7 @@ public class AprovacaoService {
     private final CalendarioService calendarioService;
     private final EmpresaAtual empresaAtual;
     private final Clock relogio;
+    private final ApplicationEventPublisher eventos;
 
     public AprovacaoService(SolicitacaoFeriasRepository solicitacaoRepository,
                             PeriodoAquisitivoRepository periodoRepository,
@@ -49,7 +51,8 @@ public class AprovacaoService {
                             SimulacaoService simulacaoService,
                             CalendarioService calendarioService,
                             EmpresaAtual empresaAtual,
-                            Clock relogio) {
+                            Clock relogio,
+                            ApplicationEventPublisher eventos) {
         this.solicitacaoRepository = solicitacaoRepository;
         this.periodoRepository = periodoRepository;
         this.configuracaoRepository = configuracaoRepository;
@@ -57,6 +60,7 @@ public class AprovacaoService {
         this.calendarioService = calendarioService;
         this.empresaAtual = empresaAtual;
         this.relogio = relogio;
+        this.eventos = eventos;
     }
 
     public enum Filtro { TODOS, COM_CONFLITO, SEM_CONFLITO }
@@ -95,6 +99,7 @@ public class AprovacaoService {
         exigirQuePossaAprovar(avaliar(pedido).resultado().verificacoes(), decisao, "Este pedido");
 
         pedido.aprovarPeloGestor(eu, decisao.mensagem(), configuracao().isExigeConfirmacaoRh(), agora());
+        eventos.publishEvent(new SolicitacaoMudou(pedido.getId(), SolicitacaoMudou.Acao.APROVADA_PELO_GESTOR, eu.getId()));
         return SolicitacaoResposta.de(pedido);
     }
 
@@ -127,6 +132,7 @@ public class AprovacaoService {
         var eu = simulacaoService.colaboradorLogado();
         var pedido = pedidoQueEuPossoDecidir(id, eu);
         pedido.recusar(eu, decisao.mensagem(), agora());
+        eventos.publishEvent(new SolicitacaoMudou(pedido.getId(), SolicitacaoMudou.Acao.RECUSADA, eu.getId()));
         return SolicitacaoResposta.de(pedido);
     }
 
@@ -145,6 +151,7 @@ public class AprovacaoService {
             // Reavalia um por um: aprovar o primeiro pode criar conflito para o segundo.
             if (situacao(avaliar(pedido)) == Situacao.SEM_CONFLITO) {
                 pedido.aprovarPeloGestor(eu, null, exigeRh, agora());
+                eventos.publishEvent(new SolicitacaoMudou(pedido.getId(), SolicitacaoMudou.Acao.APROVADA_PELO_GESTOR, eu.getId()));
                 aprovados.add(SolicitacaoResposta.de(pedido));
             }
         }
@@ -164,7 +171,9 @@ public class AprovacaoService {
     @Transactional
     public SolicitacaoResposta confirmarNoRh(Long id) {
         var pedido = pedidoDaEmpresa(id);
-        pedido.confirmarNoRh(simulacaoService.colaboradorLogado(), agora());
+        var rh = simulacaoService.colaboradorLogado();
+        pedido.confirmarNoRh(rh, agora());
+        eventos.publishEvent(new SolicitacaoMudou(pedido.getId(), SolicitacaoMudou.Acao.CONFIRMADA_PELO_RH, rh.getId()));
         return SolicitacaoResposta.de(pedido);
     }
 
@@ -174,7 +183,9 @@ public class AprovacaoService {
         if (pedido.getStatus() != StatusSolicitacao.AGUARDANDO_RH) {
             throw new RegraVioladaException("Este pedido não está com o RH.");
         }
-        pedido.recusar(simulacaoService.colaboradorLogado(), decisao.mensagem(), agora());
+        var rh = simulacaoService.colaboradorLogado();
+        pedido.recusar(rh, decisao.mensagem(), agora());
+        eventos.publishEvent(new SolicitacaoMudou(pedido.getId(), SolicitacaoMudou.Acao.RECUSADA, rh.getId()));
         return SolicitacaoResposta.de(pedido);
     }
 

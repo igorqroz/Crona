@@ -20,6 +20,7 @@ import br.com.crona.ferias.negociacao.NegociacaoResposta;
 import br.com.crona.ferias.negociacao.PropostaDeTrocaRequisicao;
 import br.com.crona.ferias.negociacao.TrocaParaAprovar;
 import br.com.crona.ferias.validacao.Verificacao;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +50,7 @@ public class NegociacaoService {
     private final SimulacaoService simulacaoService;
     private final EmpresaAtual empresaAtual;
     private final Clock relogio;
+    private final ApplicationEventPublisher eventos;
 
     public NegociacaoService(NegociacaoRepository negociacaoRepository,
                              SolicitacaoFeriasRepository solicitacaoRepository,
@@ -56,7 +58,8 @@ public class NegociacaoService {
                              ConfiguracaoFeriasRepository configuracaoRepository,
                              SimulacaoService simulacaoService,
                              EmpresaAtual empresaAtual,
-                             Clock relogio) {
+                             Clock relogio,
+                             ApplicationEventPublisher eventos) {
         this.negociacaoRepository = negociacaoRepository;
         this.solicitacaoRepository = solicitacaoRepository;
         this.periodoRepository = periodoRepository;
@@ -64,6 +67,7 @@ public class NegociacaoService {
         this.simulacaoService = simulacaoService;
         this.empresaAtual = empresaAtual;
         this.relogio = relogio;
+        this.eventos = eventos;
     }
 
     // ================================================================== COLEGAS
@@ -109,7 +113,9 @@ public class NegociacaoService {
         var negociacao = new Negociacao(eu, pedidoDoColega, meuPedido, proposta.inicioSolicitante(),
                 proposta.diasSolicitante(), proposta.inicioColega(), proposta.mensagem());
         exigirSemImpedimentos(avaliar(negociacao));
-        return NegociacaoResposta.de(negociacaoRepository.save(negociacao));
+        var salva = negociacaoRepository.save(negociacao);
+        avisar(salva, NegociacaoMudou.Acao.PROPOSTA, eu);
+        return NegociacaoResposta.de(salva);
     }
 
     @Transactional
@@ -119,6 +125,7 @@ public class NegociacaoService {
         negociacao.contrapropor(eu, contraproposta.inicioSolicitante(), contraproposta.inicioColega(),
                 contraproposta.mensagem());
         exigirSemImpedimentos(avaliar(negociacao));
+        avisar(negociacao, NegociacaoMudou.Acao.CONTRAPROPOSTA, eu);
         return NegociacaoResposta.de(negociacao);
     }
 
@@ -127,6 +134,7 @@ public class NegociacaoService {
         var eu = simulacaoService.colaboradorLogado();
         var negociacao = negociacaoDeQueParticipo(id, eu);
         negociacao.aceitar(eu);
+        avisar(negociacao, NegociacaoMudou.Acao.ACEITA, eu);
         return NegociacaoResposta.de(negociacao);
     }
 
@@ -135,6 +143,7 @@ public class NegociacaoService {
         var eu = simulacaoService.colaboradorLogado();
         var negociacao = negociacaoDeQueParticipo(id, eu);
         negociacao.recusar(eu, decisao.mensagem(), agora());
+        avisar(negociacao, NegociacaoMudou.Acao.RECUSADA, eu);
         return NegociacaoResposta.de(negociacao);
     }
 
@@ -143,6 +152,7 @@ public class NegociacaoService {
         var eu = simulacaoService.colaboradorLogado();
         var negociacao = negociacaoDeQueParticipo(id, eu);
         negociacao.cancelar(eu);
+        avisar(negociacao, NegociacaoMudou.Acao.CANCELADA, eu);
         return NegociacaoResposta.de(negociacao);
     }
 
@@ -184,6 +194,7 @@ public class NegociacaoService {
 
         negociacao.aprovarPeloGestor(eu, decisao.mensagem(), agora());
         aplicarAsDatasNovas(negociacao, avaliacao, eu);
+        avisar(negociacao, NegociacaoMudou.Acao.APROVADA, eu);
         return NegociacaoResposta.de(negociacao);
     }
 
@@ -192,6 +203,7 @@ public class NegociacaoService {
         var eu = simulacaoService.colaboradorLogado();
         var negociacao = trocaQueEuPossoDecidir(id, eu);
         negociacao.recusarPeloGestor(eu, decisao.mensagem(), agora());
+        avisar(negociacao, NegociacaoMudou.Acao.RECUSADA_PELO_GESTOR, eu);
         return NegociacaoResposta.de(negociacao);
     }
 
@@ -336,6 +348,11 @@ public class NegociacaoService {
 
     private ConfiguracaoFerias configuracao() {
         return configuracaoRepository.findByEmpresaId(empresaAtual.id()).orElseGet(ConfiguracaoFerias::padrao);
+    }
+
+    /** Publica o evento da negociação (quem escuta hoje: o Notificador). */
+    private void avisar(Negociacao negociacao, NegociacaoMudou.Acao acao, Colaborador autor) {
+        eventos.publishEvent(new NegociacaoMudou(negociacao.getId(), acao, autor.getId()));
     }
 
     private LocalDate hoje() {
