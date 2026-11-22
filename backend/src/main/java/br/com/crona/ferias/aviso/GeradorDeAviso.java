@@ -26,8 +26,8 @@ import java.util.Map;
  * 2. PREENCHER (fill) o modelo com os dados → JasperPrint (o documento pronto, em memória);
  * 3. EXPORTAR o JasperPrint para PDF.
  *
- * Atenção para o deploy (Fase 9): compilar o .jrxml usa o compilador do Java em tempo de execução,
- * então a imagem precisa de um JDK (e não só de um JRE) — ou o modelo é pré-compilado no build.
+ * O passo 1 usa o compilador do Eclipse (JDT, dependência jasperreports-jdt). O javac não serve aqui:
+ * dentro do .jar do Spring Boot ele não enxerga as bibliotecas (descoberto ao rodar no Docker, Fase 9).
  */
 @Component
 public class GeradorDeAviso {

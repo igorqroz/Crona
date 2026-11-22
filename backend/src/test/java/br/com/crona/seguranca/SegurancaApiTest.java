@@ -56,6 +56,19 @@ class SegurancaApiTest {
     }
 
     @Test
+    @DisplayName("Fase 9: /actuator/health responde sem token, sem detalhes; o resto do Actuator está desligado")
+    void health() throws Exception {
+        mockMvc.perform(get("/actuator/health"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("UP"))
+                .andExpect(jsonPath("$.components").doesNotExist());
+
+        // Endpoints que revelariam informação interna não existem (com token de ADMIN, ainda assim 404).
+        mockMvc.perform(get("/actuator/env").with(jwt()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     @DisplayName("login com senha certa devolve um token que abre as outras rotas")
     void loginEUsoDoToken() throws Exception {
         String token = entrar("rafael.costa@demo.crona", "crona123");

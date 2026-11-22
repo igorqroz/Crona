@@ -31,6 +31,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
+		<!-- Fase 9: /actuator/health, o "estou vivo?" que o Docker e a hospedagem consultam. -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
 		<!--
 			Fase 8a: JasperReports gera o PDF do aviso de férias a partir de um modelo (.jrxml).
 			Na versão 7, a exportação para PDF virou um artefato separado (jasperreports-pdf).
@@ -49,6 +54,16 @@
 		<dependency>
 			<groupId>net.sf.jasperreports</groupId>
 			<artifactId>jasperreports-fonts</artifactId>
+			<version>7.0.3</version>
+		</dependency>
+		<!--
+			Fase 9: o compilador do Eclipse (JDT) para as expressões do .jrxml. Sem ele, o JasperReports
+			usa o javac, que NÃO enxerga as bibliotecas de dentro do .jar do Spring Boot (BOOT-INF/lib):
+			a API subia no "mvnw spring-boot:run", mas quebrava dentro do Docker.
+		-->
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports-jdt</artifactId>
 			<version>7.0.3</version>
 		</dependency>
 		<dependency>

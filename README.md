@@ -81,6 +81,18 @@ O projeto é construído em fases, e cada fase entrega algo que funciona.
 
 ## Como rodar
 
+### O jeito mais rápido: Docker
+
+Com o [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado, na pasta do projeto:
+```bash
+docker compose up --build
+```
+Abra http://localhost:8088 e entre com `ana.lima@demo.crona` (colaboradora), `roberto.neves@demo.crona` (gestor) ou `rafael.costa@demo.crona` (RH), todos com a senha `crona123`.
+
+Sobem 3 contêineres: o PostgreSQL, a API (perfil `demo`, com os dados de exemplo) e o site (nginx, que serve o Angular e repassa `/api` para a API). Para parar: `Ctrl+C`; para apagar também os dados: `docker compose down -v`.
+
+### Sem Docker (para desenvolver)
+
 **Pré-requisitos:** Java 21 e PostgreSQL rodando na porta 5432.
 
 1. Crie o banco e o usuário (uma vez só, como o superusuário `postgres`):

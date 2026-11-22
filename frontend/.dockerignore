@@ -1,0 +1,5 @@
+# O que NÃO vai para dentro do Docker na hora do build.
+node_modules/
+dist/
+.angular/
+.vscode/

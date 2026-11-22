@@ -1,0 +1,60 @@
+# O Crona inteiro com um comando só (Fase 9):
+#
+#     docker compose up --build
+#
+# e abra http://localhost:8088 (entre com ana.lima@demo.crona / crona123).
+#
+# São 3 contêineres, numa rede só deles: o banco, a API e o site (nginx).
+# Um fala com o outro pelo nome do serviço: a API acha o banco em "db", o nginx acha a API em "api".
+
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: crona
+      POSTGRES_USER: crona
+      POSTGRES_PASSWORD: crona_dev
+    volumes:
+      # Os dados ficam num "volume": sobrevivem a parar e subir de novo.
+      # Para começar do zero: docker compose down -v
+      - dados-do-banco:/var/lib/postgresql
+    healthcheck:
+      # A API só sobe depois que o banco responder (ver depends_on abaixo).
+      test: ["CMD-SHELL", "pg_isready -U crona -d crona"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: ./backend
+    environment:
+      SPRING_PROFILES_ACTIVE: demo
+      DB_URL: jdbc:postgresql://db:5432/crona
+      DB_USUARIO: crona
+      DB_SENHA: crona_dev
+      # Segredo só para rodar NA SUA MÁQUINA. No servidor de verdade, ele é outro e fica
+      # nas variáveis de ambiente da hospedagem, nunca no repositório.
+      JWT_SEGREDO: segredo-local-do-docker-compose-troque-em-producao
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 18
+      start_period: 30s
+
+  web:
+    build: ./frontend
+    environment:
+      API_URL: http://api:8080
+    ports:
+      # 8088 (e não 80 ou 4200) para não brigar com o que você já roda no computador.
+      - "8088:80"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  dados-do-banco:
