@@ -1,0 +1,5 @@
+# O que NÃO vai para dentro do Docker na hora do build (deixa o build mais rápido e a imagem limpa).
+target/
+.idea/
+*.iml
+.vscode/

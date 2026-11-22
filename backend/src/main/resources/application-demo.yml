@@ -1,0 +1,12 @@
+# Perfil "demo" (Fase 9): o Crona no ar para demonstração (portfólio), e no docker compose.
+# Ligado com a variável de ambiente SPRING_PROFILES_ACTIVE=demo.
+#
+# Igual ao "dev" num ponto: carrega os dados de exemplo (Empresa Demo, Ana, Roberto...),
+# para quem visitar conseguir entrar e testar.
+# Diferente do "dev" no que importa: NÃO tem segredo do JWT aqui. Ele vem obrigatoriamente
+# da variável JWT_SEGREDO, porque o segredo do dev está público no GitHub, e quem conhece
+# o segredo consegue fabricar um token de qualquer pessoa.
+
+spring:
+  flyway:
+    locations: classpath:db/migration,classpath:db/dev
