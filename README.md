@@ -1,8 +1,10 @@
 # Crona — Gestão de Férias
 
+[![CI](https://github.com/igorqroz/Crona/actions/workflows/ci.yml/badge.svg)](https://github.com/igorqroz/Crona/actions/workflows/ci.yml)
+
 O Crona é um sistema web para **planejar, solicitar, negociar e aprovar férias** dentro das regras da CLT e das regras de cada empresa.
 
-> 🚧 **Em desenvolvimento.** O fluxo principal já funciona de ponta a ponta, na API e na tela: o colaborador pede ou negocia uma troca, e o gestor aprova. A próxima etapa são os extras (recibo em PDF, notificações). Veja o [roadmap](#roadmap).
+> 🚧 **Em desenvolvimento.** O fluxo principal já funciona de ponta a ponta, na API e na tela: o colaborador pede ou negocia uma troca, e o gestor aprova, com aviso em PDF e notificações. Falta colocar a V1 no ar. Veja o [roadmap](#roadmap).
 
 ## O problema
 
@@ -125,6 +127,16 @@ npm start       # abre em http://localhost:4200
 Entre com um dos usuários dos dados de exemplo: `ana.lima@demo.crona` (colaboradora), `roberto.neves@demo.crona` (gestor, vê o menu **Aprovações**) ou `rafael.costa@demo.crona` (RH), todos com a senha `crona123`. Em desenvolvimento, o Angular repassa as chamadas `/api/...` para a API na porta 8080 ([`proxy.conf.json`](frontend/proxy.conf.json)), então não é preciso configurar CORS.
 
 Testes do front (Vitest): `npm test` (dentro de `frontend/`).
+
+### Integração contínua (CI)
+
+A cada Pull Request e a cada push na `main`, o [GitHub Actions](.github/workflows/ci.yml) roda numa máquina limpa:
+
+1. os testes do back-end, contra um PostgreSQL 18 de verdade;
+2. os testes do front-end e o build de produção;
+3. se os dois passarem, o Crona inteiro no `docker compose` e um teste de fumaça pelo nginx (a API está viva, o login funciona, uma rota protegida responde e o site abre).
+
+O selo no topo deste README mostra se a `main` está passando.
 
 **Dados de exemplo** (só no perfil `dev`): a *Empresa Demo*, 5 departamentos e 6 colaboradores com os nomes do redesign, cada um com os seus períodos aquisitivos. Todos usam a senha `crona123`: Rafael Costa (ADMIN), Roberto Neves (GESTOR), Ana Lima, Bruno Teles, Marina Jorge e Lucas Prado (COLABORADOR). Os e-mails seguem o padrão `nome.sobrenome@demo.crona`.
 
