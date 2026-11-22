@@ -73,10 +73,10 @@ O projeto é construído em fases, e cada fase entrega algo que funciona.
   - [x] 7b: solicitar férias (calendário com os colegas fora, checklist das regras e envio)
   - [x] 7c: trocas de período (propor, contrapropor, aceitar, recusar e cancelar, com o histórico das rodadas)
   - [x] 7d: aprovações do gestor (fila com filtro, detalhe com a equipe no período, aprovar mesmo assim, aprovação em lote, trocas e confirmação do RH)
-- [ ] **Fase 8 — Extras:** aviso de férias em PDF, notificações e calendário do departamento
+- [x] **Fase 8 — Extras:** aviso de férias em PDF, notificações e calendário do departamento
   - [x] 8a: aviso de férias em PDF (JasperReports), para baixar na tela Início
   - [x] 8b: notificações dentro do Crona (sino no menu, avisos do fluxo e rotina diária de férias a vencer)
-  - [ ] 8c: calendário do departamento
+  - [x] 8c: calendário da equipe (quem está fora em 2 semanas, 6 semanas ou um trimestre, com os dias acima do limite e os períodos restritos)
 - [ ] **Fase 9 — Entrega:** Docker, CI com GitHub Actions e deploy
 
 ## Como rodar
@@ -146,6 +146,7 @@ Toda rota, menos o login, exige o cabeçalho `Authorization: Bearer <token>`. O 
 | `GET` `POST` | `/confirmacoes-rh`, `/confirmacoes-rh/{id}/confirmar`, `/confirmacoes-rh/{id}/recusar` | A etapa do RH, quando a EMP-06 está ligada | `SOLICITACAO_CONFIRMAR_RH` |
 | `GET` | `/notificacoes` | As minhas notificações: o número de não lidas e as 30 mais recentes | Estar logado |
 | `POST` | `/notificacoes/{id}/lida`, `/notificacoes/lidas` | Marca uma, ou todas, como lidas | Estar logado |
+| `GET` | `/gestao/calendario?de=&ate=` | Quem está fora, por departamento, com o limite e os períodos restritos (o gestor vê a equipe; o ADMIN, a empresa toda) | `COLABORADOR_VER` |
 
 **Notificações:** cada passo do fluxo avisa quem precisa agir ou saber (o gestor recebe o pedido, o colaborador recebe a decisão, o colega recebe a proposta de troca...), e ninguém é avisado da própria ação. Uma rotina diária, às 7h, avisa quem tem férias para tirar quando faltam 90, 60 e 30 dias para o prazo (CLT-03), sem repetir o aviso. Ver [PAD-03](docs/padroes-de-referencia.md).
 | `GET` | `/minhas-ferias/equipe` | Férias aprovadas dos colegas da minha equipe que ainda vão começar (as que dá para propor trocar) | Estar logado |

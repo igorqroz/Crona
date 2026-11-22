@@ -1,0 +1,271 @@
+:host {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.topo {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+h1 {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+}
+
+.topo p {
+  margin: 4px 0 0;
+}
+
+.controles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.janelas {
+  display: flex;
+  padding: 3px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  background: var(--cor-superficie);
+}
+
+.janelas button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: var(--raio-pequeno);
+  background: transparent;
+  font-family: var(--fonte-texto);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cor-texto-secundario);
+  cursor: pointer;
+}
+
+.janelas button.ativa {
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  box-shadow: inset 0 0 0 1px var(--cor-borda-forte);
+}
+
+.navegacao {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.seta {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-pequeno);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  cursor: pointer;
+}
+
+.hoje-botao {
+  min-height: 36px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+/* ---------------------------------------------------------------- a grade */
+
+.calendario {
+  gap: 14px;
+}
+
+.calendario.carregando {
+  opacity: 0.6;
+}
+
+.rolagem {
+  overflow-x: auto;
+}
+
+/* Cada linha é uma grade com as MESMAS colunas: assim os dias de todas as linhas se alinham.
+   Tudo dentro da linha fica na mesma "fileira" (grid-row: 1), e as barras ficam por cima dos dias. */
+.linha {
+  display: grid;
+  min-width: 720px;
+}
+
+.linha > * {
+  grid-row: 1;
+}
+
+.nome {
+  grid-column: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 6px 8px 6px 0;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dia {
+  min-height: 30px;
+}
+
+.fim-de-semana {
+  background: var(--cor-fundo);
+}
+
+.hoje {
+  box-shadow: inset 2px 0 0 var(--cor-texto);
+}
+
+/* Cabeçalho: a etiqueta da semana em cima da segunda-feira. */
+.cabecalho .dia {
+  position: relative;
+  min-height: 24px;
+}
+
+.cabecalho .fim-de-semana,
+.cabecalho .feriado {
+  background: transparent;
+}
+
+.semana {
+  position: absolute;
+  left: 2px;
+  bottom: 4px;
+  font-size: 11.5px;
+  color: var(--cor-texto-suave);
+  white-space: nowrap;
+}
+
+.rotulo {
+  font-size: 12px;
+  color: var(--cor-texto-suave);
+}
+
+/* Departamento: nome, "N pessoas · limite L", restrições e os dias acima do limite. */
+.departamento {
+  margin-top: 10px;
+  border-top: 1px solid var(--cor-borda);
+}
+
+.departamento .nome {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+}
+
+.departamento strong {
+  font-size: 13.5px;
+}
+
+.departamento small {
+  font-size: 11.5px;
+  color: var(--cor-texto-suave);
+}
+
+.restricao {
+  align-self: center;
+  height: 18px;
+  padding: 0 6px;
+  overflow: hidden;
+  border-radius: 5px;
+  background: repeating-linear-gradient(135deg, #FFF1E5 0 4px, #FFE0C7 4px 8px);
+  box-shadow: inset 0 0 0 1px #F4B183;
+  color: var(--cor-alerta-texto);
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.restricao.bloqueia {
+  background: repeating-linear-gradient(135deg, #FDECEC 0 4px, #F9D3D0 4px 8px);
+  box-shadow: inset 0 0 0 1px #E5928B;
+  color: #B42318;
+}
+
+.acima {
+  align-self: center;
+  justify-self: center;
+  min-width: 18px;
+  padding: 1px 3px;
+  border-radius: 4px;
+  background: var(--cor-alerta);
+  color: #FFFFFF;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-align: center;
+  z-index: 1;
+}
+
+/* Pessoas e as barras de férias. */
+.barra {
+  align-self: center;
+  height: 20px;
+  margin: 0 1px;
+  padding: 0 6px;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--cor-primaria);
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.barra.pendente {
+  background: repeating-linear-gradient(135deg, var(--cor-primaria-clara) 0 4px, #CFE0F7 4px 8px);
+  box-shadow: inset 0 0 0 1.5px var(--cor-primaria);
+  color: var(--cor-primaria-escura);
+}
+
+.vazio {
+  margin: 16px 0 4px;
+}
+
+/* ---------------------------------------------------------------- legenda */
+
+.legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  font-size: 12.5px;
+  color: var(--cor-texto-secundario);
+}
+
+.legenda span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legenda i {
+  width: 20px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.l-aprovado { background: var(--cor-primaria); }
+.l-pendente { background: repeating-linear-gradient(135deg, var(--cor-primaria-clara) 0 3px, #CFE0F7 3px 6px); box-shadow: inset 0 0 0 1px var(--cor-primaria); }
+.l-acima { background: var(--cor-alerta); }
+.l-restricao { background: repeating-linear-gradient(135deg, #FFF1E5 0 3px, #FFE0C7 3px 6px); box-shadow: inset 0 0 0 1px #F4B183; }
+.legenda .l-hoje { width: 2px; height: 14px; border-radius: 0; background: var(--cor-texto); }

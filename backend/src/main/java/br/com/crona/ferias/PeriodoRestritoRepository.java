@@ -21,4 +21,16 @@ public interface PeriodoRestritoRepository extends JpaRepository<PeriodoRestrito
                                      @Param("departamentoId") Long departamentoId,
                                      @Param("inicio") LocalDate inicio,
                                      @Param("fim") LocalDate fim);
+
+    /** Fase 8c: todas as restrições da empresa (de qualquer departamento) que encostam nas datas. */
+    @Query("""
+            select r from PeriodoRestrito r
+                left join fetch r.departamento
+            where r.empresa.id = :empresaId
+              and r.dataInicio <= :fim and r.dataFim >= :inicio
+            order by r.dataInicio
+            """)
+    List<PeriodoRestrito> daEmpresaQueEncostam(@Param("empresaId") Long empresaId,
+                                               @Param("inicio") LocalDate inicio,
+                                               @Param("fim") LocalDate fim);
 }

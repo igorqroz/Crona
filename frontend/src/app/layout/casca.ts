@@ -58,7 +58,10 @@ export class Casca {
   protected readonly menuDeGestao = computed<ItemDoMenu[]>(() => {
     const perfil = this.usuario()?.perfil;
     return perfil === 'GESTOR' || perfil === 'ADMIN'
-      ? [{ rota: '/aprovacoes', texto: 'Aprovações', icone: 'aprovacoes', contador: this.pendencias.aprovacoes }]
+      ? [
+          { rota: '/aprovacoes', texto: 'Aprovações', icone: 'aprovacoes', contador: this.pendencias.aprovacoes },
+          { rota: '/calendario-equipe', texto: 'Calendário da equipe', icone: 'calendario' },
+        ]
       : [];
   });
 
