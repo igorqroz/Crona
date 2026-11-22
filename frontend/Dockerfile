@@ -13,7 +13,10 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
-RUN npx ng build
+# "production" = build normal. O docker-compose.yml passa "production,demo": a versão de
+# demonstração mostra as contas de exemplo na tela de login.
+ARG CONFIGURACAO=production
+RUN npx ng build --configuration $CONFIGURACAO
 
 # ------------------------------------------------------------------ etapa 2: servir
 FROM nginx:1.27-alpine

@@ -51,7 +51,8 @@ services:
     name: crona
     runtime: static
     # O Render compila o Angular e publica os arquivos. Site estático grátis não "dorme".
-    buildCommand: cd frontend && npm ci && npx ng build
+    # A configuração "demo" mostra as contas de exemplo na tela de login.
+    buildCommand: cd frontend && npm ci && npx ng build --configuration production,demo
     staticPublishPath: ./frontend/dist/crona/browser
     envVars:
       # O Angular 22 precisa do Node 24.15 ou mais novo.
