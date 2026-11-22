@@ -65,5 +65,53 @@ small {
 
 .dica {
   margin: 0;
+  font-size: 12px;
   line-height: 1.5;
+}
+
+/* Contas de exemplo (só na versão de demonstração). */
+.demonstracao {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 20px;
+  border-top: 1px solid var(--cor-borda-forte);
+}
+
+.cabecalho-demonstracao {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 14px;
+}
+
+.contas {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.conta {
+  flex-direction: column;
+  gap: 2px;
+  height: auto;
+  padding: 10px 6px;
+  text-align: center;
+}
+
+.conta .nome {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.conta .perfil {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--cor-texto-suave);
+}
+
+@media (max-width: 380px) {
+  .contas {
+    grid-template-columns: 1fr;
+  }
 }

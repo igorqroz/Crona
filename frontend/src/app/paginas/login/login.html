@@ -34,11 +34,28 @@
       {{ enviando() ? 'Entrando…' : 'Entrar' }}
     </button>
 
-    @if (emDesenvolvimento) {
-      <p class="texto-suave dica">
-        Dados de exemplo: <strong>ana.lima&#64;demo.crona</strong> (colaboradora) ou
-        <strong>roberto.neves&#64;demo.crona</strong> (gestor), senha <strong>crona123</strong>.
-      </p>
+    @if (demonstracao) {
+      <section class="demonstracao" aria-labelledby="titulo-demonstracao">
+        <div class="cabecalho-demonstracao">
+          <strong id="titulo-demonstracao">Conhecendo o Crona?</strong>
+          <span class="texto-suave">Entre com uma conta de exemplo, com um clique:</span>
+        </div>
+
+        <div class="contas">
+          @for (conta of contas; track conta.email) {
+            <button class="botao botao-secundario conta" type="button" [disabled]="enviando()" (click)="entrarComo(conta)">
+              <span class="nome">{{ conta.nome }}</span>
+              <span class="perfil">{{ conta.perfil }}</span>
+            </button>
+          }
+        </div>
+
+        <p class="texto-suave dica">
+          Ou digite um dos e-mails acima (ex.: <strong>{{ contas[0].email }}</strong>) com a senha
+          <strong>{{ senhaDeDemonstracao }}</strong>. A primeira entrada pode levar até um minuto:
+          o servidor grátis "dorme" quando ninguém usa.
+        </p>
+      </section>
     }
   </form>
 </main>

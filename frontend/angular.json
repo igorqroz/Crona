@@ -52,6 +52,14 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "demo": {
+              "fileReplacements": [
+                {
+                  "replace": "src/app/nucleo/demonstracao.build.ts",
+                  "with": "src/app/nucleo/demonstracao.build.demo.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"

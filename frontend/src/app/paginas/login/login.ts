@@ -1,10 +1,16 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, isDevMode, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { Icone } from '../../compartilhado/icone';
 import { Logo } from '../../compartilhado/logo';
+import {
+  CONTAS_DE_DEMONSTRACAO,
+  ContaDeDemonstracao,
+  DEMONSTRACAO,
+  SENHA_DE_DEMONSTRACAO,
+} from '../../nucleo/demonstracao';
 import { Problema } from '../../nucleo/modelos';
 import { Sessao } from '../../nucleo/sessao';
 
@@ -29,8 +35,10 @@ export class Login {
 
   protected readonly enviando = signal(false);
   protected readonly erro = signal<string | null>(null);
-  /** Só no `ng serve`: mostra um login de exemplo dos dados de desenvolvimento. */
-  protected readonly emDesenvolvimento = isDevMode();
+  /** No `npm start` e na versão de demonstração: mostra as contas de exemplo. */
+  protected readonly demonstracao = inject(DEMONSTRACAO);
+  protected readonly contas = CONTAS_DE_DEMONSTRACAO;
+  protected readonly senhaDeDemonstracao = SENHA_DE_DEMONSTRACAO;
 
   constructor() {
     if (this.sessao.token()) {
@@ -54,6 +62,12 @@ export class Login {
         this.erro.set(mensagemDeErro(resposta));
       },
     });
+  }
+
+  /** Um clique numa conta de exemplo: preenche o formulário e já entra. */
+  protected entrarComo(conta: ContaDeDemonstracao): void {
+    this.formulario.setValue({ email: conta.email, senha: SENHA_DE_DEMONSTRACAO });
+    this.entrar();
   }
 
   protected campoInvalido(nome: 'email' | 'senha'): boolean {
