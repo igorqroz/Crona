@@ -1,0 +1,142 @@
+# Integração contínua (CI) do Crona — Fase 9b.
+#
+# A cada Pull Request e a cada push na main, o GitHub sobe uma máquina Linux limpa e roda:
+#   1. backend:  os testes da API, contra um PostgreSQL de verdade;
+#   2. frontend: os testes do Angular e o build de produção;
+#   3. docker:   o Crona inteiro no docker compose + um "teste de fumaça" pelo nginx.
+# O PR mostra ✅ ou ❌ antes do merge: código quebrado não entra na main sem ninguém ver.
+
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Se você der dois pushes seguidos no mesmo PR, a execução antiga é cancelada (economiza tempo).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ================================================================== API
+  backend:
+    name: Back-end (228+ testes)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    # Um PostgreSQL de verdade ao lado dos testes, com o mesmo banco/usuário/senha do
+    # ambiente de desenvolvimento: os testes rodam sem mudar nenhuma configuração.
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: crona
+          POSTGRES_USER: crona
+          POSTGRES_PASSWORD: crona_dev
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U crona -d crona"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Java 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+          # Guarda as dependências do Maven entre uma execução e outra (fica bem mais rápido).
+          cache: maven
+
+      - name: Testes
+        # headless: a máquina do CI não tem tela (o JasperReports usa fontes do Java).
+        env:
+          JAVA_TOOL_OPTIONS: -Djava.awt.headless=true
+        run: ./mvnw -B test
+
+      - name: Guarda o relatório dos testes (se algum falhar)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-testes-backend
+          path: backend/target/surefire-reports/
+
+  # ================================================================== front
+  frontend:
+    name: Front-end (testes e build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Node 24
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instala as dependências
+        # npm ci: instala exatamente o que está no package-lock.json.
+        run: npm ci
+
+      - name: Testes (Vitest)
+        run: npx ng test --watch=false
+
+      - name: Build de produção
+        run: npx ng build
+
+  # ================================================================== tudo junto
+  docker:
+    name: Docker + teste de fumaça
+    # Só roda se os testes passaram: não adianta subir o Docker com código quebrado.
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Sobe o Crona (banco, API e site)
+        # --wait: espera os healthchecks (a API só fica "healthy" se subir de verdade).
+        run: docker compose up -d --build --wait
+
+      - name: Teste de fumaça (pelo nginx, como o navegador faria)
+        run: |
+          set -e
+          echo "1) A API está viva?"
+          curl -fsS http://localhost:8088/api/actuator/health
+          echo
+          echo "2) Login com um usuário de exemplo"
+          TOKEN=$(curl -fsS -X POST http://localhost:8088/api/auth/login \
+            -H "Content-Type: application/json" \
+            -d '{"email":"ana.lima@demo.crona","senha":"crona123"}' | jq -r .token)
+          test -n "$TOKEN" && test "$TOKEN" != "null"
+          echo "3) Uma rota protegida, com o token"
+          curl -fsS http://localhost:8088/api/minhas-ferias/periodos-aquisitivos \
+            -H "Authorization: Bearer $TOKEN" | jq 'length'
+          echo "4) O site (uma rota do Angular, como num F5)"
+          curl -fsS -o /dev/null -w "%{http_code}\n" http://localhost:8088/inicio
+
+      - name: Logs dos contêineres (se algo falhou)
+        if: failure()
+        run: docker compose logs
+
+      - name: Desliga tudo
+        if: always()
+        run: docker compose down -v
