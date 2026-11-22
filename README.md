@@ -4,7 +4,7 @@
 
 O Crona é um sistema web para **planejar, solicitar, negociar e aprovar férias** dentro das regras da CLT e das regras de cada empresa.
 
-> 🚧 **Em desenvolvimento.** O fluxo principal já funciona de ponta a ponta, na API e na tela: o colaborador pede ou negocia uma troca, e o gestor aprova, com aviso em PDF e notificações. Falta colocar a V1 no ar. Veja o [roadmap](#roadmap).
+> ✅ **V1 no ar: https://crona.onrender.com** (logins de exemplo em [No ar](#no-ar-demonstração)). O fluxo principal funciona de ponta a ponta: o colaborador pede ou negocia uma troca, e o gestor aprova, com aviso em PDF e notificações. Veja o [roadmap](#roadmap).
 
 ## O problema
 
@@ -79,15 +79,20 @@ O projeto é construído em fases, e cada fase entrega algo que funciona.
   - [x] 8a: aviso de férias em PDF (JasperReports), para baixar na tela Início
   - [x] 8b: notificações dentro do Crona (sino no menu, avisos do fluxo e rotina diária de férias a vencer)
   - [x] 8c: calendário da equipe (quem está fora em 2 semanas, 6 semanas ou um trimestre, com os dias acima do limite e os períodos restritos)
-- [ ] **Fase 9 — Entrega:** Docker, CI com GitHub Actions e deploy
+- [x] **Fase 9 — Entrega:** Docker, CI com GitHub Actions e deploy
+  - [x] 9a: Docker (banco, API e site com nginx no `docker compose`)
+  - [x] 9b: CI no GitHub Actions (testes, build e teste de fumaça no Docker a cada PR)
+  - [x] 9c: deploy no Render (site e API) com o banco no Neon
 
 ## Como rodar
 
 ### No ar (demonstração)
 
+**Acesse: https://crona.onrender.com**
+
 O Crona está publicado no [Render](https://render.com) (o site e a API, que roda no Docker) com o banco no [Neon](https://neon.tech) (PostgreSQL). A configuração está em [`render.yaml`](render.yaml), e cada merge na `main` publica a versão nova.
 
-A versão no ar usa os mesmos dados de exemplo e os mesmos logins de exemplo da seção abaixo. Ela roda no plano grátis: depois de 15 minutos sem uso a API "dorme", e o primeiro login seguinte pode levar até um minuto.
+A versão no ar usa os mesmos dados de exemplo: entre com `ana.lima@demo.crona` (colaboradora), `roberto.neves@demo.crona` (gestor) ou `rafael.costa@demo.crona` (RH), todos com a senha `crona123`. Ela roda no plano grátis: depois de 15 minutos sem uso a API "dorme", e o primeiro login seguinte pode levar até um minuto.
 
 ### O jeito mais rápido: Docker
 
