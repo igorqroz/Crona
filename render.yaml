@@ -1,0 +1,70 @@
+# Blueprint do Render (Fase 9c): a infraestrutura do Crona escrita como código.
+#
+# O Render lê este arquivo e cria os 2 serviços. O banco fica no Neon (PostgreSQL grátis que
+# não expira); o endereço e a senha dele são preenchidos NO PAINEL do Render, nunca aqui.
+#
+#   Navegador ──▶ crona (site estático) ──/api──▶ crona-api (Docker) ──▶ Neon (PostgreSQL)
+#
+# A cada merge na main, o Render publica a versão nova sozinho.
+
+services:
+  # ================================================================== API
+  - type: web
+    name: crona-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    # Mesma região do banco no Neon (AWS us-east-1, Virgínia): API e banco perto um do outro.
+    region: virginia
+    # O Render só manda tráfego para a versão nova quando ela responder aqui.
+    healthCheckPath: /actuator/health
+    envVars:
+      # Dados de exemplo para a demonstração (ver application-demo.yml).
+      - key: SPRING_PROFILES_ACTIVE
+        value: demo
+      # A API escuta na 8080 (o padrão do Spring); o Render encaminha para ela.
+      - key: PORT
+        value: "8080"
+      # O plano grátis tem 512 MB de RAM e 0,1 de CPU. Java econômico:
+      #  - MaxRAMPercentage=55: deixa espaço para o que não é heap (classes, threads);
+      #  - SerialGC: o coletor de lixo mais leve, bom para 1 CPU;
+      #  - TieredStopAtLevel=1: compila menos, sobe mais rápido e usa menos memória.
+      - key: JAVA_OPTS
+        value: -XX:MaxRAMPercentage=55 -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -Djava.awt.headless=true
+      # Poucas conexões com o banco: o Crona não precisa de mais, e o Neon grátis agradece.
+      - key: SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE
+        value: "5"
+      # O segredo que assina os tokens: o Render sorteia um valor aleatório (256 bits) na criação.
+      - key: JWT_SEGREDO
+        generateValue: true
+      # Os dados do banco no Neon: você digita no painel do Render na primeira vez (sync: false).
+      - key: DB_URL
+        sync: false
+      - key: DB_USUARIO
+        sync: false
+      - key: DB_SENHA
+        sync: false
+
+  # ================================================================== site
+  - type: web
+    name: crona
+    runtime: static
+    # O Render compila o Angular e publica os arquivos. Site estático grátis não "dorme".
+    buildCommand: cd frontend && npm ci && npx ng build
+    staticPublishPath: ./frontend/dist/crona/browser
+    envVars:
+      # O Angular 22 precisa do Node 24.15 ou mais novo.
+      - key: NODE_VERSION
+        value: "24"
+    routes:
+      # /api/... vai para a API (o mesmo papel do nginx no Docker). Como o navegador só fala
+      # com o site, não precisa de CORS. Se o Render der outro endereço para a API
+      # (ex.: crona-api-abcd.onrender.com), ajuste aqui.
+      - type: rewrite
+        source: /api/*
+        destination: https://crona-api.onrender.com/*
+      # SPA: qualquer outra rota (/inicio, /aprovacoes...) abre o index.html e o Angular decide.
+      - type: rewrite
+        source: /*
+        destination: /index.html
