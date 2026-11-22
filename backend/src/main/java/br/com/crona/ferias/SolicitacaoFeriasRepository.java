@@ -86,4 +86,24 @@ public interface SolicitacaoFeriasRepository extends JpaRepository<SolicitacaoFe
                                            @Param("colaboradorId") Long colaboradorId,
                                            @Param("status") StatusSolicitacao status,
                                            @Param("hoje") LocalDate hoje);
+
+    /**
+     * Fase 8c: as férias (aprovadas e em análise) que encostam nas datas, com o colaborador e o
+     * departamento já carregados. Com gestorId, só a equipe dele; nulo = a empresa toda (RH).
+     */
+    @Query("""
+            select s from SolicitacaoFerias s
+                join fetch s.colaborador c
+                left join fetch c.departamento d
+            where c.empresa.id = :empresaId
+              and (:gestorId is null or c.gestor.id = :gestorId)
+              and s.status in :status
+              and s.dataInicio <= :ate and s.dataFim >= :de
+            order by c.nome, s.dataInicio
+            """)
+    List<SolicitacaoFerias> ausenciasParaOCalendario(@Param("empresaId") Long empresaId,
+                                                     @Param("gestorId") Long gestorId,
+                                                     @Param("status") Collection<StatusSolicitacao> status,
+                                                     @Param("de") LocalDate de,
+                                                     @Param("ate") LocalDate ate);
 }

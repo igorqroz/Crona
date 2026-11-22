@@ -207,6 +207,22 @@ export interface Decisao {
   mensagem?: string;
 }
 
+// ------------------------------------------------------------------ calendário da equipe (Fase 8c)
+
+export interface CalendarioDaGestao {
+  de: string;
+  ate: string;
+  departamentos: {
+    id: number | null;
+    nome: string;
+    ativos: number;
+    limite: number | null;
+    pessoas: { id: number; nome: string; ausencias: { pedidoId: number; inicio: string; fim: string; pendente: boolean }[] }[];
+  }[];
+  restricoes: { motivo: string; departamentoId: number | null; inicio: string; fim: string; bloqueia: boolean }[];
+  feriados: string[];
+}
+
 // ------------------------------------------------------------------ notificações (Fase 8b)
 
 export interface Notificacao {

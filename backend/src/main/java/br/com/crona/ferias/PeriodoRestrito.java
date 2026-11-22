@@ -46,6 +46,11 @@ public class PeriodoRestrito extends EntidadeBase {
     protected PeriodoRestrito() {
     }
 
+    /** Nulo = vale para a empresa toda. */
+    public Departamento getDepartamento() {
+        return departamento;
+    }
+
     public Tipo getTipo() {
         return tipo;
     }

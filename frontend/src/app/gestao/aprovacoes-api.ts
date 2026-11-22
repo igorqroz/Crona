@@ -1,7 +1,15 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
-import { Decisao, DetalheDaAprovacao, ItemDeAprovacao, Negociacao, Solicitacao, TrocaParaAprovar } from '../nucleo/modelos';
+import {
+  CalendarioDaGestao,
+  Decisao,
+  DetalheDaAprovacao,
+  ItemDeAprovacao,
+  Negociacao,
+  Solicitacao,
+  TrocaParaAprovar,
+} from '../nucleo/modelos';
 
 /**
  * As chamadas do GESTOR e do RH (/aprovacoes e /confirmacoes-rh).
@@ -46,6 +54,12 @@ export class AprovacoesApi {
 
   recusarTroca(id: number, mensagem: string) {
     return this.http.post<Negociacao>(`/api/aprovacoes/negociacoes/${id}/recusar`, { mensagem });
+  }
+
+  // ------------------------------------------------------------------ calendário da equipe (Fase 8c)
+
+  calendario(de: string, ate: string) {
+    return this.http.get<CalendarioDaGestao>('/api/gestao/calendario', { params: { de, ate } });
   }
 
   // ------------------------------------------------------------------ RH (EMP-06)

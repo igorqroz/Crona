@@ -1,0 +1,98 @@
+<header class="topo">
+  <div>
+    <h1>Calendário da equipe</h1>
+    <p class="texto-suave">Quem está fora, dia a dia. Só aparecem os departamentos com alguém fora no período.</p>
+  </div>
+  <div class="controles">
+    <div class="janelas" role="tablist" aria-label="Tamanho da janela">
+      @for (j of janelas; track j.valor) {
+        <button type="button" role="tab" [attr.aria-selected]="janela() === j.valor" [class.ativa]="janela() === j.valor" (click)="mudarJanela(j.valor)">
+          {{ j.texto }}
+        </button>
+      }
+    </div>
+    <div class="navegacao">
+      <button type="button" class="seta" aria-label="Período anterior" (click)="navegar(-1)"><crona-icone nome="anterior" [tamanho]="18" /></button>
+      <button type="button" class="botao botao-secundario hoje-botao" (click)="voltarParaHoje()">Hoje</button>
+      <button type="button" class="seta" aria-label="Próximo período" (click)="navegar(1)"><crona-icone nome="proximo" [tamanho]="18" /></button>
+    </div>
+  </div>
+</header>
+
+@switch (estado()) {
+  @case ('erro') {
+    <div class="aviso" role="alert">
+      Não foi possível carregar o calendário. <a href="" (click)="$event.preventDefault(); carregar()">Tentar de novo</a>
+    </div>
+  }
+  @default {
+    @if (grade(); as g) {
+      <section class="cartao calendario" [class.carregando]="estado() === 'carregando'" aria-label="Quem está fora">
+        <div class="rolagem">
+          <!-- ============================================================ cabeçalho com as semanas -->
+          <div class="linha cabecalho" [style.grid-template-columns]="colunas()">
+            <span class="nome rotulo">Pessoa</span>
+            @for (dia of g.dias; track dia.iso; let i = $index) {
+              <span class="dia" [class.fim-de-semana]="dia.fimDeSemana" [class.feriado]="dia.feriado" [style.grid-column]="i + 2">
+                @if (dia.semana) {
+                  <span class="semana">{{ dia.semana }}</span>
+                }
+              </span>
+            }
+          </div>
+
+          @for (dep of g.departamentos; track dep.nome) {
+            <!-- ============================================================ o departamento -->
+            <div class="linha departamento" [style.grid-template-columns]="colunas()">
+              <span class="nome">
+                <strong>{{ dep.nome }}</strong>
+                <small>{{ dep.subtitulo }}</small>
+              </span>
+              @for (dia of g.dias; track dia.iso; let i = $index) {
+                <span class="dia" [class.fim-de-semana]="dia.fimDeSemana || dia.feriado" [class.hoje]="g.hoje === i" [style.grid-column]="i + 2"></span>
+              }
+              @for (r of dep.restricoes; track $index) {
+                <span class="restricao" [class.bloqueia]="r.bloqueia" [style.grid-column]="faixa(r.de, r.ate)" [title]="r.motivo + (r.bloqueia ? ' (bloqueia pedidos)' : ' (só alerta)')">
+                  {{ r.motivo }}
+                </span>
+              }
+              @for (a of dep.acima; track a.coluna) {
+                <span class="acima" [style.grid-column]="a.coluna + 2" [title]="a.total + ' pessoas fora: acima do limite'">{{ a.total }}</span>
+              }
+            </div>
+
+            <!-- ============================================================ as pessoas -->
+            @for (pessoa of dep.pessoas; track pessoa.nome) {
+              <div class="linha pessoa" [style.grid-template-columns]="colunas()">
+                <span class="nome">
+                  <crona-avatar [nome]="pessoa.nome" [tamanho]="24" />
+                  <span>{{ pessoa.nome }}</span>
+                </span>
+                @for (dia of g.dias; track dia.iso; let i = $index) {
+                  <span class="dia" [class.fim-de-semana]="dia.fimDeSemana || dia.feriado" [class.hoje]="g.hoje === i" [style.grid-column]="i + 2"></span>
+                }
+                @for (b of pessoa.barras; track $index) {
+                  <span class="barra" [class.pendente]="b.pendente" [style.grid-column]="faixa(b.de, b.ate)" [title]="pessoa.nome + ': ' + b.rotulo + (b.pendente ? ' (em análise)' : '')">
+                    {{ b.rotulo }}
+                  </span>
+                }
+              </div>
+            }
+          } @empty {
+            <p class="vazio texto-suave">Ninguém da equipe está fora neste período.</p>
+          }
+        </div>
+
+        <div class="legenda">
+          <span><i class="l-aprovado"></i>Aprovado</span>
+          <span><i class="l-pendente"></i>Em análise</span>
+          <span><i class="l-acima"></i>Acima do limite</span>
+          <span><i class="l-restricao"></i>Período restrito</span>
+          <span><i class="l-hoje"></i>Hoje</span>
+        </div>
+      </section>
+    } @else {
+      <p class="texto-suave">Carregando…</p>
+    }
+  }
+}
