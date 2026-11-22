@@ -1,0 +1,12 @@
+{
+  // Só para o editor (VS Code) entender os testes: o Playwright compila o TypeScript sozinho.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["playwright.config.ts", "apoio/**/*.ts", "testes/**/*.ts"]
+}

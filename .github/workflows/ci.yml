@@ -3,7 +3,8 @@
 # A cada Pull Request e a cada push na main, o GitHub sobe uma máquina Linux limpa e roda:
 #   1. backend:  os testes da API, contra um PostgreSQL de verdade;
 #   2. frontend: os testes do Angular e o build de produção;
-#   3. docker:   o Crona inteiro no docker compose + um "teste de fumaça" pelo nginx.
+#   3. docker:   o Crona inteiro no docker compose + um "teste de fumaça" pelo nginx
+#                + os testes E2E com o Playwright (um navegador de verdade).
 # O PR mostra ✅ ou ❌ antes do merge: código quebrado não entra na main sem ninguém ver.
 
 name: CI
@@ -103,11 +104,11 @@ jobs:
 
   # ================================================================== tudo junto
   docker:
-    name: Docker + teste de fumaça
+    name: Docker + fumaça + E2E
     # Só roda se os testes passaram: não adianta subir o Docker com código quebrado.
     needs: [backend, frontend]
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
 
     steps:
       - uses: actions/checkout@v5
@@ -132,6 +133,35 @@ jobs:
             -H "Authorization: Bearer $TOKEN" | jq 'length'
           echo "4) O site (uma rota do Angular, como num F5)"
           curl -fsS -o /dev/null -w "%{http_code}\n" http://localhost:8088/inicio
+
+      # ---------------------------------------------------------- E2E (Playwright)
+      # Com o Crona inteiro no ar (e o banco recém-criado), um navegador de verdade faz o que
+      # as pessoas fazem: login, permissões e o fluxo "Ana pede férias, Roberto aprova".
+      - name: Node 24 (para o Playwright)
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
+
+      - name: Instala o Playwright e o Chromium
+        working-directory: e2e
+        # --with-deps: instala também as bibliotecas do Linux que o navegador precisa.
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Testes E2E (Playwright)
+        working-directory: e2e
+        run: npx playwright test
+
+      - name: Guarda o relatório do Playwright (com prints, vídeos e traces das falhas)
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-e2e
+          path: e2e/playwright-report/
+          retention-days: 14
 
       - name: Logs dos contêineres (se algo falhou)
         if: failure()

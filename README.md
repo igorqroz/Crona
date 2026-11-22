@@ -139,13 +139,25 @@ Entre com um dos usuários dos dados de exemplo: `ana.lima@demo.crona` (colabora
 
 Testes do front (Vitest): `npm test` (dentro de `frontend/`).
 
+### Testes E2E (Playwright)
+
+Testam o Crona inteiro pelo navegador, como uma pessoa usaria. Com o Crona no ar no Docker (porta 8088):
+```bash
+cd e2e
+npm install                          # só na primeira vez
+npx playwright install chromium      # só na primeira vez (baixa o navegador)
+npx playwright test
+```
+Detalhes (ver o navegador, modo UI, relatório, rodar contra o `npm start`) em [`e2e/README.md`](e2e/README.md).
+
 ### Integração contínua (CI)
 
 A cada Pull Request e a cada push na `main`, o [GitHub Actions](.github/workflows/ci.yml) roda numa máquina limpa:
 
 1. os testes do back-end, contra um PostgreSQL 18 de verdade;
 2. os testes do front-end e o build de produção;
-3. se os dois passarem, o Crona inteiro no `docker compose` e um teste de fumaça pelo nginx (a API está viva, o login funciona, uma rota protegida responde e o site abre).
+3. se os dois passarem, o Crona inteiro no `docker compose` e um teste de fumaça pelo nginx (a API está viva, o login funciona, uma rota protegida responde e o site abre);
+4. com o Crona ainda no ar, os testes E2E com o [Playwright](https://playwright.dev): um navegador de verdade faz login, confere as permissões de cada perfil e segue o fluxo "Ana pede férias, Roberto aprova". O relatório (com prints, vídeos e traces das falhas) fica nos artefatos da execução.
 
 O selo no topo deste README mostra se a `main` está passando.
 

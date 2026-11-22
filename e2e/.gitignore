@@ -1,0 +1,5 @@
+# O que o Playwright gera a cada execução (relatório, prints, vídeos, traces): não sobe.
+node_modules/
+test-results/
+playwright-report/
+blob-report/
