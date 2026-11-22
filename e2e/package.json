@@ -1,0 +1,15 @@
+{
+  "name": "crona-e2e",
+  "private": true,
+  "description": "Testes E2E (ponta a ponta) do Crona com o Playwright: o navegador de verdade, contra o site e a API rodando.",
+  "scripts": {
+    "test": "playwright test",
+    "test:ver": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "relatorio": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "@types/node": "^26.6.6"
+  }
+}
