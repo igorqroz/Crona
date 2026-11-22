@@ -38,6 +38,7 @@ public final class ValidadorDeFerias {
         LocalDate fim = pedido.inicio().plusDays(Math.max(pedido.diasGozo(), 1) - 1L);
 
         List<Verificacao> verificacoes = new ArrayList<>();
+        verificacoes.add(outrasFerias(dados, fim));
         verificacoes.add(periodoCompleto(dados));
         verificacoes.add(prazoDeConcessao(dados, fim));
         verificacoes.add(saldo(dados));
@@ -50,6 +51,23 @@ public final class ValidadorDeFerias {
 
         return new ResultadoDaValidacao(pedido.inicio(), fim, proximoDiaUtil(fim.plusDays(1), dados.feriados()),
                 List.copyOf(verificacoes));
+    }
+
+    // ------------------------------------------------------------------ CRONA-01
+
+    /** Ninguém tira férias duas vezes no mesmo dia: as datas não podem coincidir com outras férias suas. */
+    private static Verificacao outrasFerias(DadosParaValidar dados, LocalDate fim) {
+        LocalDate inicio = dados.pedido().inicio();
+        var coincide = dados.outrasFerias().stream()
+                .filter(f -> !f.inicio().isAfter(fim) && !f.fim().isBefore(inicio))
+                .findFirst();
+        if (coincide.isPresent()) {
+            var f = coincide.get();
+            return impedimento("CRONA-01", "Você já tem férias " + (f.aprovada() ? "aprovadas" : "em análise")
+                    + " de " + f.inicio().format(DATA) + " a " + f.fim().format(DATA)
+                    + ", que coincidem com estas datas.");
+        }
+        return ok("CRONA-01", "Não coincide com outras férias suas");
     }
 
     // ------------------------------------------------------------------ CLT-01

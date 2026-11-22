@@ -110,7 +110,7 @@ public class SimulacaoService {
         // 1. Regras do próprio pedido (CLT)
         var escolhido = escolherPeriodo(colaborador.getId(), pedido.periodo(), ignorarSolicitacaoId);
         var resultadoIndividual = ValidadorDeFerias.validar(
-                dadosDoPedido(pedido, escolhido, hoje, empresaId, config, ignorarSolicitacaoId));
+                dadosDoPedido(colaborador.getId(), pedido, escolhido, hoje, empresaId, config, ignorarSolicitacaoId));
 
         // 2. Regras da equipe e da empresa (EMP), nas datas já calculadas
         var resultadoEquipe = ValidadorDaEquipe.validar(
@@ -155,12 +155,23 @@ public class SimulacaoService {
                 .orElse(periodos.getLast());     // nenhum disponível: o validador vai explicar o motivo
     }
 
-    private DadosParaValidar dadosDoPedido(SimulacaoRequisicao pedido, PeriodoComSaldo escolhido, LocalDate hoje,
+    private DadosParaValidar dadosDoPedido(Long colaboradorId, SimulacaoRequisicao pedido, PeriodoComSaldo escolhido, LocalDate hoje,
                                            Long empresaId, ConfiguracaoFerias config, Long ignorarSolicitacaoId) {
         var periodo = escolhido.periodo();
         var outrosPedidos = solicitacaoRepository.findByPeriodoAquisitivoIdAndStatusIn(
                         periodo.getId(), StatusSolicitacao.EM_ANDAMENTO_OU_APROVADA).stream()
                 .filter(s -> !s.getId().equals(ignorarSolicitacaoId))
+                .toList();
+
+        // As outras férias da pessoa nas mesmas datas, de QUALQUER período aquisitivo (CRONA-01).
+        // O fim é calculado igual ao do validador.
+        LocalDate fim = pedido.inicio().plusDays(Math.max(pedido.diasGozo(), 1) - 1L);
+        var outrasFerias = solicitacaoRepository.feriasDoColaboradorEntre(
+                        colaboradorId, StatusSolicitacao.EM_ANDAMENTO_OU_APROVADA, pedido.inicio(), fim)
+                .stream()
+                .filter(s -> !s.getId().equals(ignorarSolicitacaoId))
+                .map(s -> new DadosParaValidar.FeriasMarcadas(s.getDataInicio(), s.getDataFim(),
+                        s.getStatus() == StatusSolicitacao.APROVADA))
                 .toList();
 
         // Feriados do início até um pouco depois do fim (para calcular a volta ao trabalho).
@@ -175,7 +186,8 @@ public class SimulacaoService {
                 outrosPedidos.stream().map(SolicitacaoFerias::getDiasGozo).toList(),
                 outrosPedidos.stream().mapToInt(SolicitacaoFerias::getDiasAbono).sum(),
                 feriados,
-                config.getAntecedenciaMinimaDias());
+                config.getAntecedenciaMinimaDias(),
+                outrasFerias);
     }
 
     private DadosDaEquipe dadosDaEquipe(Colaborador colaborador, Long empresaId, ConfiguracaoFerias config,

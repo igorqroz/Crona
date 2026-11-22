@@ -69,6 +69,42 @@ class SolicitacaoApiTest extends ComBiaTestBase {
     }
 
     @Test
+    @DisplayName("CRONA-01: as mesmas férias pedidas de novo são recusadas, mesmo cabendo no saldo")
+    void mesmoPedidoDuasVezes() throws Exception {
+        enviar(segunda, 15, null).andExpect(status().isCreated());
+
+        enviar(segunda, 15, null)                    // sobram 15 dias: só a regra nova segura
+                .andExpect(status().isUnprocessableContent())
+                .andExpect(jsonPath("$.verificacoes[?(@.regra == 'CRONA-01')].resultado").value("IMPEDIMENTO"));
+
+        mockMvc.perform(get("/minhas-ferias/solicitacoes").with(como(biaId, "COLABORADOR")))
+                .andExpect(jsonPath("$", hasSize(1)));
+    }
+
+    @Test
+    @DisplayName("CRONA-01: um pedido que só encosta no outro (começa no dia seguinte) passa")
+    void pedidoQueSoEncosta() throws Exception {
+        // Duas segundas sem feriado perto (CLT-05), com 2 semanas entre elas.
+        LocalDate inicio = segunda;
+        while (!feriadoRepository.datasEntre(empresaDemo, inicio.plusWeeks(2), inicio.plusWeeks(2).plusDays(2)).isEmpty()) {
+            inicio = segundaLivreDepoisDe(inicio.plusWeeks(1));
+        }
+        enviar(inicio, 14, null).andExpect(status().isCreated());        // de segunda até o domingo da semana seguinte
+
+        enviar(inicio.plusWeeks(2), 5, null).andExpect(status().isCreated());   // começa na segunda logo depois
+    }
+
+    @Test
+    @DisplayName("CRONA-01: depois de cancelar, as mesmas datas podem ser pedidas de novo")
+    void pedirDeNovoDepoisDeCancelar() throws Exception {
+        Long id = idDe(enviar(segunda, 15, null).andExpect(status().isCreated()));
+        mockMvc.perform(post("/minhas-ferias/solicitacoes/" + id + "/cancelar").with(como(biaId, "COLABORADOR")))
+                .andExpect(status().isOk());
+
+        enviar(segunda, 15, null).andExpect(status().isCreated());
+    }
+
+    @Test
     @DisplayName("ponto de atenção não impede o envio (menos de 30 dias de antecedência)")
     void atencaoNaoImpede() throws Exception {
         LocalDate embreve = segundaLivreDepoisDe(LocalDate.now(RelogioConfig.FUSO).plusDays(10));

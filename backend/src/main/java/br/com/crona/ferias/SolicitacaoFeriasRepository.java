@@ -47,6 +47,19 @@ public interface SolicitacaoFeriasRepository extends JpaRepository<SolicitacaoFe
     List<SolicitacaoFerias> findByPeriodoAquisitivoIdAndStatusIn(Long periodoAquisitivoId,
                                                                  Collection<StatusSolicitacao> status);
 
+    /** As férias da própria pessoa que encostam nas datas, de qualquer período aquisitivo (CRONA-01). */
+    @Query("""
+            select s from SolicitacaoFerias s
+            where s.colaborador.id = :colaboradorId
+              and s.status in :status
+              and s.dataInicio <= :fim and s.dataFim >= :inicio
+            order by s.dataInicio
+            """)
+    List<SolicitacaoFerias> feriasDoColaboradorEntre(@Param("colaboradorId") Long colaboradorId,
+                                                     @Param("status") Collection<StatusSolicitacao> status,
+                                                     @Param("inicio") LocalDate inicio,
+                                                     @Param("fim") LocalDate fim);
+
     /**
      * Férias dos OUTROS colaboradores da empresa que encostam nas datas.
      * "left join" no departamento: quem não tem departamento também conta para a empresa (EMP-04).

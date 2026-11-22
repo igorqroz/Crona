@@ -54,10 +54,17 @@ export class DetalhePedido {
   protected readonly diaMesAno = diaMesAno;
   protected readonly haQuanto = haQuanto;
 
+  /**
+   * Só o id do pedido. Um computed só avisa quem depende dele quando o VALOR muda: se o mesmo
+   * pedido chega de novo (clique nele outra vez, ou a fila recarregada), o id é igual e nada acontece.
+   */
+  private readonly idDoPedido = computed(() => this.detalhe().pedido.id);
+
   constructor() {
-    // Outro pedido escolhido na lista (ou o mesmo recarregado): começa com a mensagem em branco.
+    // Outro pedido escolhido na lista: começa com a mensagem em branco. O MESMO pedido recarregado
+    // mantém o que o gestor já começou a escrever.
     effect(() => {
-      this.detalhe();
+      this.idDoPedido();
       untracked(() => {
         this.mensagem.set('');
         this.aviso.set(null);
