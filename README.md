@@ -45,7 +45,7 @@ Cada empresa organiza as férias do seu jeito, então o Crona separa as regras e
 | **Regras da CLT** | Direito a 30 dias, prazo de vencimento, divisão em até 3 períodos, abono de 1/3 | Não, valem para todos |
 | **Regras da empresa** | Limite de pessoas de férias por setor ou na empresa toda, antecedência mínima, períodos bloqueados | Sim: cada empresa liga, desliga e ajusta as suas |
 
-Todas as regras estão detalhadas em [docs/regras-de-negocio.md](docs/regras-de-negocio.md), e o modelo de dados em [docs/modelo-de-dominio.md](docs/modelo-de-dominio.md). Padrões de sistemas de gestão em produção que o Crona vai seguir (e armadilhas a evitar) estão em [docs/padroes-de-referencia.md](docs/padroes-de-referencia.md).
+Todas as regras estão detalhadas em [docs/regras-de-negocio.md](docs/regras-de-negocio.md), e o modelo de dados em [docs/modelo-de-dominio.md](docs/modelo-de-dominio.md). Padrões de sistemas de gestão em produção que o Crona vai seguir (e armadilhas a evitar) estão em [docs/padroes-de-referencia.md](docs/padroes-de-referencia.md). Como o Crona é testado (camadas, regras para cada PR e o registro dos bugs) está em [docs/plano-de-testes.md](docs/plano-de-testes.md).
 
 ## Stack
 
@@ -140,6 +140,8 @@ Entre com um dos usuários dos dados de exemplo: `ana.lima@demo.crona` (colabora
 Testes do front (Vitest): `npm test` (dentro de `frontend/`). Com cobertura: `npm run test:cobertura` (relatório em `frontend/coverage/crona/index.html`).
 
 ### Cobertura dos testes
+
+O mapa completo dos testes (o que cada camada cobre, o que fica de fora e a regra "todo bug vira um teste de regressão") está no [plano de testes](docs/plano-de-testes.md).
 
 **Cobertura** é quanto do código os testes realmente executam: se uma linha (ou um lado de um `if`) nunca roda em nenhum teste, um bug ali passa sem ninguém ver. Ela mostra **onde faltam testes**; não prova que os testes são bons (um teste sem `assert` também "cobre" o código).
 
