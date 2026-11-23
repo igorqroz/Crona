@@ -58,18 +58,16 @@ test('Ana pede 15 dias de férias, Roberto aprova e Ana vê aprovado', async ({ 
     await expect(detalhe.getByRole('heading', { level: 2 })).toBeVisible();
 
     // O item da lista com o nome da Ana E as datas deste teste (pode haver outros pedidos).
-    // .first(): hoje a API aceita o mesmo período pedido duas vezes (bug conhecido), então
-    // numa 2ª execução sem zerar o banco pode haver itens repetidos; qualquer um serve.
+    // É um só: a API não aceita o mesmo período pedido duas vezes pela mesma pessoa (CRONA-01).
     const item = roberto
       .getByRole('region', { name: 'Pedidos' })
       .getByRole('button')
       .filter({ hasText: ANA.nome })
-      .filter({ hasText: intervalo })
-      .first();
+      .filter({ hasText: intervalo });
 
-    // Clicar no item busca o detalhe na API (GET /api/aprovacoes/{id}) e, quando ele chega,
-    // a tela limpa a mensagem. Se o teste digitar antes da resposta, o texto some (foi assim
-    // que este teste ficou instável na primeira versão). Então: clica E espera a resposta.
+    // Clicar em OUTRO pedido busca o detalhe na API (GET /api/aprovacoes/{id}) e, quando ele
+    // chega, a tela limpa a mensagem. Se o teste digitar antes da resposta, o texto some (foi
+    // assim que este teste ficou instável na primeira versão). Então: clica E espera a resposta.
     const detalheChegou = roberto.waitForResponse(
       (r) => r.request().method() === 'GET' && /\/api\/aprovacoes\/\d+$/.test(new URL(r.url()).pathname),
     );

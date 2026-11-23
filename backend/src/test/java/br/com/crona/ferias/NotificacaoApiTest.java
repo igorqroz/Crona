@@ -26,11 +26,15 @@ class NotificacaoApiTest extends ComBiaTestBase {
     private AvisoDeVencimento avisoDeVencimento;
 
     private Long biaPede() throws Exception {
+        return biaPede(segunda);
+    }
+
+    private Long biaPede(LocalDate inicio) throws Exception {
         var json = mockMvc.perform(post("/minhas-ferias/solicitacoes").with(como(biaId, "COLABORADOR"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"inicio": "%s", "diasGozo": 15}
-                                """.formatted(segunda)))
+                                """.formatted(inicio)))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
         return ((Number) JsonPath.read(json, "$.id")).longValue();
@@ -155,7 +159,7 @@ class NotificacaoApiTest extends ComBiaTestBase {
         @DisplayName("marcar uma como lida, e depois todas")
         void marcar() throws Exception {
             biaPede();
-            biaPede();      // dois pedidos → duas notificações para o Roberto
+            biaPede(segundaLivreDepoisDe(segunda.plusWeeks(3)));    // outro pedido, em outras datas → 2 notificações
             Integer id = JsonPath.read(notificacoesDe(robertoId, "GESTOR"), "$.itens[0].id");
 
             mockMvc.perform(post("/notificacoes/" + id + "/lida").with(como(robertoId, "GESTOR")))

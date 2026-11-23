@@ -217,6 +217,20 @@ class NegociacaoApiTest extends ComBiaTestBase {
         }
 
         @Test
+        @DisplayName("CRONA-01: ninguém pega na troca datas em que já tem as próprias férias (422)")
+        void datasQueJaSaoMinhas() throws Exception {
+            Long doCaio = feriasAprovadas(caioId, depois, 15);
+            feriasAprovadas(biaId, depois, 15);         // a Bia já tem férias nas mesmas datas do Caio
+
+            biaPropoe("""
+                    {"pedidoDoColegaId": %d, "inicioSolicitante": "%s", "diasSolicitante": 10, "inicioColega": "%s"}
+                    """.formatted(doCaio, depois, segunda))
+                    .andExpect(status().isUnprocessableContent())
+                    .andExpect(jsonPath("$.verificacoes[?(@.regra == 'CRONA-01' && @.resultado == 'IMPEDIMENTO')].mensagem")
+                            .value(org.hamcrest.Matchers.contains(org.hamcrest.Matchers.startsWith("Bia Teste:"))));
+        }
+
+        @Test
         @DisplayName("as mesmas férias não entram em duas negociações abertas ao mesmo tempo (409)")
         void umaNegociacaoPorVez() throws Exception {
             Long doCaio = feriasAprovadas(caioId, depois, 15);

@@ -28,6 +28,14 @@ Este documento é a fonte da verdade das regras. Toda regra aqui vira **um teste
 | CLT-08 | O pagamento das férias deve ser feito **até 2 dias antes do início**. | Art. 145 |
 | CLT-09 | Quem decide a data é a empresa, o que justifica a **aprovação do gestor**. | Art. 136 |
 
+### Regras do próprio Crona
+
+Não vêm da CLT nem mudam de empresa para empresa: existem para o sistema não aceitar pedidos sem sentido.
+
+| Código | Regra |
+|---|---|
+| CRONA-01 | **Sem férias sobrepostas:** as datas de um pedido não podem coincidir com outras férias da mesma pessoa que estejam em análise (aguardando o gestor ou o RH) ou aprovadas, de qualquer período aquisitivo. Vale também para as datas novas de uma troca. Férias que só encostam (uma termina na véspera do início da outra) podem. Pedidos recusados ou cancelados não contam. |
+
 ## 3. Regras da empresa (configuráveis)
 
 Essas regras variam de empresa para empresa. Cada uma pode ser **ligada, desligada e ajustada** na tela de Configurações. A lista abaixo é o ponto de partida, e outras regras podem entrar depois.
@@ -50,6 +58,7 @@ Ao conferir um pedido, cada regra quebrada gera um de dois resultados:
 | Regra | Tipo | Por quê |
 |---|---|---|
 | Saldo insuficiente no período aquisitivo | Impedimento | Não existe dia para tirar |
+| CRONA-01 Datas que coincidem com outras férias da pessoa | Impedimento | Ninguém tira férias duas vezes no mesmo dia |
 | CLT-03 Fim das férias depois do prazo de concessão | Impedimento | Gera pagamento em dobro |
 | CLT-03 Período que **já venceu** | Ponto de atenção | As férias continuam devidas (pagas em dobro); bloquear deixaria os dias presos para sempre |
 | CLT-04 Divisão inválida (menos de 5 dias, mais de 3 partes, sem uma parte de 14+) | Impedimento | Proibido pela CLT |
@@ -70,7 +79,7 @@ O RH lança no Crona as faltas injustificadas de cada período aquisitivo, e o s
 
 ### Solicitação de férias
 1. O colaborador escolhe o primeiro e o último dia no calendário, que mostra quantos colegas já estarão fora em cada dia.
-2. O sistema confere as regras (CLT-03 a CLT-07, EMP-01 a EMP-06, as que estiverem ligadas) e separa o resultado em dois tipos:
+2. O sistema confere as regras (CRONA-01, CLT-03 a CLT-07, EMP-01 a EMP-06, as que estiverem ligadas) e separa o resultado em dois tipos:
    - **Impedimento:** o pedido não pode ser enviado (ex.: passa do saldo ou cai num período restrito do tipo bloqueio).
    - **Ponto de atenção:** o pedido pode ser enviado, e o gestor verá o aviso (ex.: passa do limite do departamento).
 3. Quando há conflito com colegas, o sistema sugere uma data alternativa e a opção de propor uma troca.

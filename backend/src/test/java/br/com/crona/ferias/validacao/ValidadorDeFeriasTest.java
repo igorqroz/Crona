@@ -1,6 +1,7 @@
 package br.com.crona.ferias.validacao;
 
 import br.com.crona.ferias.SaldoDoPeriodo.Situacao;
+import br.com.crona.ferias.validacao.DadosParaValidar.FeriasMarcadas;
 import br.com.crona.ferias.validacao.DadosParaValidar.Pedido;
 import br.com.crona.ferias.validacao.DadosParaValidar.Periodo;
 import br.com.crona.ferias.validacao.Verificacao.Resultado;
@@ -34,10 +35,11 @@ class ValidadorDeFeriasTest {
     private int abonoJaPedido = 0;
     private Set<LocalDate> feriados = Set.of();
     private int antecedenciaMinima = 30;
+    private List<FeriasMarcadas> outrasFerias = List.of();
 
     private ResultadoDaValidacao validar() {
         return ValidadorDeFerias.validar(new DadosParaValidar(pedido, HOJE, periodo, partesJaPedidas,
-                abonoJaPedido, feriados, antecedenciaMinima));
+                abonoJaPedido, feriados, antecedenciaMinima, outrasFerias));
     }
 
     private Periodo periodoCom(int direito, int livres) {
@@ -121,6 +123,51 @@ class ValidadorDeFeriasTest {
         assertThat(resultado.daRegra("CLT-03").resultado()).isEqualTo(Resultado.ATENCAO);
         assertThat(resultado.daRegra("CLT-03").mensagem()).contains("dobro");
         assertThat(resultado.podeEnviar()).isTrue();
+    }
+
+    // ------------------------------------------------------------------ CRONA-01: férias que coincidem
+
+    @Nested
+    @DisplayName("CRONA-01: não coincidir com outras férias da própria pessoa")
+    class OutrasFerias {
+
+        @Test
+        @DisplayName("sem outras férias marcadas: OK")
+        void semOutras() {
+            assertThat(validar().daRegra("CRONA-01").resultado()).isEqualTo(Resultado.OK);
+        }
+
+        @Test
+        @DisplayName("o MESMO período já pedido e em análise: impedimento (o bug do pedido repetido)")
+        void mesmoPeriodoEmAnalise() {
+            outrasFerias = List.of(new FeriasMarcadas(SEGUNDA, LocalDate.of(2026, 4, 6), false));
+
+            var resultado = validar();
+            var verificacao = resultado.daRegra("CRONA-01");
+            assertThat(verificacao.resultado()).isEqualTo(Resultado.IMPEDIMENTO);
+            assertThat(verificacao.mensagem()).contains("23/03/2026", "06/04/2026", "em análise");
+            assertThat(resultado.podeEnviar()).isFalse();
+        }
+
+        @Test
+        @DisplayName("só um pedaço coincide com férias aprovadas: impedimento")
+        void coincideEmParte() {
+            outrasFerias = List.of(new FeriasMarcadas(LocalDate.of(2026, 4, 6), LocalDate.of(2026, 4, 20), true));
+
+            var verificacao = validar().daRegra("CRONA-01");     // as férias pedidas vão até 06/04
+            assertThat(verificacao.resultado()).isEqualTo(Resultado.IMPEDIMENTO);
+            assertThat(verificacao.mensagem()).contains("aprovadas");
+        }
+
+        @Test
+        @DisplayName("férias que só encostam (terminam na véspera ou começam no dia seguinte): OK")
+        void soEncostam() {
+            outrasFerias = List.of(
+                    new FeriasMarcadas(LocalDate.of(2026, 3, 9), LocalDate.of(2026, 3, 22), true),
+                    new FeriasMarcadas(LocalDate.of(2026, 4, 7), LocalDate.of(2026, 4, 11), false));
+
+            assertThat(validar().daRegra("CRONA-01").resultado()).isEqualTo(Resultado.OK);
+        }
     }
 
     // ------------------------------------------------------------------ CLT-04: divisão

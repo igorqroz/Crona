@@ -26,6 +26,7 @@ export function contagens(itens: ItemDeAprovacao[]): Record<Filtro, number> {
 
 /** Um nome curto para a regra que gerou o alerta, como no redesign ("Acima do limite"). */
 const NOME_CURTO: Record<string, string> = {
+  'CRONA-01': 'Férias repetidas',
   'EMP-01': 'Acima do limite',
   'EMP-03': 'Pouca antecedência',
   'EMP-04': 'Limite da empresa',

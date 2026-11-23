@@ -17,6 +17,7 @@ import java.util.Set;
  * @param abonoJaPedido        dias de abono já pedidos no mesmo período (CLT-06)
  * @param feriados             feriados que valem para o colaborador (CLT-05)
  * @param antecedenciaMinima   dias de antecedência configurados pela empresa (EMP-03, mínimo 30)
+ * @param outrasFerias         as outras férias da pessoa (em análise ou aprovadas) que encostam nas datas (CRONA-01)
  */
 public record DadosParaValidar(
         Pedido pedido,
@@ -25,7 +26,8 @@ public record DadosParaValidar(
         List<Integer> partesJaPedidas,
         int abonoJaPedido,
         Set<LocalDate> feriados,
-        int antecedenciaMinima
+        int antecedenciaMinima,
+        List<FeriasMarcadas> outrasFerias
 ) {
 
     public record Pedido(LocalDate inicio, int diasGozo, int diasAbono) {
@@ -33,5 +35,9 @@ public record DadosParaValidar(
 
     public record Periodo(int numero, LocalDate fim, LocalDate limiteConcessao, int direito, int livres,
                           SaldoDoPeriodo.Situacao situacao) {
+    }
+
+    /** Férias que a pessoa já tem: um pedido em análise (aguardando gestor ou RH) ou aprovado. */
+    public record FeriasMarcadas(LocalDate inicio, LocalDate fim, boolean aprovada) {
     }
 }
