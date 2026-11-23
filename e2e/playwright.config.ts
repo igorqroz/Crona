@@ -23,8 +23,8 @@ if (!['localhost', '127.0.0.1'].includes(hostDoTeste)) {
 }
 
 export default defineConfig({
-  // Onde estão os testes.
-  testDir: './testes',
+  // Onde estão os testes (os cenários). As telas ficam em pages/ e os dados em fixtures/.
+  testDir: './specs',
 
   // Os arquivos de teste rodam em paralelo (cada um no seu navegador, isolado).
   fullyParallel: true,

@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test';
 
-import { proximasFeriasValidas } from '../apoio/api';
-import { ANA, ROBERTO } from '../apoio/contas';
-import { entrar } from '../apoio/login';
-import { SolicitarPagina } from '../apoio/solicitar.pagina';
+import { proximasFeriasValidas } from '../fixtures/api';
+import { ANA, ROBERTO } from '../fixtures/contas';
+import { LoginPagina } from '../pages/login.page';
+import { SolicitarPagina } from '../pages/solicitar.page';
 
 /** "2027-01-11" → "11/01" (o formato das datas nas telas). */
 const diaMes = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
@@ -28,7 +28,7 @@ test('Ana pede 15 dias de férias, Roberto aprova e Ana vê aprovado', async ({ 
   const roberto = await (await browser.newContext()).newPage();
 
   await test.step(`Ana escolhe de ${inicio} a ${fim} no calendário`, async () => {
-    await entrar(ana, ANA);
+    await new LoginPagina(ana).entrar(ANA);
     const solicitar = new SolicitarPagina(ana);
     await solicitar.abrir();
     await solicitar.escolherPeriodo(inicio, fim);
@@ -50,7 +50,7 @@ test('Ana pede 15 dias de férias, Roberto aprova e Ana vê aprovado', async ({ 
   });
 
   await test.step('Roberto acha o pedido da Ana nas Aprovações e aprova', async () => {
-    await entrar(roberto, ROBERTO);
+    await new LoginPagina(roberto).entrar(ROBERTO);
     await roberto.getByRole('navigation', { name: 'Principal' }).getByRole('link', { name: /Aprovações/ }).click();
 
     // A tela já abre com o 1º pedido escolhido: espera esse detalhe carregar.

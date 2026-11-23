@@ -8,5 +8,5 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["playwright.config.ts", "apoio/**/*.ts", "testes/**/*.ts"]
+  "include": ["playwright.config.ts", "fixtures/**/*.ts", "pages/**/*.ts", "specs/**/*.ts"]
 }
