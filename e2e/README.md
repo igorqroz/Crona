@@ -11,9 +11,9 @@ a partir de um código TypeScript.
 
 | Arquivo | O que testa |
 |---|---|
-| [`testes/login.spec.ts`](testes/login.spec.ts) | Login certo, senha errada, campos vazios, `logadoGuard` (sem login volta para o login) e "Sair" |
-| [`testes/permissoes.spec.ts`](testes/permissoes.spec.ts) | Menu por perfil: colaboradora não vê Gestão; `perfilGuard` em `/aprovacoes`; gestor e RH abrem as Aprovações |
-| [`testes/ferias.spec.ts`](testes/ferias.spec.ts) | O fluxo principal com **duas pessoas**: Ana escolhe as datas no calendário e envia; Roberto acha o pedido e aprova; Ana recebe a notificação |
+| [`specs/login.spec.ts`](specs/login.spec.ts) | Login certo, senha errada, campos vazios, `logadoGuard` (sem login volta para o login) e "Sair" |
+| [`specs/permissoes.spec.ts`](specs/permissoes.spec.ts) | Menu por perfil: colaboradora não vê Gestão; `perfilGuard` em `/aprovacoes`; gestor e RH abrem as Aprovações |
+| [`specs/ferias.spec.ts`](specs/ferias.spec.ts) | O fluxo principal com **duas pessoas**: Ana escolhe as datas no calendário e envia; Roberto acha o pedido e aprova; Ana recebe a notificação |
 
 Quem barra o acesso de verdade é a API. Isso já está nos testes do back-end (`SegurancaApiTest`, `PermissaoTest`).
 Aqui, o foco é o que a pessoa **vê**.
@@ -38,7 +38,7 @@ Outros jeitos de rodar:
 |---|---|
 | `npx playwright test --headed` | Mostra o navegador enquanto testa |
 | `npx playwright test --ui` | Modo UI: escolhe o teste, roda passo a passo e "volta no tempo" em cada ação |
-| `npx playwright test testes/login.spec.ts` | Só um arquivo |
+| `npx playwright test specs/login.spec.ts` | Só um arquivo |
 | `npx playwright show-report` | Abre o relatório HTML da última execução |
 | `npx playwright show-trace test-results/.../trace.zip` | Abre o *trace* de um teste que falhou (tela, rede e console a cada passo) |
 | `npx playwright codegen http://localhost:8088` | Grava o que você clica e gera o código do teste (bom para aprender os seletores) |
@@ -84,10 +84,20 @@ O `expect` do Playwright **espera sozinho** (até 5 s) a tela chegar no estado e
 ```
 e2e/
 ├── playwright.config.ts     endereço, navegador, idioma, fuso, o que guardar quando falha
-├── apoio/
+├── fixtures/                os DADOS dos testes
 │   ├── contas.ts            as contas de exemplo (Ana, Roberto, Rafael)
-│   ├── login.ts             entrar(page, conta): o login pela tela
-│   ├── api.ts               ajudantes que falam direto com a API (preparar dados)
-│   └── solicitar.pagina.ts  Page Object da tela "Solicitar férias" (o calendário)
-└── testes/                  os testes (*.spec.ts)
+│   └── api.ts               ajudantes que falam direto com a API (token, datas válidas)
+├── pages/                   um PAGE OBJECT por tela: COMO mexer nela
+│   ├── login.page.ts        LoginPagina: abrir, tentarEntrar, entrar(conta)
+│   └── solicitar.page.ts    SolicitarPagina: o calendário e o resumo
+└── specs/                   os CENÁRIOS (*.spec.ts): O QUE se testa
 ```
+
+Essa divisão em três é a mais comum em projetos com Playwright:
+
+- **specs/** diz **o que** se testa ("Ana pede férias e Roberto aprova"), sem saber de botões e campos;
+- **pages/** sabe **como** mexer em cada tela. Se uma tela mudar, o conserto fica num arquivo só;
+- **fixtures/** guarda os **dados** que os testes usam e os ajudantes que preparam esses dados pela API.
+
+No Playwright, "fixture" também é o nome de um recurso (`test.extend`) que entrega coisas prontas
+para o teste, como uma página já logada. Se um dia o Crona usar isso, o lugar é a pasta `fixtures/`.

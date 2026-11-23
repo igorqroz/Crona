@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
-import { ANA, RAFAEL, ROBERTO } from '../apoio/contas';
-import { entrar } from '../apoio/login';
+import { ANA, RAFAEL, ROBERTO } from '../fixtures/contas';
+import { LoginPagina } from '../pages/login.page';
 
 /**
  * Cada perfil vê um menu diferente. O que se testa aqui é a TELA (menu e perfilGuard).
@@ -9,7 +9,7 @@ import { entrar } from '../apoio/login';
  */
 test.describe('Permissões por perfil', () => {
   test('colaboradora não vê o menu de Gestão', async ({ page }) => {
-    await entrar(page, ANA);
+    await new LoginPagina(page).entrar(ANA);
 
     const menu = page.getByRole('navigation', { name: 'Principal' });
     await expect(menu.getByRole('link', { name: 'Solicitar férias' })).toBeVisible();
@@ -18,7 +18,7 @@ test.describe('Permissões por perfil', () => {
   });
 
   test('colaboradora que digita /aprovacoes volta para o Início (perfilGuard)', async ({ page }) => {
-    await entrar(page, ANA);
+    await new LoginPagina(page).entrar(ANA);
 
     await page.goto('/aprovacoes');
 
@@ -29,7 +29,7 @@ test.describe('Permissões por perfil', () => {
   // O mesmo teste para dois perfis: um for gera um test() para cada um.
   for (const conta of [ROBERTO, RAFAEL]) {
     test(`${conta.nome} vê o menu de Gestão e abre as Aprovações`, async ({ page }) => {
-      await entrar(page, conta);
+      await new LoginPagina(page).entrar(conta);
 
       const menu = page.getByRole('navigation', { name: 'Principal' });
       await expect(menu.getByRole('link', { name: 'Calendário da equipe' })).toBeVisible();
