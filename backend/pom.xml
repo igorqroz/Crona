@@ -151,6 +151,69 @@
 					<argLine>@{argLine} -javaagent:${org.mockito:mockito-core:jar}</argLine>
 				</configuration>
 			</plugin>
+			<!-- COBERTURA dos testes (JaCoCo): mede quais linhas e caminhos (if/else) do código os
+			     testes executaram. Roda junto com ./mvnw test e gera o relatório em
+			     target/site/jacoco/index.html (abra no navegador).
+			     Como funciona: o "prepare-agent" coloca um agente na JVM dos testes (ele entra no
+			     @{argLine} do surefire, acima) que anota cada linha executada; o "report" transforma
+			     essas anotações no relatório. -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.14</version>
+				<configuration>
+					<excludes>
+						<!-- Só o main() que sobe o Spring: não tem lógica para testar. -->
+						<exclude>br/com/crona/CronaApiApplication.class</exclude>
+					</excludes>
+				</configuration>
+				<executions>
+					<execution>
+						<id>preparar-agente</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>relatorio</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+					<!-- A "catraca" da cobertura: o build FALHA se a cobertura cair abaixo destes
+					     mínimos (um pouco abaixo do que temos hoje). Assim, código novo sem teste
+					     não entra sem ninguém ver. Fica na fase "verify" (./mvnw verify, que o CI
+					     roda) e não no "test": rodar um teste só na sua máquina não esbarra nela.
+					     Quando a cobertura subir, suba os números junto. -->
+					<execution>
+						<id>minimo-de-cobertura</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<rule>
+									<element>BUNDLE</element>
+									<limits>
+										<limit>
+											<counter>LINE</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.90</minimum>
+										</limit>
+										<limit>
+											<counter>BRANCH</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.80</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 

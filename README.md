@@ -123,7 +123,7 @@ Sobem 3 contêineres: o PostgreSQL, a API (perfil `demo`, com os dados de exempl
    Invoke-RestMethod -Uri http://localhost:8080/minhas-ferias/periodos-aquisitivos -Headers @{ Authorization = "Bearer $($login.token)" }
    ```
 
-Para rodar os testes automatizados: `./mvnw test` (dentro de `backend/`).
+Para rodar os testes automatizados: `./mvnw test` (dentro de `backend/`). A cobertura (JaCoCo) sai junto, em `backend/target/site/jacoco/index.html`; `./mvnw verify` também confere o mínimo de cobertura (ver [Cobertura dos testes](#cobertura-dos-testes)).
 
 ### Front-end (Angular)
 
@@ -137,7 +137,20 @@ npm start       # abre em http://localhost:4200
 ```
 Entre com um dos usuários dos dados de exemplo: `ana.lima@demo.crona` (colaboradora), `roberto.neves@demo.crona` (gestor, vê o menu **Aprovações**) ou `rafael.costa@demo.crona` (RH), todos com a senha `crona123`. Em desenvolvimento, o Angular repassa as chamadas `/api/...` para a API na porta 8080 ([`proxy.conf.json`](frontend/proxy.conf.json)), então não é preciso configurar CORS.
 
-Testes do front (Vitest): `npm test` (dentro de `frontend/`).
+Testes do front (Vitest): `npm test` (dentro de `frontend/`). Com cobertura: `npm run test:cobertura` (relatório em `frontend/coverage/crona/index.html`).
+
+### Cobertura dos testes
+
+**Cobertura** é quanto do código os testes realmente executam: se uma linha (ou um lado de um `if`) nunca roda em nenhum teste, um bug ali passa sem ninguém ver. Ela mostra **onde faltam testes**; não prova que os testes são bons (um teste sem `assert` também "cobre" o código).
+
+| Onde | Ferramenta | Comando | Mínimo exigido (a "catraca") |
+|---|---|---|---|
+| Back-end | [JaCoCo](https://www.jacoco.org/jacoco/) | `./mvnw verify` | 90% das linhas e 80% dos desvios (`if/else`) |
+| Front-end | Vitest (v8) | `npm run test:cobertura` | 25% das linhas e 45% dos desvios |
+
+Abaixo do mínimo, o CI fica vermelho: assim código novo sem teste não entra sem ninguém ver. Os mínimos ficam um pouco abaixo do que temos hoje e sobem conforme os testes aumentam. O front ainda está baixo porque as regras (`*.regras.ts`) estão 100% testadas, mas as páginas (Solicitar, Trocas, Aprovações...) ainda não têm testes de componente: elas são cobertas só pelos testes E2E, que não entram nesta conta.
+
+A cada execução do CI, a cobertura aparece no resumo da página da execução, e o relatório completo (com cada linha pintada de verde ou vermelho) fica nos artefatos `cobertura-backend` e `cobertura-frontend`.
 
 ### Testes E2E (Playwright)
 
