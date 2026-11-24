@@ -47,6 +47,18 @@ public interface SolicitacaoFeriasRepository extends JpaRepository<SolicitacaoFe
     List<SolicitacaoFerias> findByPeriodoAquisitivoIdAndStatusIn(Long periodoAquisitivoId,
                                                                  Collection<StatusSolicitacao> status);
 
+    /** A aba "Aprovadas" do RH: férias aprovadas da empresa que começam depois de {@code hoje}. */
+    @EntityGraph(attributePaths = {"colaborador", "colaborador.departamento", "gestorDecidiuPor", "rhConfirmouPor"})
+    @Query("""
+            select s from SolicitacaoFerias s
+            where s.colaborador.empresa.id = :empresaId
+              and s.status = br.com.crona.ferias.StatusSolicitacao.APROVADA
+              and s.dataInicio > :hoje
+            order by s.dataInicio, s.id
+            """)
+    List<SolicitacaoFerias> aprovadasQueComecamDepoisDe(@Param("empresaId") Long empresaId,
+                                                        @Param("hoje") LocalDate hoje);
+
     /** As férias da própria pessoa que encostam nas datas, de qualquer período aquisitivo (CRONA-01). */
     @Query("""
             select s from SolicitacaoFerias s

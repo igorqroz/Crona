@@ -22,7 +22,8 @@ public enum Permissao {
     COLABORADOR_VER,
     COLABORADOR_GERENCIAR,      // cadastrar, alterar, desativar, reativar
     SOLICITACAO_APROVAR,        // aprovar e recusar pedidos de férias (da própria equipe, ou de todos se ADMIN)
-    SOLICITACAO_CONFIRMAR_RH;   // EMP-06: confirmar pedidos já aprovados pelo gestor
+    SOLICITACAO_CONFIRMAR_RH,   // EMP-06: confirmar pedidos já aprovados pelo gestor
+    SOLICITACAO_CANCELAR_APROVADA; // cancelar férias já aprovadas (erro humano): só o RH
 
     /** O mapa perfil → permissões. */
     public static Set<Permissao> doPerfil(Perfil perfil) {

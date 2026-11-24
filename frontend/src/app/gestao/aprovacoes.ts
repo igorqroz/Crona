@@ -6,20 +6,28 @@ import { Avatar } from '../compartilhado/avatar';
 import { Icone } from '../compartilhado/icone';
 import { Pendencias } from '../ferias/pendencias';
 import { intervalo } from '../nucleo/datas';
-import { Decisao, DetalheDaAprovacao, ItemDeAprovacao, Problema, TrocaParaAprovar } from '../nucleo/modelos';
+import {
+  Decisao,
+  DetalheDaAprovacao,
+  FeriasAprovada,
+  ItemDeAprovacao,
+  Problema,
+  TrocaParaAprovar,
+} from '../nucleo/modelos';
 import { Sessao } from '../nucleo/sessao';
 import { AprovacoesApi } from './aprovacoes-api';
 import { contagens, Filtro, filtrar, selo } from './aprovacoes.regras';
 import { DetalhePedido, ErroDaDecisao } from './detalhe-pedido';
 import { TrocaParaAprovarCartao } from './troca-para-aprovar';
 
-type Aba = 'pedidos' | 'trocas' | 'rh';
+type Aba = 'pedidos' | 'trocas' | 'rh' | 'aprovadas';
 
 /**
  * Tela "Aprovações" do gestor (tela 2 do redesign), em 3 abas:
  * - Pedidos: lista à esquerda (com filtro) e o detalhe do escolhido à direita;
  * - Trocas: as negociações que os dois colegas já combinaram;
- * - Confirmação do RH: só para o ADMIN, quando a empresa liga a EMP-06.
+ * - Confirmação do RH: só para o ADMIN, quando a empresa liga a EMP-06;
+ * - Aprovadas: só para o ADMIN, que pode cancelar férias aprovadas por engano (até a véspera).
  */
 @Component({
   selector: 'crona-aprovacoes',
@@ -51,8 +59,14 @@ export class Aprovacoes {
   protected readonly recusandoNoRh = signal<number | null>(null);
   protected readonly motivoDoRh = signal('');
 
+  // ------------------------------------------------------------------ RH: férias aprovadas
+  protected readonly aprovadas = signal<FeriasAprovada[]>([]);
+  /** Qual das férias aprovadas está com o campo de motivo aberto. */
+  protected readonly cancelando = signal<number | null>(null);
+  protected readonly motivoDoCancelamento = signal('');
+
   // ------------------------------------------------------------------ ações
-  /** Qual item tem uma ação indo para a API ("pedido-3", "troca-7", "rh-5"), e o erro dela. */
+  /** Qual item tem uma ação indo para a API ("pedido-3", "troca-7", "rh-5", "aprovada-9"), e o erro dela. */
   protected readonly ocupado = signal<string | null>(null);
   protected readonly erro = signal<{ chave: string; erro: ErroDaDecisao } | null>(null);
 
@@ -74,11 +88,13 @@ export class Aprovacoes {
       pedidos: this.api.fila(),
       trocas: this.api.trocas(),
       rh: this.ehRh ? this.api.filaDoRh() : of([]),
+      aprovadas: this.ehRh ? this.api.aprovadas() : of([]),
     }).subscribe({
-      next: ({ pedidos, trocas, rh }) => {
+      next: ({ pedidos, trocas, rh, aprovadas }) => {
         this.pedidos.set(pedidos);
         this.trocas.set(trocas);
         this.filaDoRh.set(rh);
+        this.aprovadas.set(aprovadas);
         this.estado.set('pronto');
         this.pendencias.atualizar();
         // Mantém o pedido escolhido; se ele saiu da fila (foi decidido), escolhe o primeiro.
@@ -164,6 +180,33 @@ export class Aprovacoes {
     this.executar(`rh-${id}`, this.api.recusarNoRh(id, motivo), 'Pedido recusado pelo RH.');
   }
 
+  /** O RH cancela férias aprovadas por engano. O motivo vai para o colaborador. */
+  protected cancelarAprovada(ferias: FeriasAprovada): void {
+    const motivo = this.motivoDoCancelamento().trim();
+    const chave = `aprovada-${ferias.id}`;
+    if (!motivo) {
+      this.erro.set({ chave, erro: { mensagem: 'Escreva o motivo do cancelamento.', verificacoes: [] } });
+      return;
+    }
+    const nome = ferias.colaborador.nome.split(' ')[0];
+    this.executar(chave, this.api.cancelarAprovada(ferias.id, motivo),
+      `Férias de ${nome} canceladas. Os dias voltaram para o saldo e ${nome} foi avisado(a).`);
+  }
+
+  /**
+   * Faltam 3 dias ou menos para o início? O pagamento das férias sai até 2 dias antes (CLT-08),
+   * então ele pode já ter sido feito: a tela avisa antes de cancelar.
+   */
+  protected pagamentoPodeTerSaido(inicio: string): boolean {
+    const [ano, mes, dia] = inicio.split('-').map(Number);
+    const hoje = new Date();
+    const faltam = Math.round(
+      (new Date(ano, mes - 1, dia).getTime() - new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()).getTime()) /
+        86_400_000,
+    );
+    return faltam <= 3;
+  }
+
   /** Toda decisão segue o mesmo roteiro: marca ocupado, chama a API, recarrega ou mostra o erro. */
   private executar(chave: string, acao: Observable<unknown>, sucesso: string): void {
     this.ocupado.set(chave);
@@ -174,6 +217,8 @@ export class Aprovacoes {
         this.ocupado.set(null);
         this.recusandoNoRh.set(null);
         this.motivoDoRh.set('');
+        this.cancelando.set(null);
+        this.motivoDoCancelamento.set('');
         this.feito.set(sucesso);
         this.carregar();
       },

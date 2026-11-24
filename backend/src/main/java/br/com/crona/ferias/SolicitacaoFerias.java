@@ -75,6 +75,17 @@ public class SolicitacaoFerias extends EntidadeBase {
     @Column(name = "mensagem_decisao", length = 500)
     private String mensagemDecisao;
 
+    /** Preenchidos só quando o RH cancela férias que já estavam aprovadas. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cancelado_por_id")
+    private Colaborador canceladoPor;
+
+    @Column(name = "cancelado_em")
+    private Instant canceladoEm;
+
+    @Column(name = "motivo_cancelamento", length = 500)
+    private String motivoCancelamento;
+
     protected SolicitacaoFerias() {
     }
 
@@ -138,14 +149,42 @@ public class SolicitacaoFerias extends EntidadeBase {
 
     /**
      * O colaborador desiste enquanto o pedido ainda está em análise.
-     * Depois de aprovado, cancelar é outro assunto (o pagamento pode já ter saído, CLT-08)
-     * e vai precisar de uma regra própria (EMP-07, em padroes-de-referencia.md).
+     * Depois de aprovado, só o RH cancela: ver {@link #cancelarAprovada}.
      */
     public void cancelar() {
         if (status != StatusSolicitacao.AGUARDANDO_GESTOR && status != StatusSolicitacao.AGUARDANDO_RH) {
             throw new RegraVioladaException("Só dá para cancelar um pedido que ainda está em análise. "
                     + "Este está " + status + ".");
         }
+        this.status = StatusSolicitacao.CANCELADA;
+    }
+
+    /**
+     * O RH cancela férias que JÁ estavam aprovadas (ex.: aprovadas por engano). Os dias voltam
+     * para o saldo, porque CANCELADA não consome saldo, e o aviso de férias deixa de valer.
+     *
+     * Regras (decididas pelo Igor, ver "Cancelamento de férias aprovadas" em regras-de-negocio.md):
+     * - só férias APROVADAS e que ainda não começaram: dá até a véspera do início;
+     * - ninguém cancela as próprias férias por aqui (o mesmo princípio da aprovação);
+     * - o motivo é obrigatório e fica registrado, junto com quem cancelou e quando.
+     * Quem pode (o RH) e a troca em aberto são conferidos no service.
+     */
+    public void cancelarAprovada(Colaborador rh, String motivo, LocalDate hoje, Instant agora) {
+        exigirStatus(StatusSolicitacao.APROVADA, "cancelado pelo RH");
+        if (!hoje.isBefore(dataInicio)) {
+            throw new RegraVioladaException("Estas férias começam em "
+                    + dataInicio.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                    + ". Só dá para cancelar até a véspera do início.");
+        }
+        if (rh.getId().equals(colaborador.getId())) {
+            throw new RegraVioladaException("Ninguém pode cancelar as próprias férias aprovadas.");
+        }
+        if (textoOuNulo(motivo) == null) {
+            throw new RegraVioladaException("Informe o motivo do cancelamento: o colaborador precisa saber por quê.");
+        }
+        this.canceladoPor = rh;
+        this.canceladoEm = agora;
+        this.motivoCancelamento = motivo.trim();
         this.status = StatusSolicitacao.CANCELADA;
     }
 
@@ -225,5 +264,17 @@ public class SolicitacaoFerias extends EntidadeBase {
 
     public String getMensagemDecisao() {
         return mensagemDecisao;
+    }
+
+    public Colaborador getCanceladoPor() {
+        return canceladoPor;
+    }
+
+    public Instant getCanceladoEm() {
+        return canceladoEm;
+    }
+
+    public String getMotivoCancelamento() {
+        return motivoCancelamento;
     }
 }

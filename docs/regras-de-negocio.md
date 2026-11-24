@@ -108,13 +108,25 @@ Regras da troca (decididas na Fase 6):
 | Uma por vez | As mesmas férias não podem estar em duas negociações em aberto ao mesmo tempo. |
 | Depois de aprovada | As férias trocadas continuam aprovadas, só mudam as datas (não passam de novo pelo RH, porque os dias não mudam). O pedido novo, de quem não tinha férias marcadas, segue a EMP-06 como qualquer pedido. |
 
+### Cancelamento de férias aprovadas
+
+Para corrigir um erro humano (ex.: férias aprovadas por engano). Antes de aprovar, quem desiste é o próprio colaborador, que cancela o pedido em análise. Depois de aprovado, vale a tabela abaixo.
+
+| Regra | Decisão |
+|---|---|
+| Quem cancela | **Só o RH** (perfil ADMIN), na aba "Aprovadas" da tela Aprovações. Ninguém cancela as próprias férias por aqui: as do RH precisam de outra pessoa do RH. |
+| Até quando | **Até a véspera do início.** Se faltarem 3 dias ou menos, a tela avisa que o pagamento pode já ter saído (CLT-08), mas não bloqueia. |
+| Motivo | **Obrigatório.** Fica registrado no pedido junto com quem cancelou e quando, e vai na notificação. |
+| Troca em aberto | **Bloqueia.** Se as férias estão numa negociação em aberto, é preciso encerrar a troca antes. |
+| Depois de cancelar | O pedido fica `CANCELADA` (o histórico não é apagado), os dias voltam para o saldo, o aviso de férias deixa de valer e o colaborador e o gestor são avisados. |
+
 ## 5. Perfis
 
 | Perfil | Pode |
 |---|---|
 | Colaborador | Ver painel e saldos, solicitar férias, negociar trocas, ver histórico e recibo |
 | Gestor | Tudo do colaborador, mais aprovar solicitações e negociações da **própria equipe** |
-| Administrador | Cadastrar colaboradores e departamentos, configurar regras, ver conflitos de toda a empresa |
+| Administrador | Cadastrar colaboradores e departamentos, configurar regras, ver conflitos de toda a empresa, cancelar férias aprovadas por engano |
 
 ## 6. Dúvidas em aberto
 
@@ -126,7 +138,7 @@ Para responder com quem conhece o processo na empresa antes da Fase 4:
 - [x] Para cada regra, ela é **impedimento** ou **ponto de atenção**? Decidido na Fase 4: ver a tabela na seção 3.
 - [x] O gestor pode aprovar uma solicitação que passa do limite do departamento? **Sim** (decidido no redesign): o pedido chega com ponto de atenção e o gestor pode "aprovar mesmo assim". Ver EMP-01.
 - [x] Faltas injustificadas (CLT-02) vão ser lançadas no Crona ou vêm de outro sistema? **O RH lança no Crona** (ver seção 3).
-- [ ] Criar a **EMP-07** (não permitir cancelar férias aprovadas a menos de N dias do início)? Proposta em [padroes-de-referencia.md](padroes-de-referencia.md#pad-05--bloqueio-por-prazo-e-confirmação-em-ação-sensível).
+- [x] Criar a **EMP-07** (não permitir cancelar férias aprovadas a menos de N dias do início)? **Não, por enquanto**: o RH pode cancelar até a véspera, e a tela só avisa quando faltam 3 dias ou menos. Ver "Cancelamento de férias aprovadas" na seção 4.
 - [ ] Feriados móveis e estaduais/municipais para a CLT-05: como cadastrar? Ver [PAD-11](padroes-de-referencia.md#pad-11--feriados-recorrentes-e-móveis).
 
 ## 7. O que corrigir em relação ao protótipo

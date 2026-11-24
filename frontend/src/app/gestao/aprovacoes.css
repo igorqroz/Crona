@@ -207,6 +207,14 @@ h1 {
   color: #B42318;
 }
 
+/* Aba "Aprovadas": por que estas férias não podem ser canceladas agora. */
+.bloqueio {
+  max-width: 260px;
+  margin-left: auto;
+  font-size: 13px;
+  text-align: right;
+}
+
 textarea {
   resize: vertical;
   padding: 10px 12px;

@@ -55,6 +55,23 @@ export interface Solicitacao {
   enviadoEm: string;
   decididoPor: Referencia | null;
   mensagemDecisao: string | null;
+  /** Só quando o RH cancelou férias que já estavam aprovadas. */
+  canceladoPor?: Referencia | null;
+  motivoCancelamento?: string | null;
+}
+
+/** Férias aprovadas que ainda não começaram: a aba "Aprovadas" do RH, onde dá para cancelar. */
+export interface FeriasAprovada {
+  id: number;
+  colaborador: Referencia;
+  departamento: string | null;
+  inicio: string;
+  fim: string;
+  diasGozo: number;
+  diasAbono: number;
+  aprovadoPor: Referencia | null;
+  /** Por que não dá para cancelar agora (são as férias de quem está logado, troca em aberto). Nulo = pode. */
+  bloqueio: string | null;
 }
 
 export type StatusNegociacao =

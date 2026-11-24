@@ -90,6 +90,16 @@ class Notificador {
 
             case RECUSADA -> avisar(colaborador, autor, SOLICITACAO_DECIDIDA, autor.getNome()
                     + " recusou suas férias de " + ferias + comMotivo(s.getMensagemDecisao()), "/inicio");
+
+            // O RH cancelou férias que já estavam aprovadas: avisa a pessoa (com o motivo) e o gestor dela.
+            case APROVADA_CANCELADA_PELO_RH -> {
+                avisar(colaborador, autor, SOLICITACAO_DECIDIDA, autor.getNome() + " cancelou suas férias de "
+                        + ferias + ", que estavam aprovadas" + comMotivo(s.getMotivoCancelamento())
+                        + " Os dias voltaram para o seu saldo.", "/inicio");
+                avisar(colaborador.getGestor(), autor, SOLICITACAO_CANCELADA, autor.getNome()
+                        + " cancelou as férias aprovadas de " + colaborador.getNome() + " (" + ferias + ")"
+                        + comMotivo(s.getMotivoCancelamento()), "/calendario-equipe");
+            }
         }
     }
 

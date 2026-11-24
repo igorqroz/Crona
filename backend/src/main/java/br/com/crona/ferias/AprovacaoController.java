@@ -1,7 +1,9 @@
 package br.com.crona.ferias;
 
 import br.com.crona.ferias.AprovacaoService.Filtro;
+import br.com.crona.ferias.aprovacao.CancelamentoRequisicao;
 import br.com.crona.ferias.aprovacao.DecisaoRequisicao;
+import br.com.crona.ferias.aprovacao.FeriasAprovada;
 import br.com.crona.ferias.aprovacao.ItemDeAprovacao;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,13 +28,19 @@ import java.util.List;
  *   GET  /confirmacoes-rh
  *   POST /confirmacoes-rh/{id}/confirmar
  *   POST /confirmacoes-rh/{id}/recusar   {"mensagem"}
+ *
+ * RH (SOLICITACAO_CANCELAR_APROVADA), para corrigir um erro humano:
+ *   GET  /ferias-aprovadas                               aprovadas que ainda não começaram
+ *   POST /ferias-aprovadas/{id}/cancelar   {"motivo"}    cancela (até a véspera), sempre com motivo
  */
 @RestController
 public class AprovacaoController {
 
     private final AprovacaoService service;
+    private final CancelamentoService cancelamento;
 
-    public AprovacaoController(AprovacaoService service) {
+    public AprovacaoController(AprovacaoService service, CancelamentoService cancelamento) {
+        this.cancelamento = cancelamento;
         this.service = service;
     }
 
@@ -83,5 +91,20 @@ public class AprovacaoController {
     @PostMapping("/confirmacoes-rh/{id}/recusar")
     public SolicitacaoResposta recusarNoRh(@PathVariable Long id, @Valid @RequestBody DecisaoRequisicao decisao) {
         return service.recusarNoRh(id, decisao);
+    }
+
+    // ------------------------------------------------------------------ cancelar férias aprovadas
+
+    @PreAuthorize("hasAuthority('SOLICITACAO_CANCELAR_APROVADA')")
+    @GetMapping("/ferias-aprovadas")
+    public List<FeriasAprovada> aprovadas() {
+        return cancelamento.aprovadasQueAindaVaoComecar();
+    }
+
+    @PreAuthorize("hasAuthority('SOLICITACAO_CANCELAR_APROVADA')")
+    @PostMapping("/ferias-aprovadas/{id}/cancelar")
+    public SolicitacaoResposta cancelarAprovada(@PathVariable Long id,
+                                                @Valid @RequestBody CancelamentoRequisicao requisicao) {
+        return cancelamento.cancelar(id, requisicao);
     }
 }
