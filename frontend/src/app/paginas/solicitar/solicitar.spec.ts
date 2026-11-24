@@ -308,6 +308,69 @@ describe('Solicitar', () => {
     expect(resumo('Volta ao trabalho')).toBe('22/03 · segunda');
   });
 
+  /*
+   * BUG-03 (registro em docs/plano-de-testes.md): uma simulação ainda sem resposta precisa ser
+   * descartada quando a seleção muda e NÃO gera outra simulação (recomeçou sem fim, ou passou
+   * de 30 dias). Antes da correção, a resposta antiga aparecia na tela: resumo, checklist
+   * "Tudo certo" e o botão Enviar habilitado, sem o último dia escolhido.
+   */
+  describe('BUG-03: simulação atrasada depois de mudar a seleção', () => {
+    function comSimulacaoPendente() {
+      const pendente = new Subject<Simulacao>();
+      api.simular.mockReturnValueOnce(pendente);
+      const tela = criar();
+      tela.clicarNoDia(15, 'março');
+      tela.clicarNoDia(29, 'março'); // a simulação sai e fica sem resposta
+      return { pendente, ...tela };
+    }
+
+    it('recomeçar a seleção descarta a resposta que chega depois', () => {
+      const { pendente, elemento, fixture, clicarNoDia, resumo, botaoEnviar } =
+        comSimulacaoPendente();
+
+      clicarNoDia(16, 'março'); // novo início, ainda sem fim
+      // Nada está sendo conferido agora: o "Conferindo as regras…" da seleção antiga some já.
+      expect(elemento.textContent).not.toContain('Conferindo as regras');
+
+      pendente.next(simulacao()); // a resposta antiga chega agora
+      fixture.detectChanges();
+
+      expect(elemento.textContent).not.toContain('Conferindo as regras');
+      expect(resumo('Último dia')).toBe('escolha no calendário');
+      expect(resumo('Volta ao trabalho')).toBeUndefined();
+      expect(resumo('Saldo depois')).toBeUndefined();
+      expect(elemento.querySelector('crona-checklist')).toBeNull();
+      expect(botaoEnviar().disabled).toBe(true);
+    });
+
+    it('um erro atrasado também é descartado: não aparece aviso depois de recomeçar', () => {
+      const { pendente, fixture, clicarNoDia, alerta } = comSimulacaoPendente();
+
+      clicarNoDia(16, 'março');
+      pendente.error(
+        new HttpErrorResponse({ status: 400, error: { detail: 'A data de início é inválida.' } }),
+      );
+      fixture.detectChanges();
+
+      expect(alerta()).toBeUndefined();
+    });
+
+    it('passar de 30 dias descarta a resposta que chega depois: fica só o aviso dos 30 dias', () => {
+      const { pendente, elemento, fixture, clicarNoDia, resumo, alerta, botaoEnviar } =
+        comSimulacaoPendente();
+
+      clicarNoDia(2, 'março'); // seleção completa: o clique recomeça a partir de 02/03
+      clicarNoDia(5, 'abril'); // 02/03 a 05/04 = 35 dias
+      pendente.next(simulacao());
+      fixture.detectChanges();
+
+      expect(alerta()).toBe('Um período de férias tem no máximo 30 dias. Você escolheu 35.');
+      expect(resumo('Volta ao trabalho')).toBeUndefined();
+      expect(elemento.querySelector('crona-checklist')).toBeNull();
+      expect(botaoEnviar().disabled).toBe(true);
+    });
+  });
+
   it('erro ao carregar o calendário: avisa na tela', () => {
     api.calendario.mockReturnValue(erroHttp(500));
     const { alerta } = criar();

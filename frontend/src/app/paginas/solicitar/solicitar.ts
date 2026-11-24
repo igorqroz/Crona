@@ -133,6 +133,11 @@ export class Solicitar {
   }
 
   private simular(): void {
+    // BUG-03: cada clique invalida a simulação que ainda está a caminho, ANTES de qualquer
+    // "return". Senão, ao recomeçar a seleção (ou passar de 30 dias), a resposta antiga
+    // chegava depois e mostrava o resumo e o botão Enviar de um pedido que não existe mais.
+    const numero = ++this.ultimaSimulacao;
+    this.simulando.set(false); // a pendente foi descartada: some o "Conferindo as regras…"
     this.simulacao.set(null);
     this.erro.set(null);
     this.verificacoesDoErro.set([]);
@@ -145,7 +150,6 @@ export class Solicitar {
       return;
     }
 
-    const numero = ++this.ultimaSimulacao;
     this.simulando.set(true);
     this.api.simular(pedido).subscribe({
       next: (simulacao) => {

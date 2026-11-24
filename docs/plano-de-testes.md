@@ -123,7 +123,7 @@ Teste e correção entram **no mesmo PR**. O QA cria a branch da correção (`co
 |---|---|---|---|---|
 | BUG-01 | A API aceitava o mesmo período de férias pedido várias vezes pela mesma pessoa, e o saldo era descontado de novo a cada vez | E2E | PR #24: regra CRONA-01 | `ValidadorDeFeriasTest`, `SolicitacaoApiTest`, `NegociacaoApiTest` |
 | BUG-02 | Em Aprovações, clicar de novo no mesmo pedido apagava a mensagem que o gestor estava escrevendo | E2E | PR #24 | `detalhe-pedido.spec.ts` |
-| BUG-03 | Em Solicitar, uma simulação que chegava depois de a pessoa recomeçar a seleção aparecia na tela, com o botão Enviar habilitado | Teste de componente (PR #26) | Pendente | Pendente (entra em `solicitar.spec.ts`) |
+| BUG-03 | Em Solicitar, uma simulação que chegava depois de a pessoa recomeçar a seleção aparecia na tela, com o botão Enviar habilitado | Teste de componente (PR #26) | PR #28: `simular()` invalida a simulação pendente antes de tudo | `solicitar.spec.ts` (bloco "BUG-03", 3 testes) |
 
 ### Como relatar um bug
 
