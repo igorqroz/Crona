@@ -205,6 +205,110 @@ class SolicitacaoFeriasTest {
         }
     }
 
+    /*
+     * O RH cancela férias que já estavam aprovadas (regras-de-negocio.md, seção 4,
+     * "Cancelamento de férias aprovadas"). As férias do pedido começam em 23/03/2026.
+     */
+    @Nested
+    @DisplayName("cancelamento de férias aprovadas pelo RH")
+    class CancelamentoPeloRh {
+
+        private static final LocalDate VESPERA = LocalDate.of(2026, 3, 22);
+        private static final LocalDate DIA_DO_INICIO = LocalDate.of(2026, 3, 23);
+
+        @Test
+        @DisplayName("na véspera do início: CANCELADA, e quem, quando e por quê ficam gravados (motivo sem espaços nas pontas)")
+        void cancelaNaVespera() {
+            pedido.aprovarPeloGestor(roberto, "Boa viagem", false, AGORA);
+
+            pedido.cancelarAprovada(rafael, "  Aprovado por engano: datas trocadas  ", VESPERA, AGORA);
+
+            assertThat(pedido.getStatus()).isEqualTo(StatusSolicitacao.CANCELADA);
+            assertThat(pedido.getCanceladoPor()).isSameAs(rafael);
+            assertThat(pedido.getCanceladoEm()).isEqualTo(AGORA);
+            assertThat(pedido.getMotivoCancelamento()).isEqualTo("Aprovado por engano: datas trocadas");
+            assertThat(pedido.getMensagemDecisao()).isEqualTo("Boa viagem"); // a aprovação continua no histórico
+        }
+
+        @Test
+        @DisplayName("no dia do início já não dá: as férias começaram")
+        void noDiaDoInicio() {
+            pedido.aprovarPeloGestor(roberto, null, false, AGORA);
+
+            assertThatThrownBy(() -> pedido.cancelarAprovada(rafael, "Engano", DIA_DO_INICIO, AGORA))
+                    .isInstanceOf(RegraVioladaException.class)
+                    .hasMessageContaining("23/03/2026")
+                    .hasMessageContaining("véspera");
+            assertThat(pedido.getStatus()).isEqualTo(StatusSolicitacao.APROVADA);
+        }
+
+        @Test
+        @DisplayName("depois do início também não")
+        void depoisDoInicio() {
+            pedido.aprovarPeloGestor(roberto, null, false, AGORA);
+
+            assertThatThrownBy(() -> pedido.cancelarAprovada(rafael, "Engano", DIA_DO_INICIO.plusDays(3), AGORA))
+                    .isInstanceOf(RegraVioladaException.class);
+        }
+
+        @Test
+        @DisplayName("ninguém cancela as próprias férias aprovadas")
+        void propriasFerias() {
+            var feriasDoRafael = new SolicitacaoFerias(rafael, mock(PeriodoAquisitivo.class),
+                    LocalDate.of(2026, 3, 23), LocalDate.of(2026, 4, 6), 15, 0, null);
+            feriasDoRafael.aprovarPeloGestor(roberto, null, false, AGORA);
+
+            assertThatThrownBy(() -> feriasDoRafael.cancelarAprovada(rafael, "Engano", VESPERA, AGORA))
+                    .isInstanceOf(RegraVioladaException.class)
+                    .hasMessageContaining("próprias");
+        }
+
+        @Test
+        @DisplayName("sem motivo não pode (nulo, vazio ou só espaços): o colaborador precisa saber por quê")
+        void semMotivo() {
+            pedido.aprovarPeloGestor(roberto, null, false, AGORA);
+
+            for (String motivo : new String[] {null, "", "   "}) {
+                assertThatThrownBy(() -> pedido.cancelarAprovada(rafael, motivo, VESPERA, AGORA))
+                        .as("motivo [%s]", motivo)
+                        .isInstanceOf(RegraVioladaException.class)
+                        .hasMessageContaining("motivo");
+            }
+            assertThat(pedido.getStatus()).isEqualTo(StatusSolicitacao.APROVADA);
+        }
+
+        @Test
+        @DisplayName("só férias APROVADAS: em análise, recusadas ou já canceladas não")
+        void soAprovadas() {
+            // esperando o gestor
+            assertThatThrownBy(() -> pedido.cancelarAprovada(rafael, "Engano", VESPERA, AGORA))
+                    .isInstanceOf(RegraVioladaException.class);
+
+            // esperando o RH (EMP-06)
+            pedido.aprovarPeloGestor(roberto, null, true, AGORA);
+            assertThatThrownBy(() -> pedido.cancelarAprovada(rafael, "Engano", VESPERA, AGORA))
+                    .isInstanceOf(RegraVioladaException.class);
+
+            // recusada
+            var recusado = new SolicitacaoFerias(ana, mock(PeriodoAquisitivo.class),
+                    LocalDate.of(2026, 3, 23), LocalDate.of(2026, 4, 6), 15, 0, null);
+            recusado.recusar(roberto, "Equipe no limite", AGORA);
+            assertThatThrownBy(() -> recusado.cancelarAprovada(rafael, "Engano", VESPERA, AGORA))
+                    .isInstanceOf(RegraVioladaException.class);
+        }
+
+        @Test
+        @DisplayName("cancelar duas vezes não pode: o primeiro cancelamento fica valendo")
+        void duasVezes() {
+            pedido.aprovarPeloGestor(roberto, null, false, AGORA);
+            pedido.cancelarAprovada(rafael, "Primeiro motivo", VESPERA, AGORA);
+
+            assertThatThrownBy(() -> pedido.cancelarAprovada(rafael, "Segundo motivo", VESPERA, AGORA))
+                    .isInstanceOf(RegraVioladaException.class);
+            assertThat(pedido.getMotivoCancelamento()).isEqualTo("Primeiro motivo");
+        }
+    }
+
     private static Colaborador pessoa(Long id, String nome, Perfil perfil) {
         var c = new Colaborador(mock(Empresa.class), nome, id + "@x.com", "hash", perfil, null, LocalDate.of(2020, 1, 1));
         ReflectionTestUtils.setField(c, "id", id);

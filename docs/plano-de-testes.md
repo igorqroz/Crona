@@ -2,7 +2,7 @@
 
 Este documento diz **o que** é testado no Crona, **onde** (em qual camada e com qual ferramenta), **o que fica de fora** e **quais regras** valem para todo PR. Ele é o mapa da qualidade do projeto: quem chega ao repositório lê aqui como os testes estão organizados antes de abrir o código.
 
-Situação em 22/11/2026: **236 testes no back-end, 106 no front-end e 10 E2E**, todos rodando no CI a cada Pull Request.
+Situação em 24/11/2026: **257 testes no back-end, 118 no front-end e 11 E2E**, todos rodando no CI a cada Pull Request.
 
 ## 1. Objetivo
 
@@ -21,11 +21,11 @@ Quando algo quebra, o objetivo é descobrir **no PR**, antes do merge, e não em
 Quanto mais baixo na pirâmide, mais rápido e barato é o teste. Por isso há muitos testes embaixo e poucos em cima. Cada camada testa o que só ela consegue testar bem.
 
 ```
-              /\        E2E (Playwright)             10    o sistema inteiro, no navegador
-             /  \       Componente (Vitest)          52    uma tela, com a API falsa
-            /    \      Integração da API (JUnit)    ~95   HTTP + banco de verdade
-           /      \     Unidade (JUnit e Vitest)     ~195  regras puras, em milissegundos
-          ----------                                       (~140 no back + 54 no front)
+              /\        E2E (Playwright)             11    o sistema inteiro, no navegador
+             /  \       Componente (Vitest)          64    uma tela, com a API falsa
+            /    \      Integração da API (JUnit)    ~110  HTTP + banco de verdade
+           /      \     Unidade (JUnit e Vitest)     ~200  regras puras, em milissegundos
+          ----------                                       (~147 no back + 54 no front)
 ```
 
 | Camada | Ferramenta | Onde fica | O que testa | Exemplo |
@@ -58,6 +58,7 @@ Mais detalhes no [README](../README.md#cobertura-dos-testes) e no [README do E2E
 | Pedir férias | ✅ | ✅ | ✅ (Solicitar) | ✅ |
 | Aprovar, recusar e aprovar em lote | ✅ | ✅ | ✅ (Aprovações) | ✅ (aprovar) |
 | Confirmação do RH (EMP-06) | ✅ | ✅ | ✅ (Aprovações) | — |
+| Cancelamento de férias aprovadas (RH) | ✅ | ✅ | ✅ (Aprovações) | ✅ |
 | Troca de férias entre colegas | ✅ | ✅ | ⚠️ só as regras | — |
 | Aviso de férias em PDF | ✅ | ✅ | ✅ (Início) | — |
 | Notificações (sino) | — | ✅ | ✅ | — |
@@ -151,4 +152,7 @@ Antes de corrigir, descreva o bug assim:
 - Testes de componente das telas que faltam: **Trocas**, **calendário da gestão** e o **menu (Casca)**.
 - Testes dos **guards** (`logadoGuard`, `perfilGuard`) e do **interceptor** que coloca o token.
 - Mais cenários E2E: **recusar pedido**, **troca de férias** e **RH confirmando**.
+- **E2E repetível sem recriar o banco.** O `ferias.spec.ts` aprova 15 dias da Ana a cada execução, e o saldo dela acaba depois de 2 ou 3 execuções. Com o cancelamento pelo RH, o teste pode devolver os dias no fim.
+- **Testes de API menos dependentes do banco.** O `NotificacaoApiTest` conta as notificações do Roberto e quebra se o banco local tiver sobras de um teste manual. Ele pode contar só as que o próprio teste criou.
+- **Concorrência no cancelamento.** Dois RHs cancelando as mesmas férias ao mesmo tempo podem gerar notificação em dobro, porque não há trava no pedido. É um risco de baixa probabilidade, ainda não confirmado por teste.
 - **Acessibilidade** com axe, junto com os testes do Playwright.
