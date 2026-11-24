@@ -18,6 +18,7 @@
   <button type="button" [class.ativa]="aba() === 'trocas'" (click)="mudarAba('trocas')">Trocas · {{ trocas().length }}</button>
   @if (ehRh) {
     <button type="button" [class.ativa]="aba() === 'rh'" (click)="mudarAba('rh')">Confirmação do RH · {{ filaDoRh().length }}</button>
+    <button type="button" [class.ativa]="aba() === 'aprovadas'" (click)="mudarAba('aprovadas')">Aprovadas · {{ aprovadas().length }}</button>
   }
 </nav>
 
@@ -130,6 +131,64 @@
             </div>
           } @empty {
             <div class="cartao"><p class="texto-suave vazio">Nada esperando o RH.</p></div>
+          }
+        </div>
+      }
+
+      <!-- ============================================================ aprovadas (RH cancela) -->
+      @case ('aprovadas') {
+        <div class="coluna">
+          <p class="texto-suave">
+            Férias aprovadas que ainda não começaram. Se alguma foi aprovada por engano, cancele aqui (até a véspera do
+            início): os dias voltam para o saldo e a pessoa e o gestor são avisados.
+          </p>
+          @for (f of aprovadas(); track f.id) {
+            <div class="cartao rh">
+              <div class="rh-linha">
+                <crona-avatar [nome]="f.colaborador.nome" [tamanho]="38" />
+                <span class="item-texto">
+                  <strong>{{ f.colaborador.nome }}</strong>
+                  <span class="texto-suave">{{ f.departamento }} · {{ intervalo(f.inicio, f.fim) }} · {{ f.diasGozo }} dias{{ f.diasAbono ? ' + ' + f.diasAbono + ' de abono' : '' }}</span>
+                  @if (f.aprovadoPor) {
+                    <span class="texto-suave">Aprovadas por {{ f.aprovadoPor.nome }}</span>
+                  }
+                </span>
+                @if (f.bloqueio) {
+                  <span class="texto-suave bloqueio">{{ f.bloqueio }}</span>
+                } @else if (cancelando() !== f.id) {
+                  <button class="botao botao-texto recusar" type="button" (click)="cancelando.set(f.id); motivoDoCancelamento.set('')">
+                    Cancelar férias
+                  </button>
+                }
+              </div>
+              @if (cancelando() === f.id) {
+                @if (pagamentoPodeTerSaido(f.inicio)) {
+                  <div class="aviso" role="note">
+                    Faltam 3 dias ou menos para o início: o pagamento das férias pode já ter saído (sai até 2 dias antes).
+                    Combine com o financeiro antes de cancelar.
+                  </div>
+                }
+                <textarea
+                  aria-label="Motivo do cancelamento"
+                  rows="2"
+                  maxlength="500"
+                  placeholder="Motivo do cancelamento (a pessoa vai ver)"
+                  [value]="motivoDoCancelamento()"
+                  (input)="motivoDoCancelamento.set(valor($event))"
+                ></textarea>
+                <div class="rh-acoes">
+                  <button class="botao botao-secundario" type="button" (click)="cancelando.set(null)">Voltar</button>
+                  <button class="botao botao-perigo" type="button" [disabled]="ocupado() === 'aprovada-' + f.id" (click)="cancelarAprovada(f)">
+                    Cancelar as férias de {{ f.colaborador.nome.split(' ')[0] }}
+                  </button>
+                </div>
+              }
+              @if (erroDe('aprovada-' + f.id); as e) {
+                <div class="aviso" role="alert">{{ e.mensagem }}</div>
+              }
+            </div>
+          } @empty {
+            <div class="cartao"><p class="texto-suave vazio">Nenhuma férias aprovada para os próximos dias.</p></div>
           }
         </div>
       }

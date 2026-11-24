@@ -3,7 +3,13 @@ import { TestBed } from '@angular/core/testing';
 import { Observable, of, throwError } from 'rxjs';
 
 import { Pendencias } from '../ferias/pendencias';
-import { DetalheDaAprovacao, ItemDeAprovacao, Perfil, SituacaoDoPedido } from '../nucleo/modelos';
+import {
+  DetalheDaAprovacao,
+  FeriasAprovada,
+  ItemDeAprovacao,
+  Perfil,
+  SituacaoDoPedido,
+} from '../nucleo/modelos';
 import { Sessao } from '../nucleo/sessao';
 import { AprovacoesApi } from './aprovacoes-api';
 import { Aprovacoes } from './aprovacoes';
@@ -73,7 +79,9 @@ describe('Aprovacoes', () => {
     | 'recusar'
     | 'aprovarSemConflito'
     | 'confirmarNoRh'
-    | 'recusarNoRh',
+    | 'recusarNoRh'
+    | 'aprovadas'
+    | 'cancelarAprovada',
     ReturnType<typeof vi.fn>
   >;
   const pendencias = { atualizar: vi.fn() };
@@ -91,6 +99,8 @@ describe('Aprovacoes', () => {
       aprovarSemConflito: vi.fn(() => of([{}, {}])),
       confirmarNoRh: vi.fn(() => of({})),
       recusarNoRh: vi.fn(() => of({})),
+      aprovadas: vi.fn(() => of([])),
+      cancelarAprovada: vi.fn(() => of({})),
     };
   });
 
@@ -321,6 +331,171 @@ describe('Aprovacoes', () => {
 
       expect(api.recusarNoRh).toHaveBeenCalledWith(3, 'Período de fechamento contábil.');
       expect(mensagemDeSucesso()).toBe('Pedido recusado pelo RH.');
+    });
+  });
+
+  /*
+   * O RH cancela férias já aprovadas (regras-de-negocio.md, seção 4). "Hoje" fica fixo em
+   * 01/03/2027: a Ana sai em 04/03 (faltam 3 dias: a tela avisa do pagamento) e o Bruno em
+   * 05/03 (faltam 4: sem aviso).
+   */
+  describe('férias aprovadas (o RH cancela)', () => {
+    function aprovada(
+      id: number,
+      nome: string,
+      inicio: string,
+      extra: Partial<FeriasAprovada> = {},
+    ): FeriasAprovada {
+      return {
+        id,
+        colaborador: { id: 10 + id, nome },
+        departamento: 'Engenharia',
+        inicio,
+        fim: '2027-03-18',
+        diasGozo: 15,
+        diasAbono: 0,
+        aprovadoPor: { id: 2, nome: 'Roberto Neves' },
+        bloqueio: null,
+        ...extra,
+      };
+    }
+
+    const anaPerto = aprovada(20, 'Ana Lima', '2027-03-04');
+    const brunoLonge = aprovada(21, 'Bruno Teles', '2027-03-05', { diasAbono: 5 });
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(new Date(2027, 2, 1, 10, 0)); // 01/03/2027
+      api.aprovadas.mockReturnValue(of([anaPerto, brunoLonge]));
+    });
+
+    afterEach(() => vi.useRealTimers());
+
+    /** Abre a aba Aprovadas como ADMIN e devolve o cartão de cada pessoa. */
+    function abrirAprovadas() {
+      const tela = criar('ADMIN');
+      tela.clicar('Aprovadas');
+      const cartaoDe = (nome: string) =>
+        [...tela.elemento.querySelectorAll('.cartao.rh')].find((c) =>
+          c.textContent?.includes(nome),
+        )!;
+      const escreverMotivo = (cartao: Element, texto: string) => {
+        const caixa = cartao.querySelector<HTMLTextAreaElement>('textarea')!;
+        caixa.value = texto;
+        caixa.dispatchEvent(new Event('input'));
+        tela.fixture.detectChanges();
+      };
+      return { ...tela, cartaoDe, escreverMotivo };
+    }
+
+    it('o GESTOR não vê a aba nem busca a lista', () => {
+      const { botao } = criar('GESTOR');
+
+      expect(botao('Aprovadas')).toBeUndefined();
+      expect(api.aprovadas).not.toHaveBeenCalled();
+    });
+
+    it('o ADMIN vê a aba com a contagem, quem sai, as datas e quem aprovou', () => {
+      const { botao, cartaoDe } = abrirAprovadas();
+
+      expect(botao('Aprovadas').textContent).toContain('Aprovadas · 2');
+      expect(cartaoDe('Ana Lima').textContent).toContain('04/03 – 18/03 · 15 dias');
+      expect(cartaoDe('Ana Lima').textContent).toContain('Aprovadas por Roberto Neves');
+      expect(cartaoDe('Bruno Teles').textContent).toContain('15 dias + 5 de abono');
+    });
+
+    it('cancelar sem motivo: pede o motivo e não chama a API', () => {
+      const { clicar, cartaoDe } = abrirAprovadas();
+      const cartao = cartaoDe('Bruno Teles');
+
+      clicar('Cancelar férias', cartao);
+      clicar('Cancelar as férias de Bruno', cartao);
+
+      expect(cartao.querySelector('[role="alert"]')?.textContent).toContain(
+        'Escreva o motivo do cancelamento.',
+      );
+      expect(api.cancelarAprovada).not.toHaveBeenCalled();
+    });
+
+    it('cancelar com motivo: manda o motivo sem espaços, mostra o sucesso e recarrega a lista', () => {
+      const { clicar, cartaoDe, escreverMotivo, mensagemDeSucesso } = abrirAprovadas();
+      const cartao = cartaoDe('Bruno Teles');
+
+      clicar('Cancelar férias', cartao);
+      escreverMotivo(cartao, '  Aprovado por engano: datas trocadas  ');
+      clicar('Cancelar as férias de Bruno', cartao);
+
+      expect(api.cancelarAprovada).toHaveBeenCalledWith(21, 'Aprovado por engano: datas trocadas');
+      expect(mensagemDeSucesso()).toBe(
+        'Férias de Bruno canceladas. Os dias voltaram para o saldo e Bruno foi avisado(a).',
+      );
+      expect(api.aprovadas).toHaveBeenCalledTimes(2);
+    });
+
+    it('faltando 3 dias, avisa que o pagamento pode já ter saído; faltando 4, não avisa', () => {
+      const { clicar, cartaoDe } = abrirAprovadas();
+
+      clicar('Cancelar férias', cartaoDe('Ana Lima'));
+      clicar('Cancelar férias', cartaoDe('Bruno Teles')); // fecha o da Ana e abre o do Bruno
+      expect(cartaoDe('Bruno Teles').querySelector('[role="note"]')).toBeNull();
+
+      clicar('Cancelar férias', cartaoDe('Ana Lima'));
+      expect(cartaoDe('Ana Lima').querySelector('[role="note"]')?.textContent).toContain(
+        'o pagamento das férias pode já ter saído',
+      );
+    });
+
+    it('com bloqueio: mostra o motivo e não oferece o botão de cancelar', () => {
+      api.aprovadas.mockReturnValue(
+        of([
+          aprovada(22, 'Carla Souza', '2027-04-05', {
+            bloqueio: 'Estas férias estão numa troca em aberto.',
+          }),
+        ]),
+      );
+      const { botao, cartaoDe } = abrirAprovadas();
+
+      expect(cartaoDe('Carla Souza').textContent).toContain(
+        'Estas férias estão numa troca em aberto.',
+      );
+      expect(botao('Cancelar férias', cartaoDe('Carla Souza'))).toBeUndefined();
+    });
+
+    it('a API recusa (409, troca aberta depois que a lista carregou): mostra o motivo no cartão', () => {
+      api.cancelarAprovada.mockReturnValue(
+        erroHttp(409, {
+          detail: 'Estas férias estão numa troca em aberto. Encerre a troca antes de cancelar.',
+        }),
+      );
+      const { clicar, cartaoDe, escreverMotivo, mensagemDeSucesso } = abrirAprovadas();
+      const cartao = cartaoDe('Bruno Teles');
+
+      clicar('Cancelar férias', cartao);
+      escreverMotivo(cartao, 'Engano');
+      clicar('Cancelar as férias de Bruno', cartao);
+
+      expect(cartao.querySelector('[role="alert"]')?.textContent).toContain(
+        'Encerre a troca antes de cancelar.',
+      );
+      expect(mensagemDeSucesso()).toBeUndefined();
+    });
+
+    it('"Voltar" fecha o campo do motivo sem chamar a API', () => {
+      const { clicar, cartaoDe } = abrirAprovadas();
+      const cartao = cartaoDe('Bruno Teles');
+
+      clicar('Cancelar férias', cartao);
+      clicar('Voltar', cartao);
+
+      expect(cartao.querySelector('textarea')).toBeNull();
+      expect(api.cancelarAprovada).not.toHaveBeenCalled();
+    });
+
+    it('nenhuma férias aprovada: mostra a frase de lista vazia', () => {
+      api.aprovadas.mockReturnValue(of([]));
+      const { elemento } = abrirAprovadas();
+
+      expect(elemento.textContent).toContain('aprovada para os próximos dias');
     });
   });
 });

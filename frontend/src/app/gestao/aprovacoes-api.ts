@@ -5,6 +5,7 @@ import {
   CalendarioDaGestao,
   Decisao,
   DetalheDaAprovacao,
+  FeriasAprovada,
   ItemDeAprovacao,
   Negociacao,
   Solicitacao,
@@ -12,7 +13,7 @@ import {
 } from '../nucleo/modelos';
 
 /**
- * As chamadas do GESTOR e do RH (/aprovacoes e /confirmacoes-rh).
+ * As chamadas do GESTOR e do RH (/aprovacoes, /confirmacoes-rh e /ferias-aprovadas).
  * Quem pode chamar quem é decidido na API (@PreAuthorize): aqui é só HTTP.
  */
 @Injectable({ providedIn: 'root' })
@@ -74,5 +75,16 @@ export class AprovacoesApi {
 
   recusarNoRh(id: number, mensagem: string) {
     return this.http.post<Solicitacao>(`/api/confirmacoes-rh/${id}/recusar`, { mensagem });
+  }
+
+  // ------------------------------------------------------------------ RH: cancelar férias aprovadas
+
+  /** As férias aprovadas que ainda não começaram (as únicas que dá para cancelar). */
+  aprovadas() {
+    return this.http.get<FeriasAprovada[]>('/api/ferias-aprovadas');
+  }
+
+  cancelarAprovada(id: number, motivo: string) {
+    return this.http.post<Solicitacao>(`/api/ferias-aprovadas/${id}/cancelar`, { motivo });
   }
 }

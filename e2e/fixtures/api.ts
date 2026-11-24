@@ -37,9 +37,14 @@ export async function proximasFeriasValidas(
   request: APIRequestContext,
   conta: Conta,
   diasGozo: number,
+  /**
+   * De quantos dias para frente começar a procurar. Testes que rodam em paralelo com a mesma
+   * pessoa usam pontos de partida diferentes, para não escolherem as mesmas datas (CRONA-01).
+   */
+  aPartirDe = 35,
 ): Promise<Datas> {
   const token = await tokenDe(request, conta);
-  let inicio = proximaSegunda(adicionarDias(hoje(), 35));
+  let inicio = proximaSegunda(adicionarDias(hoje(), aPartirDe));
 
   for (let tentativa = 0; tentativa < 30; tentativa++) {
     const resposta = await request.post('/api/minhas-ferias/simulacao', {
@@ -52,6 +57,35 @@ export async function proximasFeriasValidas(
     inicio = adicionarDias(inicio, 7);
   }
   throw new Error(`A API não aceitou nenhuma data para ${conta.nome} nas próximas 30 semanas.`);
+}
+
+/**
+ * Prepara férias APROVADAS pela API: a pessoa pede e o gestor aprova, sem passar pelas telas.
+ * Serve para testes que começam DEPOIS da aprovação (ex.: o RH cancelando).
+ */
+export async function feriasAprovadasPelaApi(
+  request: APIRequestContext,
+  colaborador: Conta,
+  gestor: Conta,
+  diasGozo: number,
+  aPartirDe: number,
+): Promise<Datas & { id: number }> {
+  const datas = await proximasFeriasValidas(request, colaborador, diasGozo, aPartirDe);
+
+  const pedido = await request.post('/api/minhas-ferias/solicitacoes', {
+    headers: { Authorization: `Bearer ${await tokenDe(request, colaborador)}` },
+    data: { inicio: datas.inicio, diasGozo, diasAbono: 0 },
+  });
+  expect(pedido.status(), `pedido de ${colaborador.nome} pela API`).toBe(201);
+  const { id } = await pedido.json();
+
+  const aprovacao = await request.post(`/api/aprovacoes/${id}/aprovar`, {
+    headers: { Authorization: `Bearer ${await tokenDe(request, gestor)}` },
+    // A mensagem cobre o caso "aprovar mesmo assim" (pedido com ponto de atenção).
+    data: { mesmoAssim: true, mensagem: 'Aprovado pelo teste E2E (preparação).' },
+  });
+  expect(aprovacao.ok(), `aprovação de ${gestor.nome} pela API`).toBeTruthy();
+  return { id, ...datas };
 }
 
 // ------------------------------------------------------------------ datas

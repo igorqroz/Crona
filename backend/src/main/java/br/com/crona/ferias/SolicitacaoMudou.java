@@ -10,5 +10,5 @@ package br.com.crona.ferias;
  */
 public record SolicitacaoMudou(Long solicitacaoId, Acao acao, Long autorId) {
 
-    public enum Acao { ENVIADA, CANCELADA, APROVADA_PELO_GESTOR, CONFIRMADA_PELO_RH, RECUSADA }
+    public enum Acao { ENVIADA, CANCELADA, APROVADA_PELO_GESTOR, CONFIRMADA_PELO_RH, RECUSADA, APROVADA_CANCELADA_PELO_RH }
 }
