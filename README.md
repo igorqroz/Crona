@@ -148,9 +148,9 @@ O mapa completo dos testes (o que cada camada cobre, o que fica de fora e a regr
 | Onde | Ferramenta | Comando | Mínimo exigido (a "catraca") |
 |---|---|---|---|
 | Back-end | [JaCoCo](https://www.jacoco.org/jacoco/) | `./mvnw verify` | 90% das linhas e 80% dos desvios (`if/else`) |
-| Front-end | Vitest (v8) | `npm run test:cobertura` | 60% das linhas e 65% dos desvios |
+| Front-end | Vitest (v8) | `npm run test:cobertura` | 80% das linhas e 78% dos desvios |
 
-Abaixo do mínimo, o CI fica vermelho: assim código novo sem teste não entra sem ninguém ver. Os mínimos ficam um pouco abaixo do que temos hoje e sobem conforme os testes aumentam. No front, as regras (`*.regras.ts`) estão 100% testadas, e as páginas Início, Solicitar e Aprovações têm testes de componente. Ainda faltam Trocas, o calendário da gestão e o menu (Casca): por enquanto, eles são cobertos só pelos testes E2E, que não entram nesta conta.
+Abaixo do mínimo, o CI fica vermelho: assim código novo sem teste não entra sem ninguém ver. Os mínimos ficam um pouco abaixo do que temos hoje e sobem conforme os testes aumentam. No front, as regras (`*.regras.ts`) estão 100% testadas, e todas as telas têm testes de componente. Os testes E2E não entram nesta conta.
 
 A cada execução do CI, a cobertura aparece no resumo da página da execução, e o relatório completo (com cada linha pintada de verde ou vermelho) fica nos artefatos `cobertura-backend` e `cobertura-frontend`.
 

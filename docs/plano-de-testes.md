@@ -2,7 +2,7 @@
 
 Este documento diz **o que** é testado no Crona, **onde** (em qual camada e com qual ferramenta), **o que fica de fora** e **quais regras** valem para todo PR. Ele é o mapa da qualidade do projeto: quem chega ao repositório lê aqui como os testes estão organizados antes de abrir o código.
 
-Situação em 24/11/2026: **257 testes no back-end, 118 no front-end e 11 E2E**, todos rodando no CI a cada Pull Request.
+Situação em 24/11/2026: **257 testes no back-end, 168 no front-end e 11 E2E**, todos rodando no CI a cada Pull Request.
 
 ## 1. Objetivo
 
@@ -22,7 +22,7 @@ Quanto mais baixo na pirâmide, mais rápido e barato é o teste. Por isso há m
 
 ```
               /\        E2E (Playwright)             11    o sistema inteiro, no navegador
-             /  \       Componente (Vitest)          64    uma tela, com a API falsa
+             /  \       Componente (Vitest)          114   uma tela, com a API falsa
             /    \      Integração da API (JUnit)    ~110  HTTP + banco de verdade
            /      \     Unidade (JUnit e Vitest)     ~200  regras puras, em milissegundos
           ----------                                       (~147 no back + 54 no front)
@@ -52,17 +52,17 @@ Mais detalhes no [README](../README.md#cobertura-dos-testes) e no [README do E2E
 | Funcionalidade | Unidade | API | Componente | E2E |
 |---|---|---|---|---|
 | Login, sessão e saída | ✅ | ✅ | ✅ (tela de login) | ✅ |
-| Permissões por perfil (colaborador, gestor, RH) | ✅ | ✅ | — | ✅ |
+| Permissões por perfil (colaborador, gestor, RH) | ✅ | ✅ | ✅ (menu) | ✅ |
 | Saldo e períodos aquisitivos | ✅ | ✅ | ✅ (Início) | — |
 | Regras CLT, da empresa e do Crona (simulação) | ✅ | ✅ | ✅ (Solicitar) | — |
 | Pedir férias | ✅ | ✅ | ✅ (Solicitar) | ✅ |
 | Aprovar, recusar e aprovar em lote | ✅ | ✅ | ✅ (Aprovações) | ✅ (aprovar) |
 | Confirmação do RH (EMP-06) | ✅ | ✅ | ✅ (Aprovações) | — |
 | Cancelamento de férias aprovadas (RH) | ✅ | ✅ | ✅ (Aprovações) | ✅ |
-| Troca de férias entre colegas | ✅ | ✅ | ⚠️ só as regras | — |
+| Troca de férias entre colegas | ✅ | ✅ | ✅ (Trocas e Aprovações) | — |
 | Aviso de férias em PDF | ✅ | ✅ | ✅ (Início) | — |
 | Notificações (sino) | — | ✅ | ✅ | — |
-| Calendário da equipe (gestão) | ✅ | ✅ | ⚠️ só as regras | — |
+| Calendário da equipe (gestão) | ✅ | ✅ | ✅ | — |
 
 ✅ coberto · ⚠️ parcial · — não coberto nesta camada
 
@@ -89,7 +89,7 @@ Fora do escopo é uma **decisão registrada**, não um esquecimento:
 ## 6. Regras para todo Pull Request
 
 1. **CI verde para fazer merge.** Os 3 jobs (back, front, Docker + fumaça + E2E) precisam passar.
-2. **Cobertura mínima (a "catraca").** Back: 90% das linhas e 80% dos desvios. Front: 60% das linhas e 65% dos desvios. Abaixo disso, o CI fica vermelho. Os mínimos só sobem.
+2. **Cobertura mínima (a "catraca").** Back: 90% das linhas e 80% dos desvios. Front: 80% das linhas e 78% dos desvios. Abaixo disso, o CI fica vermelho. Os mínimos só sobem.
 3. **Código novo vem com teste**, na camada mais barata que consegue testá-lo.
 4. **Todo bug corrigido vem com um teste de regressão** (seção 7).
 
@@ -125,6 +125,8 @@ Teste e correção entram **no mesmo PR**. O QA cria a branch da correção (`co
 | BUG-01 | A API aceitava o mesmo período de férias pedido várias vezes pela mesma pessoa, e o saldo era descontado de novo a cada vez | E2E | PR #24: regra CRONA-01 | `ValidadorDeFeriasTest`, `SolicitacaoApiTest`, `NegociacaoApiTest` |
 | BUG-02 | Em Aprovações, clicar de novo no mesmo pedido apagava a mensagem que o gestor estava escrevendo | E2E | PR #24 | `detalhe-pedido.spec.ts` |
 | BUG-03 | Em Solicitar, uma simulação que chegava depois de a pessoa recomeçar a seleção aparecia na tela, com o botão Enviar habilitado | Teste de componente (PR #26) | PR #28: `simular()` invalida a simulação pendente antes de tudo | `solicitar.spec.ts` (bloco "BUG-03", 3 testes) |
+| BUG-04 | Quando a lista recarrega (depois de uma ação em OUTRO cartão), o cartão de troca apaga o que estava sendo digitado. Acontece em Aprovações, na mensagem do gestor, e em Trocas, onde a contraproposta aberta fecha. É a mesma causa do BUG-02: o cartão reage a qualquer objeto novo, e não à mudança de troca | Teste de componente (PR das telas restantes) | Pendente | Pendente |
+| BUG-05 | As férias do RH ficam presas. O pedido do Rafael (ADMIN, sem gestor, único ADMIN) aparece só na fila dele, mas ele não pode aprovar o próprio pedido (422), e o gestor da equipe não o vê. Ninguém consegue aprovar | Teste manual do Igor, confirmado por teste de API | Pendente. Decisão do Igor: aprova o gestor cadastrado da pessoa (sem gestor, outro ADMIN); o próprio pedido sai das filas de Aprovações e de confirmação do RH | Pendente |
 
 ### Como relatar um bug
 
@@ -149,7 +151,6 @@ Antes de corrigir, descreva o bug assim:
 
 ## 9. Próximos passos
 
-- Testes de componente das telas que faltam: **Trocas**, **calendário da gestão** e o **menu (Casca)**.
 - Testes dos **guards** (`logadoGuard`, `perfilGuard`) e do **interceptor** que coloca o token.
 - Mais cenários E2E: **recusar pedido**, **troca de férias** e **RH confirmando**.
 - **E2E repetível sem recriar o banco.** O `ferias.spec.ts` aprova 15 dias da Ana a cada execução, e o saldo dela acaba depois de 2 ou 3 execuções. Com o cancelamento pelo RH, o teste pode devolver os dias no fim.
