@@ -37,11 +37,12 @@ spring:
 
 # Fase 9: o Actuator mostra SÓ o /actuator/health (sem detalhes). Os outros endpoints dele
 # (variáveis de ambiente, métricas...) revelariam informação interna e ficam desligados.
+# Versionamento: o /actuator/info também fica ligado, e mostra só a versão (build-info, ver pom.xml).
 management:
   endpoints:
     web:
       exposure:
-        include: health
+        include: health, info
   endpoint:
     health:
       show-details: never

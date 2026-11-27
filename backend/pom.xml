@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>br.com.crona</groupId>
 	<artifactId>crona-api</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.2.0</version>
 	<name>crona-api</name>
 	<description>API do Crona - Gestao de Ferias</description>
 	<properties>
@@ -129,6 +129,19 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<executions>
+					<!-- Versionamento: grava a versão (a <version> lá em cima) em META-INF/build-info.properties.
+					     O /actuator/info lê de lá. -->
+					<execution>
+						<goals>
+							<goal>build-info</goal>
+						</goals>
+						<configuration>
+							<!-- Sem a hora do build: com builds reproduzíveis ela sairia como 1980. -->
+							<time>off</time>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<!-- Descobre o caminho do jar do Mockito (vira a propriedade ${org.mockito:mockito-core:jar}) -->
 			<plugin>
