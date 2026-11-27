@@ -85,6 +85,9 @@ describe('Departamentos', () => {
     const { elemento, linhas } = await criar();
 
     expect(elemento.querySelector('h1')?.textContent).toBe('Departamentos');
+    expect(elemento.querySelector('.topo-pagina p')?.textContent).toBe(
+      'Cada pessoa fica num departamento. É por ele que o Crona conta quantas pessoas podem sair de férias no mesmo dia.',
+    );
     expect(elemento.querySelector('#titulo-lista')?.textContent).toBe('3 departamentos');
     expect(linhas()).toEqual([
       'Comercial | Ninguém ainda',
