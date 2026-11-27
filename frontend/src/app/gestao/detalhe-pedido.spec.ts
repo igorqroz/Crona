@@ -33,10 +33,10 @@ describe('DetalhePedido', () => {
     };
   }
 
-  function criar() {
+  function criar(detalhe: DetalheDaAprovacao = detalheDoPedido(1, 'Ana Lima')) {
     TestBed.configureTestingModule({ imports: [DetalhePedido] });
     const fixture = TestBed.createComponent(DetalhePedido);
-    fixture.componentRef.setInput('detalhe', detalheDoPedido(1, 'Ana Lima'));
+    fixture.componentRef.setInput('detalhe', detalhe);
     fixture.detectChanges();
     const caixa = () => fixture.nativeElement.querySelector('textarea') as HTMLTextAreaElement;
     const digitar = (texto: string) => {
@@ -65,5 +65,33 @@ describe('DetalhePedido', () => {
     fixture.detectChanges();
 
     expect(caixa().value).toBe('');
+  });
+
+  /*
+   * Teste manual do Igor (PR #32): a conta do "Fora no dia" é só do departamento do pedido (como o
+   * limite da EMP-01). Sem dizer qual, parecia que faltava gente de outros departamentos.
+   */
+  describe('o rótulo "Fora no dia"', () => {
+    const rotulo = (fixture: { nativeElement: HTMLElement }) =>
+      fixture.nativeElement.querySelector('.rotulo-fora') as HTMLElement;
+
+    it('diz de qual departamento é a conta', () => {
+      const { fixture } = criar();
+
+      expect(rotulo(fixture).textContent?.replace(/\s+/g, ' ').trim()).toBe(
+        'Fora no dia (Engenharia)',
+      );
+      expect(rotulo(fixture).getAttribute('title')).toBe('Fora no dia (Engenharia)');
+    });
+
+    it('pedido de quem não tem departamento: só "Fora no dia"', () => {
+      const semDepartamento = detalheDoPedido(1, 'Ana Lima');
+      semDepartamento.pedido = { ...semDepartamento.pedido, departamento: null };
+      const { fixture } = criar(semDepartamento);
+
+      expect(rotulo(fixture).textContent?.trim()).toBe('Fora no dia');
+      expect(rotulo(fixture).querySelector('small')).toBeNull();
+      expect(rotulo(fixture).getAttribute('title')).toBe('Fora no dia');
+    });
   });
 });

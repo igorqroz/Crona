@@ -166,6 +166,20 @@ describe('Inicio', () => {
     expect(elemento.querySelector('.cartao-pedido a')?.getAttribute('href')).toBe('/solicitar');
   });
 
+  /*
+   * Teste manual do Igor (PR #32): o Início tinha dois botões para a mesma coisa, o "Solicitar
+   * férias" no topo e o "Planejar férias". Ficou só o "Planejar férias", e o menu lateral continua
+   * com o "Solicitar férias".
+   */
+  it('um caminho só para pedir férias: nada no topo, só o "Planejar férias"', () => {
+    api.solicitacoes.mockReturnValue(of([]));
+    const { elemento } = criar();
+
+    expect(elemento.querySelector('header')?.querySelectorAll('a, button')).toHaveLength(0);
+    const links = [...elemento.querySelectorAll('a[href="/solicitar"]')];
+    expect(links.map((a) => a.textContent?.trim())).toEqual(['Planejar férias']);
+  });
+
   it('pedido que o gestor já aprovou: a etapa atual é o RH, e a mensagem do gestor aparece', () => {
     api.solicitacoes.mockReturnValue(
       of([solicitacao({ status: 'AGUARDANDO_RH', mensagemDecisao: 'Bom descanso!' })]),
