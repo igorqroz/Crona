@@ -87,7 +87,7 @@ h3 {
 }
 
 .dia:hover:not(:disabled) {
-  outline: 2px solid var(--cor-foco);
+  box-shadow: inset 0 0 0 1px var(--cor-borda-campo);
 }
 
 .dia:disabled {

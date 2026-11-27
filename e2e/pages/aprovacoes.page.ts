@@ -5,6 +5,8 @@ import { Locator, Page } from '@playwright/test';
  *
  * A tela tem abas ("Pedidos", "Trocas", "Confirmação do RH", "Aprovadas"); o nome de cada aba
  * termina com a contagem ("Aprovadas · 3"), por isso a aba é achada pelo começo do nome.
+ * Desde o P1 de acessibilidade, as abas são botões de alternar num grupo (role="group"),
+ * e não mais um <nav>.
  */
 export class AprovacoesPagina {
   constructor(private readonly page: Page) {}
@@ -16,7 +18,7 @@ export class AprovacoesPagina {
 
   async abrirAba(nome: string): Promise<void> {
     await this.page
-      .getByRole('navigation', { name: 'O que aprovar' })
+      .getByRole('group', { name: 'O que aprovar' })
       .getByRole('button', { name: new RegExp(`^${nome}`) })
       .click();
   }

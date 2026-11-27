@@ -94,12 +94,30 @@ describe('CalendarioEquipe', () => {
 
       clicar('2 semanas');
       expect(api.calendario).toHaveBeenLastCalledWith('2027-03-01', '2027-03-14');
-      expect(elemento.querySelector('[aria-selected="true"]')?.textContent?.trim()).toBe(
+      expect(elemento.querySelector('[aria-pressed="true"]')?.textContent?.trim()).toBe(
         '2 semanas',
       );
 
       clicar('Trimestre');
       expect(api.calendario).toHaveBeenLastCalledWith('2027-03-01', '2027-05-30'); // 13 semanas
+    });
+
+    /*
+     * Acessibilidade (P1 do Design): as janelas são botões de alternar, num grupo com nome. O
+     * leitor de tela diz "Tamanho da janela, grupo" e, em cada botão, se está apertado ou não.
+     */
+    it('as janelas são um grupo com nome, e só a janela escolhida fica apertada', () => {
+      const { clicar, elemento } = criar();
+      const grupo = elemento.querySelector('[role="group"][aria-label="Tamanho da janela"]')!;
+      const apertados = () =>
+        [...grupo.querySelectorAll('button')].map(
+          (b) => `${b.textContent?.trim()}: ${b.getAttribute('aria-pressed')}`,
+        );
+
+      expect(apertados()).toEqual(['2 semanas: false', '6 semanas: true', 'Trimestre: false']);
+
+      clicar('Trimestre');
+      expect(apertados()).toEqual(['2 semanas: false', '6 semanas: false', 'Trimestre: true']);
     });
 
     it('as setas andam uma janela inteira, e "Hoje" volta para esta semana', () => {
