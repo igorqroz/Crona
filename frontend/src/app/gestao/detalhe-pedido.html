@@ -64,7 +64,13 @@
       ></span>
     }
 
-    <span class="nome rotulo-fora">Fora no dia</span>
+    <!-- A conta é só do departamento do pedido: o rótulo diz qual é. -->
+    <span class="nome rotulo-fora" [title]="p.departamento ? 'Fora no dia (' + p.departamento + ')' : 'Fora no dia'">
+      Fora no dia
+      @if (p.departamento) {
+        <small>({{ p.departamento }})</small>
+      }
+    </span>
     @for (fora of l.foraNoDia; track $index) {
       <span class="fora" [class.acima]="fora.acima">{{ fora.total }}</span>
     }

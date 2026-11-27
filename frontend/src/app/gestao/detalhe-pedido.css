@@ -135,6 +135,16 @@ h3 {
   font-weight: 600;
 }
 
+/* O departamento numa segunda linha: a coluna dos nomes tem só 110px. */
+.rotulo-fora small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--cor-texto-suave);
+}
+
 .fora {
   padding: 3px 0;
   border-radius: 4px;
