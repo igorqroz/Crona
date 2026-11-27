@@ -3,6 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Colaborador, DadosDoColaborador } from '../nucleo/modelos';
 import {
   avisoDeEquipe,
+  descricaoDoPerfil,
   errosDaApi,
   faixaDaPagina,
   gestoresPossiveis,
@@ -24,6 +25,12 @@ describe('colaboradores.regras', () => {
     expect(seloDoPerfil('COLABORADOR')).toBe('selo');
     expect(seloDoPerfil('GESTOR')).toBe('selo selo-info');
     expect(seloDoPerfil('ADMIN')).toBe('selo selo-forte');
+  });
+
+  it('descricaoDoPerfil: o que cada perfil pode fazer (o mesmo texto dos cartões de perfil)', () => {
+    expect(descricaoDoPerfil('COLABORADOR')).toBe('Pede férias, propõe trocas e baixa os avisos.');
+    expect(descricaoDoPerfil('GESTOR')).toBe('Também aprova as férias e as trocas da equipe.');
+    expect(descricaoDoPerfil('ADMIN')).toBe('Também cuida dos cadastros e confirma as férias.');
   });
 
   it('resumoDaEquipe: o subtítulo, no singular e no plural', () => {

@@ -349,13 +349,19 @@ describe('PainelColaborador', () => {
         expect(elemento.textContent).toContain('Este é o seu acesso. Para desativá-lo, peça para outra pessoa do RH.');
       });
 
-      it('o perfil fica travado, com a dica ligada ao grupo', async () => {
+      // Pedido do Design: só leitura, em vez de rádios desativados (o cinza claro não passava no contraste).
+      it('o perfil aparece só para leitura: sem rádios, com o selo, a descrição e a dica', async () => {
         const { elemento } = await criar(rafael);
 
         const grupo = perfil(elemento);
-        expect(grupo.disabled).toBe(true);
-        expect(grupo.getAttribute('aria-describedby')).toBe('dica-proprio-perfil');
-        expect(elemento.querySelector('#dica-proprio-perfil')?.textContent).toBe(
+        expect(grupo.querySelectorAll('input[type="radio"]')).toHaveLength(0);
+        const selo = grupo.querySelector('.perfil-leitura .selo')!;
+        expect(selo.className).toBe('selo selo-forte');
+        expect(selo.textContent).toBe('Administrador (RH)');
+        expect(grupo.querySelector('.perfil-leitura p')?.textContent).toBe(
+          'Também cuida dos cadastros e confirma as férias.',
+        );
+        expect(grupo.querySelector('#dica-proprio-perfil')?.textContent).toBe(
           'Você não pode mudar o próprio perfil. Peça para outra pessoa do RH.',
         );
       });
@@ -373,11 +379,13 @@ describe('PainelColaborador', () => {
         expect(salvou).toHaveBeenCalledWith('Dados de Rafael Costa salvos.');
       });
 
-      it('guarda: no painel de OUTRA pessoa, o perfil fica livre e o "Desativar" aparece', async () => {
+      it('guarda: no painel de OUTRA pessoa, os 3 perfis para escolher e o "Desativar" aparece', async () => {
         const { elemento, botao } = await criar(ana);
 
-        expect(perfil(elemento).disabled).toBe(false);
-        expect(elemento.querySelector('#dica-proprio-perfil')).toBeNull();
+        const radios = [...perfil(elemento).querySelectorAll<HTMLInputElement>('input[type="radio"]')];
+        expect(radios.map((r) => r.value)).toEqual(['COLABORADOR', 'GESTOR', 'ADMIN']);
+        expect(radios.find((r) => r.checked)?.value).toBe('COLABORADOR');
+        expect(elemento.querySelector('.perfil-leitura')).toBeNull();
         expect(botao('Desativar acesso de Ana')).toBeDefined();
       });
     });
