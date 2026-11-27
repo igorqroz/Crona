@@ -6,7 +6,7 @@
     <span class="titulo">Troca com {{ v.outro.nome }}</span>
     <span class="texto-suave">{{ v.souQuemPropos ? 'Você propôs' : v.outro.nome + ' propôs' }} · {{ haQuanto(v.rodadas[0].feitaEm) }}</span>
   </div>
-  <span class="selo" [class]="'selo ' + v.tom">{{ v.rotulo }}</span>
+  <span [class]="classeDoSelo(v.tom)">{{ v.rotulo }}</span>
 </div>
 
 <div class="datas">

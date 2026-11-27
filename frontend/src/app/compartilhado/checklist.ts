@@ -47,8 +47,8 @@ import { Icone } from './icone';
     .texto { padding-top: 3px; }
     .OK .marca { background: var(--cor-sucesso-fundo); color: var(--cor-sucesso); }
     .ATENCAO .marca { background: var(--cor-alerta-fundo); color: var(--cor-alerta-texto); }
-    .IMPEDIMENTO .marca { background: #FDECEC; color: #B42318; }
-    .IMPEDIMENTO .texto { color: #B42318; font-weight: 600; }
+    .IMPEDIMENTO .marca { background: var(--cor-perigo-fundo); color: var(--cor-perigo); }
+    .IMPEDIMENTO .texto { color: var(--cor-perigo); font-weight: 600; }
   `,
 })
 export class Checklist {

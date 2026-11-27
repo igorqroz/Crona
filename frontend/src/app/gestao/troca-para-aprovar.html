@@ -2,7 +2,7 @@
 
 <div class="cabecalho">
   <h3>{{ n.solicitante.nome }} ⇄ {{ n.colega.nome }}</h3>
-  <span class="selo" [class]="'selo ' + selo().tom">{{ selo().texto }}</span>
+  <span [class]="classeDoSelo(selo().tom)">{{ selo().texto }}</span>
 </div>
 
 <div class="lados">

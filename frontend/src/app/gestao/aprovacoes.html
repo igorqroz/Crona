@@ -43,9 +43,9 @@
       @case ('pedidos') {
         <div class="mestre-detalhe">
           <section class="lista" aria-label="Pedidos">
-            <div class="filtros" role="group" aria-label="Filtrar os pedidos">
+            <div class="segmentado" role="group" aria-label="Filtrar os pedidos">
               @for (f of filtros; track f.valor) {
-                <button type="button" [attr.aria-pressed]="filtro() === f.valor" [class.ativo]="filtro() === f.valor" (click)="mudarFiltro(f.valor)">
+                <button type="button" [attr.aria-pressed]="filtro() === f.valor" (click)="mudarFiltro(f.valor)">
                   {{ f.texto }} · {{ contagens()[f.valor] }}
                 </button>
               }
@@ -60,7 +60,7 @@
                     <span class="texto-suave">{{ p.departamento }}</span>
                   </span>
                   <span class="texto-suave">{{ intervalo(p.inicio, p.fim) }} · {{ p.diasGozo }} dias</span>
-                  <span class="selo" [class]="'selo ' + s.tom">{{ s.texto }}</span>
+                  <span [class]="classeDoSelo(s.tom)">{{ s.texto }}</span>
                 </span>
               </button>
             } @empty {

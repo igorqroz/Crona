@@ -1,6 +1,7 @@
 import { Component, computed, effect, input, output, signal, untracked } from '@angular/core';
 
 import { Checklist } from '../compartilhado/checklist';
+import { classeDoSelo } from '../compartilhado/selo';
 import { intervalo } from '../nucleo/datas';
 import { Decisao, TrocaParaAprovar } from '../nucleo/modelos';
 import { acaoPrincipal, selo } from './aprovacoes.regras';
@@ -28,6 +29,7 @@ export class TrocaParaAprovarCartao {
   protected readonly aviso = signal<string | null>(null);
 
   protected readonly acao = computed(() => acaoPrincipal(this.troca().situacao));
+  protected readonly classeDoSelo = classeDoSelo;
   protected readonly selo = computed(() => {
     const t = this.troca();
     return selo(t.situacao, [...t.verificacoesSolicitante, ...t.verificacoesColega].filter((v) => v.resultado !== 'OK'));

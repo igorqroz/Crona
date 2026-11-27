@@ -141,11 +141,6 @@ h1 {
   font-size: 12px;
 }
 
-.selo-alerta {
-  background: var(--cor-alerta-fundo);
-  color: var(--cor-alerta-texto);
-}
-
 .selo-claro {
   border-color: transparent; /* no cartão escuro, a borda cinza do selo global apareceria como contorno */
   background: rgba(255, 255, 255, 0.14);

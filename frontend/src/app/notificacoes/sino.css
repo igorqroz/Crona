@@ -18,7 +18,7 @@
 }
 
 .botao-sino:hover {
-  border-color: #B9CBE6;
+  border-color: var(--cor-borda-hover);
   color: var(--cor-texto);
 }
 
@@ -67,10 +67,12 @@
 }
 
 .marcar {
+  min-height: var(--altura-compacta);
+  padding: 0 8px;
   border: none;
   background: none;
   font-family: var(--fonte-texto);
-  font-size: 12.5px;
+  font-size: var(--texto-13);
   font-weight: 600;
   color: var(--cor-primaria-escura);
   cursor: pointer;

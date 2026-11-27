@@ -211,11 +211,11 @@ textarea {
 }
 
 .recusar {
-  color: #B42318;
+  color: var(--cor-perigo);
 }
 
 .bloqueado {
   font-size: 13px;
   font-weight: 600;
-  color: #B42318;
+  color: var(--cor-perigo);
 }

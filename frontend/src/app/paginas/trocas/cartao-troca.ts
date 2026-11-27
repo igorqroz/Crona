@@ -2,6 +2,7 @@ import { Component, computed, effect, input, output, signal, untracked } from '@
 
 import { Avatar } from '../../compartilhado/avatar';
 import { Checklist } from '../../compartilhado/checklist';
+import { classeDoSelo } from '../../compartilhado/selo';
 import { haQuanto } from '../../nucleo/datas';
 import { Contraproposta, Verificacao } from '../../nucleo/modelos';
 import { paraContraproposta, VisaoDaTroca } from './trocas.regras';
@@ -40,6 +41,7 @@ export class CartaoTroca {
   protected readonly mensagem = signal('');
 
   protected readonly haQuanto = haQuanto;
+  protected readonly classeDoSelo = classeDoSelo;
   protected readonly amanha = amanhaIso();
 
   /**

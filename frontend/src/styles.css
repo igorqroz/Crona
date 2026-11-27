@@ -134,7 +134,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 
 .botao-secundario:hover:not(:disabled) {
-  border-color: #B9CBE6;
+  border-color: var(--cor-borda-hover);
   color: var(--cor-texto);
 }
 

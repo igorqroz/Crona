@@ -4,6 +4,7 @@ import { forkJoin, Observable, of } from 'rxjs';
 
 import { Avatar } from '../compartilhado/avatar';
 import { Icone } from '../compartilhado/icone';
+import { classeDoSelo } from '../compartilhado/selo';
 import { Pendencias } from '../ferias/pendencias';
 import { intervalo } from '../nucleo/datas';
 import {
@@ -77,6 +78,7 @@ export class Aprovacoes {
   ];
 
   protected readonly selo = selo;
+  protected readonly classeDoSelo = classeDoSelo;
   protected readonly intervalo = intervalo;
 
   constructor() {
