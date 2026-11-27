@@ -282,6 +282,62 @@ describe('Aprovacoes', () => {
     expect(elemento.textContent).toContain('Nenhuma troca esperando você.');
   });
 
+  /*
+   * Acessibilidade (P1 do Design): as abas e os filtros são botões de alternar (aria-pressed),
+   * cada conjunto num grupo com nome. Não são "tabs" (role="tab"/aria-selected).
+   */
+  describe('acessibilidade das abas e dos filtros', () => {
+    /** Cada botão do grupo como "texto: aria-pressed". */
+    function apertados(elemento: HTMLElement, nomeDoGrupo: string) {
+      const grupo = elemento.querySelector(`[role="group"][aria-label="${nomeDoGrupo}"]`)!;
+      return [...grupo.querySelectorAll('button')].map(
+        (b) => `${b.textContent?.trim()}: ${b.getAttribute('aria-pressed')}`,
+      );
+    }
+
+    it('as abas são um grupo com nome, e só a aba aberta fica apertada', () => {
+      const { elemento, clicar } = criar('ADMIN');
+
+      expect(apertados(elemento, 'O que aprovar')).toEqual([
+        'Pedidos · 3: true',
+        'Trocas · 0: false',
+        'Confirmação do RH · 0: false',
+        'Aprovadas · 0: false',
+      ]);
+
+      clicar('Trocas · 0');
+      expect(apertados(elemento, 'O que aprovar')).toEqual([
+        'Pedidos · 3: false',
+        'Trocas · 0: true',
+        'Confirmação do RH · 0: false',
+        'Aprovadas · 0: false',
+      ]);
+    });
+
+    it('os filtros são um grupo com nome, e só o filtro escolhido fica apertado', () => {
+      const { elemento, clicar } = criar();
+
+      expect(apertados(elemento, 'Filtrar os pedidos')).toEqual([
+        'Todos · 3: true',
+        'Com conflito · 1: false',
+        'Sem conflito · 2: false',
+      ]);
+
+      clicar('Com conflito');
+      expect(apertados(elemento, 'Filtrar os pedidos')).toEqual([
+        'Todos · 3: false',
+        'Com conflito · 1: true',
+        'Sem conflito · 2: false',
+      ]);
+    });
+
+    it('nada na tela se apresenta como aba (role="tab" ou aria-selected)', () => {
+      const { elemento } = criar('ADMIN');
+
+      expect(elemento.querySelectorAll('[role="tab"], [role="tablist"], [aria-selected]')).toHaveLength(0);
+    });
+  });
+
   describe('confirmação do RH (EMP-06)', () => {
     it('o GESTOR não vê a aba do RH nem busca a fila dela', () => {
       const { botao } = criar('GESTOR');
