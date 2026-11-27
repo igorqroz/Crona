@@ -1,4 +1,4 @@
-import { Component, effect, input, output, signal, untracked } from '@angular/core';
+import { Component, computed, effect, input, output, signal, untracked } from '@angular/core';
 
 import { Avatar } from '../../compartilhado/avatar';
 import { Checklist } from '../../compartilhado/checklist';
@@ -42,12 +42,23 @@ export class CartaoTroca {
   protected readonly haQuanto = haQuanto;
   protected readonly amanha = amanhaIso();
 
+  /**
+   * BUG-04: o que identifica um MOMENTO da negociação. A página recarrega a lista inteira depois de
+   * qualquer ação, então todos os cartões recebem um objeto novo. Só muda esta chave o cartão cuja
+   * negociação andou (status, a vez ou uma rodada nova). Como um computed só avisa quando o valor
+   * muda, os outros cartões não são avisados e o formulário aberto neles continua aberto.
+   */
+  private readonly momento = computed(() => {
+    const v = this.visao();
+    return `${v.id}|${v.status}|${v.minhaVez}|${v.rodadas.length}`;
+  });
+
   constructor() {
-    // Quando a página recarrega e manda a negociação atualizada (a ação deu certo), o formulário
-    // aberto fecha. Se a API recusar, a página não recarrega: o formulário fica, com o que foi digitado.
-    // untracked(): só a visao() dispara o effect; ler/escrever o modo aqui não cria dependência.
+    // A negociação DESTE cartão andou (a ação deu certo): o formulário aberto fecha.
+    // Se a API recusar, nada muda: o formulário fica, com o que foi digitado.
+    // untracked(): só o momento dispara o effect; ler/escrever o modo aqui não cria dependência.
     effect(() => {
-      this.visao();
+      this.momento();
       untracked(() => this.modo.set('nenhum'));
     });
   }

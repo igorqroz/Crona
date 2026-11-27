@@ -58,9 +58,17 @@ export class TrocaParaAprovarCartao {
     this.troca().negociacao.propostas.filter((p) => p.mensagem).map((p) => ({ autor: p.autor.nome, texto: p.mensagem })),
   );
 
+  /**
+   * BUG-04: só o id da negociação. Um computed só avisa quem depende dele quando o VALOR muda:
+   * a mesma troca recarregada (outra ação na tela recarrega a fila) não apaga a mensagem que o
+   * gestor está escrevendo. É a mesma ideia do detalhe-pedido.ts (BUG-02).
+   */
+  private readonly idDaTroca = computed(() => this.troca().negociacao.id);
+
   constructor() {
+    // Outra troca neste cartão: começa com a mensagem em branco.
     effect(() => {
-      this.troca();
+      this.idDaTroca();
       untracked(() => {
         this.mensagem.set('');
         this.aviso.set(null);
