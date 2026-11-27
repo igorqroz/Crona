@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { Observable, of, throwError } from 'rxjs';
 
 import { DepartamentoResumo } from '../nucleo/modelos';
@@ -39,7 +40,8 @@ describe('Departamentos', () => {
   async function criar() {
     TestBed.configureTestingModule({
       imports: [Departamentos],
-      providers: [{ provide: CadastrosApi, useValue: api }],
+      // provideRouter: o aviso de excluir tem o link "Ver as pessoas" (para Colaboradores).
+      providers: [provideRouter([]), { provide: CadastrosApi, useValue: api }],
     });
     const fixture = TestBed.createComponent(Departamentos);
     fixture.detectChanges();
@@ -227,6 +229,17 @@ describe('Departamentos', () => {
       expect(aviso.textContent).toContain('Engenharia ainda tem 5 pessoas.');
       expect(botao('Excluir departamento')).toBeUndefined();
       expect(focado()).toBe(aviso);
+    });
+
+    it('o aviso leva para as pessoas do departamento (Colaboradores já filtrado)', async () => {
+      const { clicar, elemento } = await criar();
+
+      await clicar('Excluir Engenharia');
+
+      const link = elemento.querySelector<HTMLAnchorElement>('#aviso-excluir-1 a')!;
+      expect(link.textContent?.trim()).toBe('Ver as pessoas');
+      expect(link.getAttribute('aria-label')).toBe('Ver as pessoas de Engenharia');
+      expect(link.getAttribute('href')).toBe('/cadastros/colaboradores?departamentoId=1');
     });
 
     it('"Entendi" fecha o aviso e o foco volta para o "Excluir" daquela linha', async () => {
