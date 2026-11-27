@@ -155,6 +155,46 @@ describe('PainelColaborador', () => {
     });
   });
 
+  /*
+   * Acessibilidade: o leitor de tela anuncia o NOME do campo (o rótulo) e, depois, a DESCRIÇÃO (a
+   * dica ou o erro). Se a dica ficasse dentro do nome, ela seria lida duas vezes. Cada campo usa
+   * aria-labelledby (só o texto do rótulo) e continua dentro de um <label> (clicar no texto foca o campo).
+   */
+  describe('nomes acessíveis sem leitura dupla', () => {
+    const textoDosIds = (ids: string | null) =>
+      (ids ?? '')
+        .split(' ')
+        .filter(Boolean)
+        .map((id) => document.getElementById(id)?.textContent?.trim())
+        .join(' ');
+
+    it('cada campo: o nome é só o rótulo, a dica ou o erro vêm só na descrição, e o <label> continua em volta', async () => {
+      const { salvar, elemento } = await criar();
+      await salvar(); // com os erros na tela, para conferir também a descrição dos erros
+
+      const campos = [...elemento.querySelectorAll<HTMLElement>('[aria-labelledby^="rotulo-"]')];
+      const nomes = campos.map((c) => textoDosIds(c.getAttribute('aria-labelledby')));
+      expect(nomes).toEqual([
+        'Nome completo',
+        'E-mail de trabalho',
+        'Cargo (opcional)',
+        'Gestor',
+        'Data de admissão',
+        'Senha inicial',
+      ]);
+      for (const campo of campos) {
+        const nome = textoDosIds(campo.getAttribute('aria-labelledby'));
+        const descricao = textoDosIds(campo.getAttribute('aria-describedby'));
+        expect(campo.closest('label.campo')).not.toBeNull();
+        if (descricao) {
+          expect(nome).not.toContain(descricao);
+        }
+      }
+      expect(textoDosIds(campos[1].getAttribute('aria-describedby'))).toBe('Informe o e-mail.');
+      expect(textoDosIds(campos[3].getAttribute('aria-describedby'))).toContain('É quem aprova as férias');
+    });
+  });
+
   describe('cadastrar', () => {
     it('as partes do formulário, com a senha inicial e sem "Acesso ao Crona"', async () => {
       const { legendas, botao } = await criar();

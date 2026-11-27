@@ -113,6 +113,10 @@ describe('Departamentos', () => {
       await clicar('Novo departamento');
 
       expect(campo().closest('label')?.textContent).toContain('Nome do novo departamento');
+      // Nome acessível só com o rótulo (o erro, quando houver, vem na descrição, sem leitura dupla).
+      expect(document.getElementById(campo().getAttribute('aria-labelledby')!)?.textContent).toBe(
+        'Nome do novo departamento',
+      );
       expect(focado()).toBe(campo());
       expect(botao('Novo departamento')!.disabled).toBe(true); // não abre dois
     });
@@ -184,6 +188,13 @@ describe('Departamentos', () => {
       expect(campo().id).toBe('campo-renomear-3');
       expect(campo().value).toBe('Comercial');
       expect(campo().closest('label')?.textContent).toContain('Novo nome para Comercial');
+      // Nome acessível só com o rótulo; a dica ("As pessoas e os pedidos continuam...") é a descrição.
+      expect(document.getElementById(campo().getAttribute('aria-labelledby')!)?.textContent).toBe(
+        'Novo nome para Comercial',
+      );
+      expect(document.getElementById(campo().getAttribute('aria-describedby')!)?.textContent).toContain(
+        'só o nome muda',
+      );
       expect(focado()).toBe(campo());
     });
 
