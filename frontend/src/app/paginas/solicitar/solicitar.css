@@ -6,30 +6,10 @@
   gap: 24px;
 }
 
-.topo {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
 .voltar {
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
-}
-
-h1 {
-  margin: 0;
-  font-family: var(--fonte-titulo);
-  font-size: 32px;
-  font-weight: 800;
-  letter-spacing: -0.8px;
-}
-
-.topo p {
-  margin: 0;
-  font-size: 14px;
-  color: var(--cor-texto-secundario);
 }
 
 .linha {

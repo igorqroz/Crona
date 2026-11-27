@@ -1,12 +1,14 @@
-<header class="topo">
-  <a routerLink="/inicio" class="voltar">← Início</a>
-  <h1>Solicitar férias</h1>
-  <p>
-    Clique no primeiro e no último dia.
-    @if (calendario()?.departamento; as departamento) {
-      As barrinhas mostram quantos colegas de {{ departamento }} já estarão fora.
-    }
-  </p>
+<header class="topo-pagina">
+  <div class="topo-pagina-texto">
+    <a routerLink="/inicio" class="voltar">← Início</a>
+    <h1>Solicitar férias</h1>
+    <p>
+      Clique no primeiro e no último dia.
+      @if (calendario()?.departamento; as departamento) {
+        As barrinhas mostram quantos colegas de {{ departamento }} já estarão fora.
+      }
+    </p>
+  </div>
 </header>
 
 <div class="linha">
