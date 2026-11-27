@@ -92,9 +92,10 @@ export function gestoresPossiveis(gestores: Colaborador[], idDaPessoa: number | 
 
 /** "Roberto tem 4 pessoas na equipe. Para desativar, ..." (a mesma regra do back-end). */
 export function avisoDeEquipe(nome: string, pessoas: number): string {
-  const quantas = pessoas === 1 ? '1 pessoa' : `${pessoas} pessoas`;
   const primeiro = nome.trim().split(/\s+/)[0];
-  return `${primeiro} tem ${quantas} na equipe. Para desativar, passe essas pessoas para outro gestor antes.`;
+  return pessoas === 1
+    ? `${primeiro} tem 1 pessoa na equipe. Para desativar, passe essa pessoa para outro gestor antes.`
+    : `${primeiro} tem ${pessoas} pessoas na equipe. Para desativar, passe essas pessoas para outro gestor antes.`;
 }
 
 /** O primeiro nome, para os botões ("Desativar acesso de Ana"). */

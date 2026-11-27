@@ -93,7 +93,15 @@ export class Colaboradores {
 
   // ------------------------------------------------------------------ carregar
 
+  /**
+   * BUG-07: o número do último pedido. Quem troca de filtro rápido (Inativos e logo Todos) dispara
+   * dois pedidos; se o primeiro responder por último, ele não pode sobrescrever a lista do segundo.
+   * Mesma ideia do BUG-03 (solicitar.ts).
+   */
+  private ultimoPedido = 0;
+
   protected carregar(recarga = false): void {
+    const numero = ++this.ultimoPedido;
     if (!recarga) {
       this.estado.set('carregando');
     }
@@ -110,13 +118,20 @@ export class Colaboradores {
       inativos: this.api.contar({ ...base, ativo: false }),
     }).subscribe({
       next: ({ pagina, ativos, inativos }) => {
+        if (numero !== this.ultimoPedido) {
+          return; // resposta de um filtro que a pessoa já trocou
+        }
         this.colaboradores.set(pagina.itens);
         this.total.set(pagina.total);
         this.totalPaginas.set(pagina.totalPaginas);
         this.contagem.set({ ativos, inativos });
         this.estado.set('pronto');
       },
-      error: () => this.estado.set('erro'),
+      error: () => {
+        if (numero === this.ultimoPedido) {
+          this.estado.set('erro');
+        }
+      },
     });
   }
 
