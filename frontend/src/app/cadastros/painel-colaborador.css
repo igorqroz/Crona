@@ -1,0 +1,191 @@
+/*
+ * O painel lateral de Colaboradores: uma janela presa à direita, sobre um fundo escuro.
+ * No celular, ocupa a tela toda.
+ */
+
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.fundo {
+  position: absolute;
+  inset: 0;
+  background: rgba(13, 27, 62, 0.32);
+}
+
+.janela {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(480px, 100%);
+  height: 100%;
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-flutuante);
+}
+
+.cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.cabecalho-texto {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+h2 {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-size: var(--texto-20);
+  font-weight: 700;
+}
+
+.fechar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--altura-toque);
+  height: var(--altura-toque);
+  border: none;
+  border-radius: var(--raio);
+  background: transparent;
+  color: var(--cor-texto-secundario);
+  cursor: pointer;
+}
+
+.fechar:hover {
+  background: var(--cor-hover);
+}
+
+/* O corpo rola; o cabeçalho e o rodapé ficam fixos. */
+.corpo {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+}
+
+fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+legend {
+  margin-bottom: 10px;
+  padding: 0;
+  font-size: var(--texto-14);
+  font-weight: 700;
+  color: var(--cor-texto);
+}
+
+/* Os 3 perfis: cartões de rádio com a explicação de cada um. */
+.perfis {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.perfil {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio);
+  cursor: pointer;
+}
+
+.perfil:hover {
+  border-color: var(--cor-borda-hover);
+}
+
+.perfil.escolhido {
+  border-color: var(--cor-primaria);
+  background: var(--cor-primaria-clara);
+}
+
+/* BUG-06: o próprio perfil, só para ler (o mesmo selo da tabela). */
+.perfil-leitura {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.perfil-leitura p {
+  margin: 0;
+  font-size: var(--texto-14);
+  color: var(--cor-texto-secundario);
+}
+
+.perfil input {
+  margin: 2px 0 0;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--cor-primaria);
+}
+
+.perfil-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--texto-13);
+  color: var(--cor-texto-secundario);
+}
+
+.perfil-texto strong {
+  font-size: var(--texto-14);
+  color: var(--cor-texto);
+}
+
+.botao-texto.perigo {
+  padding-left: 0;
+  color: var(--cor-perigo);
+}
+
+.confirmar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--cor-perigo-borda);
+  border-radius: var(--raio);
+  background: var(--cor-perigo-fundo);
+  color: var(--cor-perigo-escura);
+  font-size: var(--texto-14);
+}
+
+.confirmar p {
+  margin: 0;
+}
+
+.botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.rodape {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--cor-borda);
+  background: var(--cor-superficie);
+}

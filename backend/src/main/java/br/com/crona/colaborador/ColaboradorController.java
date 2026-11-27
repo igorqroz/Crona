@@ -17,10 +17,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.util.List;
+
 /**
  * GET  /colaboradores                    pesquisa paginada
  *      ?busca=ana                        parte do nome ou do e-mail
  *      &departamentoId=1&ativo=true      filtros opcionais
+ *      &perfil=GESTOR&perfil=ADMIN       Cadastros 2: só esses perfis (pode repetir)
+ *      &gestorId=2                       Cadastros 2: só a equipe dessa pessoa
  *      &page=0&size=20&sort=nome,asc     paginação (padrão do Spring Data)
  * GET  /colaboradores/{id}
  * POST /colaboradores                    cadastra (201)
@@ -44,9 +48,12 @@ public class ColaboradorController {
             @RequestParam(required = false) String busca,
             @RequestParam(required = false) Long departamentoId,
             @RequestParam(required = false) Boolean ativo,
+            // Cadastros 2: ?perfil=GESTOR&perfil=ADMIN (pode repetir) e ?gestorId=2 (a equipe de alguém).
+            @RequestParam(name = "perfil", required = false) List<Perfil> perfis,
+            @RequestParam(required = false) Long gestorId,
             // Sem parâmetros: primeira página, 20 por página, em ordem de nome.
             @PageableDefault(size = 20, sort = "nome", direction = Sort.Direction.ASC) Pageable paginacao) {
-        return service.pesquisar(busca, departamentoId, ativo, paginacao);
+        return service.pesquisar(busca, departamentoId, ativo, perfis, gestorId, paginacao);
     }
 
     @PreAuthorize("hasAuthority('COLABORADOR_VER')")

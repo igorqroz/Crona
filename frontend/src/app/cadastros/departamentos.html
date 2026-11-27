@@ -130,6 +130,14 @@
                     <div [id]="'aviso-excluir-' + d.id" class="aviso" role="alert" tabindex="-1">
                       <crona-icone nome="alerta" [tamanho]="18" [espessura]="2" />
                       <span class="aviso-texto">{{ texto }}</span>
+                      <a
+                        class="botao botao-secundario"
+                        routerLink="/cadastros/colaboradores"
+                        [queryParams]="{ departamentoId: d.id }"
+                        [attr.aria-label]="'Ver as pessoas de ' + d.nome"
+                      >
+                        Ver as pessoas
+                      </a>
                       <button class="botao botao-secundario" type="button" (click)="fechar()">Entendi</button>
                     </div>
                   } @else {

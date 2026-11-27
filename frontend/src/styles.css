@@ -369,6 +369,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   cursor: pointer;
 }
 
+/* Se o .segmentado rolar para o lado (celular), o anel de foco de fora seria cortado: fica por dentro. */
+.segmentado button:focus-visible {
+  outline-offset: -3px;
+}
+
 .segmentado button[aria-pressed="true"] {
   background: var(--cor-superficie);
   box-shadow: 0 0 0 1px var(--cor-borda-forte);

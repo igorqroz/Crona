@@ -278,3 +278,47 @@ export interface DepartamentoResumo {
   /** Quantas podem estar de férias no mesmo dia. Nulo = a regra está desligada na empresa. */
   limiteFora: number | null;
 }
+
+/** Uma página de resultados (PaginaResposta.java). */
+export interface Pagina<T> {
+  itens: T[];
+  /** Começa em 0. */
+  pagina: number;
+  tamanho: number;
+  total: number;
+  totalPaginas: number;
+}
+
+/** GET /colaboradores e /colaboradores/{id} (ColaboradorResposta.java). */
+export interface Colaborador {
+  id: number;
+  nome: string;
+  email: string;
+  perfil: Perfil;
+  cargo: string | null;
+  dataAdmissao: string;
+  ativo: boolean;
+  departamento: Referencia | null;
+  gestor: Referencia | null;
+}
+
+/** O que a tela manda ao cadastrar (POST) ou alterar (PUT, sem a senha). */
+export interface DadosDoColaborador {
+  nome: string;
+  email: string;
+  senha?: string;
+  perfil: Perfil;
+  cargo: string | null;
+  dataAdmissao: string;
+  departamentoId: number | null;
+  gestorId: number | null;
+}
+
+/** Os filtros da lista de Colaboradores (viram parâmetros do GET). */
+export interface FiltrosDeColaboradores {
+  busca: string;
+  departamentoId: number | null;
+  /** null = todos (ativos e inativos). */
+  ativo: boolean | null;
+  pagina: number;
+}

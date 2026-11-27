@@ -9,6 +9,7 @@ import br.com.crona.departamento.Departamento;
 import br.com.crona.departamento.DepartamentoRepository;
 import br.com.crona.empresa.EmpresaAtual;
 import br.com.crona.empresa.EmpresaRepository;
+import br.com.crona.seguranca.UsuarioAtual;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -31,19 +33,22 @@ public class ColaboradorService {
     private final EmpresaAtual empresaAtual;
     private final PasswordEncoder passwordEncoder;
     private final ApplicationEventPublisher eventos;
+    private final UsuarioAtual usuarioAtual;
 
     public ColaboradorService(ColaboradorRepository colaboradorRepository,
                               DepartamentoRepository departamentoRepository,
                               EmpresaRepository empresaRepository,
                               EmpresaAtual empresaAtual,
                               PasswordEncoder passwordEncoder,
-                              ApplicationEventPublisher eventos) {
+                              ApplicationEventPublisher eventos,
+                              UsuarioAtual usuarioAtual) {
         this.colaboradorRepository = colaboradorRepository;
         this.departamentoRepository = departamentoRepository;
         this.empresaRepository = empresaRepository;
         this.empresaAtual = empresaAtual;
         this.passwordEncoder = passwordEncoder;
         this.eventos = eventos;
+        this.usuarioAtual = usuarioAtual;
     }
 
     // Campos pelos quais o front pode ordenar a lista. Lista fechada: o resto vira 400.
@@ -52,6 +57,16 @@ public class ColaboradorService {
     @Transactional(readOnly = true)
     public PaginaResposta<ColaboradorResposta> pesquisar(String busca, Long departamentoId, Boolean ativo,
                                                           Pageable paginacao) {
+        return pesquisar(busca, departamentoId, ativo, null, null, paginacao);
+    }
+
+    /**
+     * Cadastros 2: também filtra por perfil (o select de Gestor pede GESTOR e ADMIN) e por gestor
+     * (quantas pessoas alguém tem na equipe, antes de desativar).
+     */
+    @Transactional(readOnly = true)
+    public PaginaResposta<ColaboradorResposta> pesquisar(String busca, Long departamentoId, Boolean ativo,
+                                                          List<Perfil> perfis, Long gestorId, Pageable paginacao) {
         paginacao.getSort().forEach(ordem -> {
             if (!ORDENACOES_PERMITIDAS.contains(ordem.getProperty())) {
                 throw new ParametroInvalidoException("Não é possível ordenar por \"" + ordem.getProperty()
@@ -61,7 +76,11 @@ public class ColaboradorService {
 
         // Busca vazia = "tudo": o LIKE '%%' casa com qualquer nome.
         String termo = busca == null ? "" : busca.trim();
-        var pagina = colaboradorRepository.pesquisar(empresaAtual.id(), termo, departamentoId, ativo, paginacao);
+        boolean semFiltrosNovos = (perfis == null || perfis.isEmpty()) && gestorId == null;
+        var pagina = semFiltrosNovos
+                ? colaboradorRepository.pesquisar(empresaAtual.id(), termo, departamentoId, ativo, paginacao)
+                : colaboradorRepository.pesquisarComFiltros(empresaAtual.id(), termo, departamentoId, ativo,
+                        perfis == null || perfis.isEmpty() ? List.of(Perfil.values()) : perfis, gestorId, paginacao);
         return PaginaResposta.de(pagina, ColaboradorResposta::de);
     }
 
@@ -103,6 +122,12 @@ public class ColaboradorService {
             throw new ConflitoException("O e-mail " + email + " já está em uso.");
         }
 
+        // BUG-06: ninguém muda o próprio perfil. Um ADMIN que tirasse de si o perfil poderia deixar a empresa
+        // sem ninguém para cuidar dos cadastros (no seed, o Rafael é o único ADMIN). Outro ADMIN pode mudar.
+        if (souEu(id) && dados.perfil() != colaborador.getPerfil()) {
+            throw new RegraVioladaException("Você não pode mudar o próprio perfil. Peça para outra pessoa do RH.");
+        }
+
         // Quem tem equipe não pode virar COLABORADOR: a equipe ficaria com um "gestor" sem perfil de gestor.
         if (!dados.perfil().podeGerenciarEquipe() && colaboradorRepository.existsByGestorIdAndAtivoTrue(id)) {
             throw new RegraVioladaException(colaborador.getNome()
@@ -122,12 +147,21 @@ public class ColaboradorService {
     @Transactional
     public ColaboradorResposta desativar(Long id) {
         var colaborador = buscarDaEmpresa(id);
+        // BUG-06: ninguém tranca a si mesmo para fora do Crona.
+        if (souEu(id)) {
+            throw new RegraVioladaException("Você não pode desativar o próprio acesso. Peça para outra pessoa do RH.");
+        }
         if (colaboradorRepository.existsByGestorIdAndAtivoTrue(id)) {
             throw new RegraVioladaException(colaborador.getNome()
                     + " é gestor de outras pessoas. Transfira a equipe antes de desativar.");
         }
         colaborador.desativar();
         return ColaboradorResposta.de(colaborador);
+    }
+
+    /** O colaborador {@code id} é quem está logado? */
+    private boolean souEu(Long id) {
+        return id.equals(usuarioAtual.id());
     }
 
     @Transactional

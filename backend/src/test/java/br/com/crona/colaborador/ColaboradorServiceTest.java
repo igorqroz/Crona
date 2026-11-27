@@ -7,6 +7,7 @@ import br.com.crona.departamento.DepartamentoRepository;
 import br.com.crona.empresa.Empresa;
 import br.com.crona.empresa.EmpresaAtual;
 import br.com.crona.empresa.EmpresaRepository;
+import br.com.crona.seguranca.UsuarioAtual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -57,13 +58,17 @@ class ColaboradorServiceTest {
     private PasswordEncoder passwordEncoder;
     @Mock
     private ApplicationEventPublisher eventos;
+    @Mock
+    private UsuarioAtual usuarioAtual;
 
     private ColaboradorService service;
 
     @BeforeEach
     void preparar() {
         service = new ColaboradorService(colaboradorRepository, departamentoRepository,
-                empresaRepository, empresaAtual, passwordEncoder, eventos);
+                empresaRepository, empresaAtual, passwordEncoder, eventos, usuarioAtual);
+        // Quem está logado é OUTRA pessoa do RH (id 999): a regra do BUG-06 é testada na API.
+        lenient().when(usuarioAtual.id()).thenReturn(999L);
         lenient().when(empresaAtual.id()).thenReturn(EMPRESA_ID);
         lenient().when(empresaRepository.getReferenceById(EMPRESA_ID)).thenReturn(mock(Empresa.class));
         lenient().when(passwordEncoder.encode(any())).thenReturn("$2a$10$hashFalsoParaTeste");
