@@ -1,6 +1,7 @@
 import { Component, computed, effect, input, output, signal, untracked } from '@angular/core';
 
 import { Checklist } from '../compartilhado/checklist';
+import { Icone } from '../compartilhado/icone';
 import { classeDoSelo } from '../compartilhado/selo';
 import { intervalo } from '../nucleo/datas';
 import { Decisao, TrocaParaAprovar } from '../nucleo/modelos';
@@ -13,7 +14,7 @@ import { ErroDaDecisao } from './detalhe-pedido';
  */
 @Component({
   selector: 'crona-troca-para-aprovar',
-  imports: [Checklist],
+  imports: [Checklist, Icone],
   templateUrl: './troca-para-aprovar.html',
   styleUrl: './troca-para-aprovar.css',
 })

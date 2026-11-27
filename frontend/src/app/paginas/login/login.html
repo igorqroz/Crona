@@ -24,9 +24,9 @@
     </label>
 
     @if (erro(); as mensagem) {
-      <div class="aviso" role="alert">
+      <div class="aviso aviso-erro" role="alert">
         <crona-icone nome="alerta" [tamanho]="18" [espessura]="2" />
-        <span>{{ mensagem }}</span>
+        <span class="aviso-texto">{{ mensagem }}</span>
       </div>
     }
 

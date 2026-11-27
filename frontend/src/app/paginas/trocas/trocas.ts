@@ -4,6 +4,7 @@ import { forkJoin, Observable } from 'rxjs';
 
 import { Avatar } from '../../compartilhado/avatar';
 import { Checklist } from '../../compartilhado/checklist';
+import { Icone } from '../../compartilhado/icone';
 import { FeriasApi } from '../../ferias/ferias-api';
 import { Pendencias } from '../../ferias/pendencias';
 import { intervalo } from '../../nucleo/datas';
@@ -20,7 +21,7 @@ import { feriasQuePossoOferecer, ordenar, visaoDaTroca, VisaoDaTroca } from './t
  */
 @Component({
   selector: 'crona-trocas',
-  imports: [Avatar, Checklist, CartaoTroca],
+  imports: [Avatar, Checklist, CartaoTroca, Icone],
   templateUrl: './trocas.html',
   styleUrl: './trocas.css',
 })

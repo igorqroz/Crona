@@ -99,10 +99,10 @@
 </label>
 
 @if (aviso(); as texto) {
-  <div class="aviso" role="alert">{{ texto }}</div>
+  <div class="aviso" role="alert"><crona-icone nome="alerta" [tamanho]="18" [espessura]="2" /><span class="aviso-texto">{{ texto }}</span></div>
 }
 @if (erro(); as e) {
-  <div class="aviso" role="alert">{{ e.mensagem }}</div>
+  <div class="aviso aviso-erro" role="alert"><crona-icone nome="alerta" [tamanho]="18" [espessura]="2" /><span class="aviso-texto">{{ e.mensagem }}</span></div>
   @if (e.verificacoes.length > 0) {
     <crona-checklist [verificacoes]="e.verificacoes" />
   }

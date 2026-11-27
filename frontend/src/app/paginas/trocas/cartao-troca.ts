@@ -2,6 +2,7 @@ import { Component, computed, effect, input, output, signal, untracked } from '@
 
 import { Avatar } from '../../compartilhado/avatar';
 import { Checklist } from '../../compartilhado/checklist';
+import { Icone } from '../../compartilhado/icone';
 import { classeDoSelo } from '../../compartilhado/selo';
 import { haQuanto } from '../../nucleo/datas';
 import { Contraproposta, Verificacao } from '../../nucleo/modelos';
@@ -19,7 +20,7 @@ export interface ErroDaAcao {
  */
 @Component({
   selector: 'crona-cartao-troca',
-  imports: [Avatar, Checklist],
+  imports: [Avatar, Checklist, Icone],
   templateUrl: './cartao-troca.html',
   styleUrl: './cartao-troca.css',
 })

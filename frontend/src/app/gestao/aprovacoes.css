@@ -62,18 +62,6 @@ h1 {
   color: var(--cor-primaria-escura);
 }
 
-.feito {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 14px;
-  border-radius: var(--raio);
-  background: var(--cor-sucesso-fundo);
-  color: var(--cor-sucesso-texto);
-  font-size: 14px;
-  font-weight: 600;
-}
-
 /* ---------------------------------------------------------------- mestre-detalhe */
 
 .mestre-detalhe {
@@ -141,7 +129,7 @@ h1 {
   min-width: 0;
 }
 
-.vazio {
+.sem-itens {
   margin: 0;
 }
 

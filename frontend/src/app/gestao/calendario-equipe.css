@@ -212,7 +212,7 @@ h1 {
   color: var(--cor-primaria-escura);
 }
 
-.vazio {
+.sem-itens {
   margin: 16px 0 4px;
 }
 

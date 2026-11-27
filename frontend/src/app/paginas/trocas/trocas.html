@@ -9,8 +9,10 @@
   }
 
   @case ('erro') {
-    <div class="aviso" role="alert">
-      Não foi possível carregar as trocas. <a href="" (click)="$event.preventDefault(); carregar()">Tentar de novo</a>
+    <div class="aviso aviso-erro" role="alert">
+      <crona-icone nome="alerta" [tamanho]="18" [espessura]="2" />
+      <span class="aviso-texto">Não foi possível carregar as trocas.</span>
+      <button class="botao botao-secundario" type="button" (click)="carregar()">Tentar de novo</button>
     </div>
   }
 
@@ -30,8 +32,9 @@
             (contrapropos)="contrapropor(troca.id, $event)"
           />
         } @empty {
-          <div class="cartao vazio">
-            <p class="texto-suave">Nenhuma troca ainda. Para propor uma, escolha férias de um colega ao lado.</p>
+          <div class="vazio">
+            <strong>Nenhuma troca ainda</strong>
+            <p>Para propor uma, escolha as férias de um colega ao lado.</p>
           </div>
         }
       </section>
@@ -100,7 +103,7 @@
             </label>
 
             @if (erroDaProposta(); as e) {
-              <div class="aviso" role="alert">{{ e.mensagem }}</div>
+              <div class="aviso aviso-erro" role="alert"><crona-icone nome="alerta" [tamanho]="18" [espessura]="2" /><span class="aviso-texto">{{ e.mensagem }}</span></div>
               @if (e.verificacoes.length > 0) {
                 <crona-checklist [verificacoes]="e.verificacoes" />
               }
