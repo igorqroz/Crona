@@ -12,6 +12,7 @@ import { Icone, NomeDoIcone } from '../compartilhado/icone';
 import { Logo } from '../compartilhado/logo';
 import { Perfil } from '../nucleo/modelos';
 import { Sessao } from '../nucleo/sessao';
+import { VERSAO } from '../nucleo/versao';
 
 interface ItemDoMenu {
   rota: string;
@@ -42,6 +43,7 @@ export class Casca {
   private readonly pendencias = inject(Pendencias);
 
   protected readonly usuario = this.sessao.usuario;
+  protected readonly versao = VERSAO;
   protected readonly perfil = computed(() => {
     const usuario = this.usuario();
     return usuario ? NOME_DO_PERFIL[usuario.perfil] : '';

@@ -21,6 +21,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # ================================================================== versão
+  # A versão do Crona fica no package.json (front) e no pom.xml (API), e os dois mudam juntos
+  # (ver CHANGELOG.md). Se alguém mudar um e esquecer o outro, este passo fica vermelho.
+  versao:
+    name: Versão igual no front e na API
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Comparar package.json e pom.xml
+        run: |
+          FRONT=$(jq -r .version frontend/package.json)
+          API=$(sed -n 's|^\t<version>\(.*\)</version>$|\1|p' backend/pom.xml | head -1)  # a <version> do projeto (1 tab); a do Spring Boot tem 2
+          echo "front: $FRONT | API: $API"
+          if [ "$FRONT" != "$API" ]; then
+            echo "::error::A versão do frontend/package.json ($FRONT) é diferente da do backend/pom.xml ($API)."
+            exit 1
+          fi
+
   # ================================================================== API
   backend:
     name: Back-end (testes e cobertura)

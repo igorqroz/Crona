@@ -57,6 +57,8 @@ public class SegurancaConfig {
                         // Fase 9: o Docker e a hospedagem perguntam "está vivo?" sem token.
                         // Só esta rota do Actuator está ligada (ver application.yml), e sem detalhes.
                         .requestMatchers(HttpMethod.GET, "/actuator/health").permitAll()
+                        // Versionamento: qual versão está no ar (só o número e a data do build).
+                        .requestMatchers(HttpMethod.GET, "/actuator/info").permitAll()
                         // Qualquer outra rota exige estar logado. Regra "fechado por padrão":
                         // uma rota nova nasce protegida, mesmo que alguém esqueça de configurar.
                         .anyRequest().authenticated())

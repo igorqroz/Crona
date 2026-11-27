@@ -134,3 +134,11 @@ nav {
   min-width: 0;
   padding: 32px clamp(16px, 3vw, 40px) 48px;
 }
+
+/* Versionamento: a versão no pé do menu, pequena e discreta. */
+.versao {
+  padding: 0 12px;
+  font-size: var(--texto-11);
+  font-variant-numeric: tabular-nums;
+  color: var(--cor-texto-suave);
+}
