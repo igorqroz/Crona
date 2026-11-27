@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { Observable, of, throwError } from 'rxjs';
 
 import { Colaborador, DadosDoColaborador, DepartamentoResumo } from '../nucleo/modelos';
+import { Sessao } from '../nucleo/sessao';
 import { CadastrosApi } from './cadastros-api';
 import { PainelColaborador } from './painel-colaborador';
 
@@ -62,7 +63,11 @@ describe('PainelColaborador', () => {
   async function criar(colaborador: Colaborador | null = null) {
     TestBed.configureTestingModule({
       imports: [PainelColaborador],
-      providers: [{ provide: CadastrosApi, useValue: api }],
+      providers: [
+        { provide: CadastrosApi, useValue: api },
+        // Quem está logado é o Rafael (RH): o painel dele mesmo tem as travas do BUG-06.
+        { provide: Sessao, useValue: { usuario: () => ({ id: 1, nome: 'Rafael Costa', perfil: 'ADMIN' }) } },
+      ],
     });
     const fixture = TestBed.createComponent(PainelColaborador);
     fixture.componentRef.setInput('colaborador', colaborador);
@@ -327,6 +332,54 @@ describe('PainelColaborador', () => {
 
       expect(elemento.querySelector('.confirmar')).toBeNull();
       expect(erroGeral()).toBe('Ana Lima é gestor de outras pessoas. Transfira a equipe antes de desativar.');
+    });
+
+    /*
+     * BUG-06: o RH não tranca a si mesmo para fora. A API recusa (ColaboradorApiTest), e a tela nem
+     * oferece: no painel de quem está logado, não há "Desativar" e o perfil fica travado.
+     */
+    describe('BUG-06: o painel de quem está logado', () => {
+      const perfil = (elemento: HTMLElement) =>
+        [...elemento.querySelectorAll('fieldset')].find((f) => f.querySelector('legend')?.textContent?.trim() === 'Perfil de acesso')!;
+
+      it('não oferece desativar: explica que outra pessoa do RH precisa fazer isso', async () => {
+        const { elemento, botao } = await criar(rafael);
+
+        expect(botao('Desativar acesso de Rafael')).toBeUndefined();
+        expect(elemento.textContent).toContain('Este é o seu acesso. Para desativá-lo, peça para outra pessoa do RH.');
+      });
+
+      it('o perfil fica travado, com a dica ligada ao grupo', async () => {
+        const { elemento } = await criar(rafael);
+
+        const grupo = perfil(elemento);
+        expect(grupo.disabled).toBe(true);
+        expect(grupo.getAttribute('aria-describedby')).toBe('dica-proprio-perfil');
+        expect(elemento.querySelector('#dica-proprio-perfil')?.textContent).toBe(
+          'Você não pode mudar o próprio perfil. Peça para outra pessoa do RH.',
+        );
+      });
+
+      it('os próprios dados continuam editáveis: salvar manda o perfil de sempre', async () => {
+        const { preencher, salvar, salvou } = await criar(rafael);
+
+        preencher('Cargo', 'Coordenador de RH');
+        await salvar();
+
+        expect(api.alterarColaborador).toHaveBeenCalledWith(1, expect.objectContaining({
+          perfil: 'ADMIN',
+          cargo: 'Coordenador de RH',
+        }));
+        expect(salvou).toHaveBeenCalledWith('Dados de Rafael Costa salvos.');
+      });
+
+      it('guarda: no painel de OUTRA pessoa, o perfil fica livre e o "Desativar" aparece', async () => {
+        const { elemento, botao } = await criar(ana);
+
+        expect(perfil(elemento).disabled).toBe(false);
+        expect(elemento.querySelector('#dica-proprio-perfil')).toBeNull();
+        expect(botao('Desativar acesso de Ana')).toBeDefined();
+      });
     });
 
     it('inativo: explica e oferece "Reativar acesso" (sem perguntar pela equipe)', async () => {
