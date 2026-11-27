@@ -181,10 +181,12 @@
                   </div>
                 }
                 <label class="campo">
-                  Motivo do cancelamento
+                  <!-- O nome do campo é só o rótulo; a dica entra como descrição (senão o leitor de tela lê duas vezes). -->
+                  <span id="rotulo-cancelamento">Motivo do cancelamento</span>
                   <textarea
                     rows="2"
                     maxlength="500"
+                    aria-labelledby="rotulo-cancelamento"
                     aria-describedby="dica-cancelamento"
                     [value]="motivoDoCancelamento()"
                     (input)="motivoDoCancelamento.set(valor($event))"
