@@ -27,13 +27,24 @@ public interface ColaboradorRepository extends JpaRepository<Colaborador, Long> 
                    or lower(c.email) like lower(concat('%', :busca, '%')))
               and (:departamentoId is null or c.departamento.id = :departamentoId)
               and (:ativo is null or c.ativo = :ativo)
+              and c.perfil in :perfis
+              and (:gestorId is null or c.gestor.id = :gestorId)
             """)
     // Pageable = qual página, quantos por página e a ordenação. Page = a página + o total.
-    Page<Colaborador> pesquisar(@Param("empresaId") Long empresaId,
-                                @Param("busca") String busca,
-                                @Param("departamentoId") Long departamentoId,
-                                @Param("ativo") Boolean ativo,
-                                Pageable paginacao);
+    // Cadastros 2: "perfis" nunca vem vazio (sem filtro = todos os perfis), porque "in ()" não é SQL válido.
+    Page<Colaborador> pesquisarComFiltros(@Param("empresaId") Long empresaId,
+                                          @Param("busca") String busca,
+                                          @Param("departamentoId") Long departamentoId,
+                                          @Param("ativo") Boolean ativo,
+                                          @Param("perfis") List<Perfil> perfis,
+                                          @Param("gestorId") Long gestorId,
+                                          Pageable paginacao);
+
+    /** A pesquisa sem os filtros de perfil e de gestor (a de antes do Cadastros 2). */
+    default Page<Colaborador> pesquisar(Long empresaId, String busca, Long departamentoId, Boolean ativo,
+                                        Pageable paginacao) {
+        return pesquisarComFiltros(empresaId, busca, departamentoId, ativo, List.of(Perfil.values()), null, paginacao);
+    }
 
     @EntityGraph(attributePaths = {"departamento", "gestor"})
     Optional<Colaborador> findByIdAndEmpresaId(Long id, Long empresaId);

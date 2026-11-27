@@ -68,7 +68,10 @@ export class Casca {
   /** A seção "Cadastros" é só do RH (ADMIN). */
   protected readonly menuDeCadastros = computed<ItemDoMenu[]>(() =>
     this.usuario()?.perfil === 'ADMIN'
-      ? [{ rota: '/cadastros/departamentos', texto: 'Departamentos', icone: 'predio' }]
+      ? [
+          { rota: '/cadastros/departamentos', texto: 'Departamentos', icone: 'predio' },
+          { rota: '/cadastros/colaboradores', texto: 'Colaboradores', icone: 'pessoas' },
+        ]
       : [],
   );
 

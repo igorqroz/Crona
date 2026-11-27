@@ -1,6 +1,7 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { afterNextRender, Component, computed, inject, Injector, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
 
 import { Icone } from '../compartilhado/icone';
@@ -21,7 +22,7 @@ type Aberto = { tipo: 'novo' } | { tipo: 'renomear' | 'excluir'; id: number };
  */
 @Component({
   selector: 'crona-departamentos',
-  imports: [Icone, NgTemplateOutlet],
+  imports: [Icone, NgTemplateOutlet, RouterLink],
   templateUrl: './departamentos.html',
   styleUrl: './departamentos.css',
 })

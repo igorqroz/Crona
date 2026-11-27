@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -52,6 +53,16 @@ public class ColaboradorService {
     @Transactional(readOnly = true)
     public PaginaResposta<ColaboradorResposta> pesquisar(String busca, Long departamentoId, Boolean ativo,
                                                           Pageable paginacao) {
+        return pesquisar(busca, departamentoId, ativo, null, null, paginacao);
+    }
+
+    /**
+     * Cadastros 2: também filtra por perfil (o select de Gestor pede GESTOR e ADMIN) e por gestor
+     * (quantas pessoas alguém tem na equipe, antes de desativar).
+     */
+    @Transactional(readOnly = true)
+    public PaginaResposta<ColaboradorResposta> pesquisar(String busca, Long departamentoId, Boolean ativo,
+                                                          List<Perfil> perfis, Long gestorId, Pageable paginacao) {
         paginacao.getSort().forEach(ordem -> {
             if (!ORDENACOES_PERMITIDAS.contains(ordem.getProperty())) {
                 throw new ParametroInvalidoException("Não é possível ordenar por \"" + ordem.getProperty()
@@ -61,7 +72,11 @@ public class ColaboradorService {
 
         // Busca vazia = "tudo": o LIKE '%%' casa com qualquer nome.
         String termo = busca == null ? "" : busca.trim();
-        var pagina = colaboradorRepository.pesquisar(empresaAtual.id(), termo, departamentoId, ativo, paginacao);
+        boolean semFiltrosNovos = (perfis == null || perfis.isEmpty()) && gestorId == null;
+        var pagina = semFiltrosNovos
+                ? colaboradorRepository.pesquisar(empresaAtual.id(), termo, departamentoId, ativo, paginacao)
+                : colaboradorRepository.pesquisarComFiltros(empresaAtual.id(), termo, departamentoId, ativo,
+                        perfis == null || perfis.isEmpty() ? List.of(Perfil.values()) : perfis, gestorId, paginacao);
         return PaginaResposta.de(pagina, ColaboradorResposta::de);
     }
 

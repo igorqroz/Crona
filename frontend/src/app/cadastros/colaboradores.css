@@ -1,0 +1,234 @@
+/*
+ * Cadastros > Colaboradores. As peças vêm do styles.css (P2): .topo-pagina, .campo, .segmentado,
+ * .selo-*, .estado, .aviso-*, .vazio. Aqui fica a tabela, a versão em cartões e os filtros.
+ */
+
+:host {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.lista {
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.dentro {
+  padding: 20px;
+}
+
+/* ---------------------------------------------------------------- filtros */
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.filtros .busca {
+  flex: 1 1 240px;
+}
+
+.filtros .campo:not(.busca) {
+  flex: 0 1 220px;
+}
+
+.situacao {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rotulo {
+  font-size: var(--texto-13);
+  font-weight: 600;
+  color: var(--cor-texto-secundario);
+}
+
+/* ---------------------------------------------------------------- tabela (computador) */
+
+.rolagem {
+  /* relative: o .so-leitor (position: absolute) fica preso aqui dentro. Sem isso, ele era
+     posicionado em relação à página e a deixava mais larga que a tela. */
+  position: relative;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+  font-size: var(--texto-14);
+}
+
+th {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--cor-borda);
+  background: var(--cor-fundo);
+  text-align: left;
+  font-size: var(--texto-12);
+  font-weight: 600;
+  color: var(--cor-texto-suave);
+  white-space: nowrap;
+}
+
+td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--cor-borda);
+  color: var(--cor-texto-secundario);
+  vertical-align: middle;
+}
+
+th:first-child,
+td:first-child {
+  padding-left: 20px;
+}
+
+tr.aberta td {
+  background: var(--cor-primaria-clara);
+}
+
+tr.inativo crona-avatar,
+.cartao-pessoa.inativo crona-avatar {
+  opacity: 0.55;
+}
+
+.pessoa {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pessoa-texto {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  min-width: 0;
+}
+
+/* O nome é um botão (abre o painel), com cara de texto forte. */
+button.nome {
+  padding: 0;
+  border: none;
+  background: none;
+  font: 600 var(--texto-14) var(--fonte-texto);
+  color: var(--cor-texto);
+  text-align: left;
+  cursor: pointer;
+}
+
+button.nome:hover {
+  color: var(--cor-primaria-escura);
+  text-decoration: underline;
+}
+
+.numero {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.so-leitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------- cartões (celular) */
+
+.cartoes {
+  display: none;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cartao-pessoa {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: var(--altura-toque);
+  padding: 12px 16px;
+  border: none;
+  border-bottom: 1px solid var(--cor-borda);
+  background: var(--cor-superficie);
+  font-family: var(--fonte-texto);
+  text-align: left;
+  color: var(--cor-texto);
+  cursor: pointer;
+}
+
+.cartao-pessoa .pessoa-texto {
+  flex: 1;
+  gap: 4px;
+}
+
+.cartao-pessoa strong {
+  font-size: var(--texto-14);
+}
+
+.selos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ---------------------------------------------------------------- paginação */
+
+.paginacao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 20px;
+}
+
+.botoes {
+  display: flex;
+  gap: 8px;
+}
+
+/* ---------------------------------------------------------------- celular */
+
+@media (max-width: 767px) {
+  .rolagem {
+    display: none;
+  }
+
+  .cartoes {
+    display: block;
+  }
+
+  .filtros .campo:not(.busca) {
+    flex: 1 1 100%;
+  }
+
+  /* Os botões de situação rolam para o lado se não couberem. */
+  .situacao {
+    width: 100%;
+  }
+
+  .segmentado {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .segmentado button {
+    flex-shrink: 0;
+    min-height: var(--altura-toque);
+    white-space: nowrap;
+  }
+}

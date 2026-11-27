@@ -1,0 +1,182 @@
+<header class="topo-pagina">
+  <div class="topo-pagina-texto">
+    <span class="secao">Cadastros</span>
+    <h1>Colaboradores</h1>
+    @if (resumo(); as texto) {
+      <p>{{ texto }}</p>
+    }
+  </div>
+  <button class="botao botao-primario" type="button" (click)="abrirNovo($event)">Novo colaborador</button>
+</header>
+
+@if (feito(); as texto) {
+  <div id="feito" class="aviso aviso-sucesso" role="status" tabindex="-1">
+    <crona-icone nome="check" [tamanho]="18" [espessura]="2" />
+    <span class="aviso-texto">{{ texto }}</span>
+  </div>
+}
+
+<section class="cartao lista" aria-label="Lista de colaboradores">
+  <!-- Filtros: cada um vira um parâmetro do GET /colaboradores. -->
+  <div class="filtros">
+    <label class="campo busca">
+      Buscar
+      <input
+        type="search"
+        placeholder="Nome ou e-mail"
+        autocomplete="off"
+        [value]="busca()"
+        (input)="digitouBusca(valor($event))"
+      />
+    </label>
+    <label class="campo">
+      Departamento
+      <select [value]="departamentoId() ?? ''" (change)="escolheuDepartamento(valor($event))">
+        <option value="">Todos os departamentos</option>
+        @for (d of departamentos(); track d.id) {
+          <option [value]="d.id" [selected]="d.id === departamentoId()">{{ d.nome }}</option>
+        }
+      </select>
+    </label>
+    <div class="situacao">
+      <span class="rotulo" id="rotulo-situacao">Situação</span>
+      <div class="segmentado" role="group" aria-labelledby="rotulo-situacao">
+        @for (s of situacoes; track s.valor) {
+          <button type="button" [attr.aria-pressed]="situacao() === s.valor" (click)="escolheuSituacao(s.valor)">
+            {{ s.texto }} · {{ numeroDa(s.valor) }}
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  @switch (estado()) {
+    @case ('carregando') {
+      <p class="texto-suave dentro">Carregando…</p>
+    }
+
+    @case ('erro') {
+      <div class="dentro">
+        <div class="aviso aviso-erro" role="alert">
+          <crona-icone nome="alerta" [tamanho]="18" [espessura]="2" />
+          <span class="aviso-texto">Não foi possível carregar os colaboradores.</span>
+          <button class="botao botao-secundario" type="button" (click)="carregar()">Tentar de novo</button>
+        </div>
+      </div>
+    }
+
+    @case ('pronto') {
+      @if (colaboradores().length === 0) {
+        <div class="dentro">
+          <div class="vazio">
+            <strong>Ninguém encontrado</strong>
+            <p>
+              @if (temFiltro()) {
+                Nenhuma pessoa combina com a busca e os filtros escolhidos.
+              } @else {
+                Ainda não há ninguém cadastrado. Comece pelo botão "Novo colaborador".
+              }
+            </p>
+            @if (temFiltro()) {
+              <button class="botao botao-secundario" type="button" (click)="limparFiltros()">Limpar busca e filtros</button>
+            }
+          </div>
+        </div>
+      } @else {
+        <!-- Computador: tabela. Rola para o lado se a tela for estreita. -->
+        <div class="rolagem">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Pessoa</th>
+                <th scope="col">Cargo</th>
+                <th scope="col">Departamento</th>
+                <th scope="col">Perfil</th>
+                <th scope="col">Gestor</th>
+                <th scope="col">Admissão</th>
+                <th scope="col">Situação</th>
+                <th scope="col"><span class="so-leitor">Ações</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (c of colaboradores(); track c.id) {
+                <tr [class.aberta]="idAberto() === c.id" [class.inativo]="!c.ativo">
+                  <td>
+                    <div class="pessoa">
+                      <crona-avatar [nome]="c.nome" [tamanho]="32" />
+                      <div class="pessoa-texto">
+                        <button class="nome" type="button" (click)="abrirEdicao(c, $event)">{{ c.nome }}</button>
+                        <span class="texto-suave">{{ c.email }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td>{{ c.cargo ?? '—' }}</td>
+                  <td>{{ c.departamento?.nome ?? '—' }}</td>
+                  <td><span [class]="seloDoPerfil(c.perfil)">{{ nomeDoPerfil(c.perfil) }}</span></td>
+                  <td>{{ c.gestor?.nome ?? '—' }}</td>
+                  <td class="numero">{{ diaMesAno(c.dataAdmissao) }}</td>
+                  <td>
+                    <span class="estado" [class.estado-sucesso]="c.ativo">{{ c.ativo ? 'Ativo' : 'Inativo' }}</span>
+                  </td>
+                  <td>
+                    <button class="botao botao-texto" type="button" [attr.aria-label]="'Editar ' + c.nome" (click)="abrirEdicao(c, $event)">
+                      Editar
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Celular: a mesma lista em cartões. -->
+        <ul class="cartoes">
+          @for (c of colaboradores(); track c.id) {
+            <li>
+              <button class="cartao-pessoa" type="button" [class.inativo]="!c.ativo" (click)="abrirEdicao(c, $event)">
+                <crona-avatar [nome]="c.nome" [tamanho]="36" />
+                <span class="pessoa-texto">
+                  <strong>{{ c.nome }}</strong>
+                  <span class="texto-suave">{{ c.cargo ?? 'Sem cargo' }} · {{ c.departamento?.nome ?? 'Sem departamento' }}</span>
+                  <span class="selos">
+                    <span [class]="seloDoPerfil(c.perfil)">{{ nomeDoPerfil(c.perfil) }}</span>
+                    @if (!c.ativo) {
+                      <span class="estado">Inativo</span>
+                    }
+                  </span>
+                </span>
+                <crona-icone nome="proximo" [tamanho]="18" />
+              </button>
+            </li>
+          }
+        </ul>
+
+        <nav class="paginacao" aria-label="Páginas">
+          <span class="texto-suave numero">{{ faixa() }}</span>
+          <div class="botoes">
+            <button class="botao botao-secundario" type="button" [disabled]="pagina() === 0" (click)="irParaPagina(pagina() - 1)">
+              Anterior
+            </button>
+            <button
+              class="botao botao-secundario"
+              type="button"
+              [disabled]="pagina() + 1 >= totalPaginas()"
+              (click)="irParaPagina(pagina() + 1)"
+            >
+              Próxima
+            </button>
+          </div>
+        </nav>
+      }
+    }
+  }
+</section>
+
+@if (painel(); as p) {
+  <crona-painel-colaborador
+    [colaborador]="p === 'novo' ? null : p"
+    [departamentos]="departamentos()"
+    (fechou)="fecharPainel()"
+    (salvou)="salvou($event)"
+  />
+}

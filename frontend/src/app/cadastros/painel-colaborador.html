@@ -1,0 +1,202 @@
+<!-- O fundo escuro: clicar nele fecha (para o teclado, há o Esc e o X). -->
+<div class="fundo" (click)="fechou.emit()" aria-hidden="true"></div>
+
+<div #janela class="janela" role="dialog" aria-modal="true" aria-labelledby="painel-titulo">
+  <header class="cabecalho">
+    @if (colaborador(); as c) {
+      <crona-avatar [nome]="c.nome" [tamanho]="40" />
+      <div class="cabecalho-texto">
+        <h2 id="painel-titulo">{{ c.nome }}</h2>
+        <span class="estado" [class.estado-sucesso]="c.ativo">
+          {{ c.ativo ? 'Ativo' : 'Inativo' }} · desde {{ diaMesAno(c.dataAdmissao) }}
+        </span>
+      </div>
+    } @else {
+      <div class="cabecalho-texto">
+        <h2 id="painel-titulo">Novo colaborador</h2>
+        <span class="texto-suave">A pessoa entra no Crona com o e-mail e a senha inicial.</span>
+      </div>
+    }
+    <button class="fechar" type="button" aria-label="Fechar" (click)="fechou.emit()">
+      <crona-icone nome="x" [tamanho]="20" />
+    </button>
+  </header>
+
+  <form id="painel-formulario" class="corpo" novalidate (submit)="$event.preventDefault(); salvar()">
+    <fieldset>
+      <legend>Dados pessoais</legend>
+      <label class="campo">
+        Nome completo
+        <input
+          id="painel-nome"
+          type="text"
+          autocomplete="off"
+          maxlength="150"
+          [value]="nome()"
+          (input)="mudou('nome', () => nome.set(valor($event)))"
+          [attr.aria-invalid]="erros().nome ? true : null"
+          [attr.aria-describedby]="erros().nome ? 'erro-nome' : null"
+        />
+        @if (erros().nome; as e) {
+          <span id="erro-nome" class="campo-erro">{{ e }}</span>
+        }
+      </label>
+      <label class="campo">
+        E-mail de trabalho
+        <input
+          type="email"
+          autocomplete="off"
+          maxlength="254"
+          [value]="email()"
+          (input)="mudou('email', () => email.set(valor($event)))"
+          [attr.aria-invalid]="erros().email ? true : null"
+          [attr.aria-describedby]="erros().email ? 'erro-email' : 'dica-email'"
+        />
+        @if (erros().email; as e) {
+          <span id="erro-email" class="campo-erro">{{ e }}</span>
+        } @else {
+          <span id="dica-email" class="campo-dica">É com este e-mail que a pessoa entra no Crona.</span>
+        }
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Trabalho</legend>
+      <label class="campo">
+        Cargo (opcional)
+        <input
+          type="text"
+          autocomplete="off"
+          maxlength="100"
+          [value]="cargo()"
+          (input)="mudou('cargo', () => cargo.set(valor($event)))"
+          [attr.aria-invalid]="erros().cargo ? true : null"
+          [attr.aria-describedby]="erros().cargo ? 'erro-cargo' : null"
+        />
+        @if (erros().cargo; as e) {
+          <span id="erro-cargo" class="campo-erro">{{ e }}</span>
+        }
+      </label>
+      <label class="campo">
+        Departamento
+        <select (change)="departamentoId.set(numeroOuNulo(valor($event)))">
+          <option value="" [selected]="departamentoId() === null">Sem departamento</option>
+          @for (d of departamentos(); track d.id) {
+            <option [value]="d.id" [selected]="d.id === departamentoId()">{{ d.nome }}</option>
+          }
+        </select>
+      </label>
+      <label class="campo">
+        Gestor
+        <select (change)="gestorId.set(numeroOuNulo(valor($event)))" aria-describedby="dica-gestor">
+          <option value="" [selected]="gestorId() === null">Sem gestor</option>
+          @for (g of opcoesDeGestor(); track g.id) {
+            <option [value]="g.id" [selected]="g.id === gestorId()">{{ g.nome }}</option>
+          }
+        </select>
+        <span id="dica-gestor" class="campo-dica">É quem aprova as férias desta pessoa. Sem gestor, quem aprova é o RH.</span>
+      </label>
+      <label class="campo">
+        Data de admissão
+        <input
+          type="date"
+          [value]="dataAdmissao()"
+          (input)="mudou('dataAdmissao', () => dataAdmissao.set(valor($event)))"
+          [attr.aria-invalid]="erros().dataAdmissao ? true : null"
+          [attr.aria-describedby]="erros().dataAdmissao ? 'erro-admissao' : 'dica-admissao'"
+        />
+        @if (erros().dataAdmissao; as e) {
+          <span id="erro-admissao" class="campo-erro">{{ e }}</span>
+        } @else {
+          <span id="dica-admissao" class="campo-dica">O primeiro período aquisitivo conta a partir desta data.</span>
+        }
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Perfil de acesso</legend>
+      <div class="perfis">
+        @for (p of perfis; track p.valor) {
+          <label class="perfil" [class.escolhido]="perfil() === p.valor">
+            <input type="radio" name="perfil" [value]="p.valor" [checked]="perfil() === p.valor" (change)="perfil.set(p.valor)" />
+            <span class="perfil-texto">
+              <strong>{{ p.nome }}</strong>
+              <span>{{ p.descricao }}</span>
+            </span>
+          </label>
+        }
+      </div>
+    </fieldset>
+
+    @if (novo()) {
+      <fieldset>
+        <legend>Primeiro acesso</legend>
+        <label class="campo">
+          Senha inicial
+          <input
+            type="password"
+            autocomplete="new-password"
+            maxlength="72"
+            [value]="senha()"
+            (input)="mudou('senha', () => senha.set(valor($event)))"
+            [attr.aria-invalid]="erros().senha ? true : null"
+            [attr.aria-describedby]="erros().senha ? 'erro-senha' : 'dica-senha'"
+          />
+          @if (erros().senha; as e) {
+            <span id="erro-senha" class="campo-erro">{{ e }}</span>
+          } @else {
+            <span id="dica-senha" class="campo-dica">De 8 a 72 caracteres. Passe para a pessoa por um canal seguro.</span>
+          }
+        </label>
+      </fieldset>
+    }
+
+    @if (colaborador(); as c) {
+      <fieldset>
+        <legend>Acesso ao Crona</legend>
+        @if (!c.ativo) {
+          <p class="texto-suave">{{ primeiroNome(c.nome) }} não entra no Crona agora. Os pedidos e o histórico continuam guardados.</p>
+          <div>
+            <button class="botao botao-secundario" type="button" [disabled]="ocupado()" (click)="reativar()">Reativar acesso</button>
+          </div>
+        } @else if (equipe() !== null && equipe()! > 0) {
+          <div class="aviso" role="note">
+            <crona-icone nome="alerta" [tamanho]="18" [espessura]="2" />
+            <span class="aviso-texto">{{ avisoDeEquipe(c.nome, equipe()!) }}</span>
+          </div>
+        } @else if (confirmandoDesativar()) {
+          <div class="confirmar" role="group" aria-label="Desativar acesso">
+            <p>
+              {{ primeiroNome(c.nome) }} deixa de entrar no Crona. Os pedidos e o histórico continuam guardados, e dá para
+              reativar quando quiser.
+            </p>
+            <div class="botoes">
+              <button id="painel-voltar" class="botao botao-secundario" type="button" (click)="fecharConfirmacao()">Voltar</button>
+              <button class="botao botao-perigo" type="button" [disabled]="ocupado()" (click)="desativar()">Desativar acesso</button>
+            </div>
+          </div>
+        } @else {
+          <div>
+            <button id="painel-desativar" class="botao botao-texto perigo" type="button" (click)="abrirConfirmacao()">
+              Desativar acesso de {{ primeiroNome(c.nome) }}
+            </button>
+          </div>
+        }
+      </fieldset>
+    }
+
+    @if (erroGeral(); as e) {
+      <div class="aviso aviso-erro" role="alert">
+        <crona-icone nome="alerta" [tamanho]="18" [espessura]="2" />
+        <span class="aviso-texto">{{ e }}</span>
+      </div>
+    }
+  </form>
+
+  <footer class="rodape">
+    <button class="botao botao-secundario" type="button" (click)="fechou.emit()">Cancelar</button>
+    <button class="botao botao-primario" type="submit" form="painel-formulario" [disabled]="ocupado()">
+      {{ novo() ? 'Cadastrar colaborador' : 'Salvar alterações' }}
+    </button>
+  </footer>
+</div>
