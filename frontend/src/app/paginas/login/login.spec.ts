@@ -52,6 +52,55 @@ describe('Login', () => {
     expect(TestBed.inject(Router).navigate).toHaveBeenCalledWith(['/inicio']);
   });
 
+  /*
+   * P2 (campos): o erro de cada campo fica LIGADO ao campo (aria-invalid + aria-describedby), para o
+   * leitor de tela dizer "inválido" e ler o motivo quando a pessoa volta ao campo.
+   */
+  describe('erros dos campos', () => {
+    const enviar = (fixture: { nativeElement: HTMLElement; detectChanges: () => void }) => {
+      fixture.nativeElement.querySelector('form')!.dispatchEvent(new Event('submit'));
+      fixture.detectChanges();
+    };
+
+    it('enviar vazio: os dois campos ficam inválidos, cada um ligado à sua mensagem, e não tenta entrar', () => {
+      const { fixture, elemento } = criar(false);
+
+      enviar(fixture);
+
+      const email = elemento.querySelector<HTMLInputElement>('input[type="email"]')!;
+      const senha = elemento.querySelector<HTMLInputElement>('input[type="password"]')!;
+      expect(email.getAttribute('aria-invalid')).toBe('true');
+      expect(email.getAttribute('aria-describedby')).toBe('erro-email');
+      expect(elemento.querySelector('#erro-email.campo-erro')?.textContent).toBe('Informe um e-mail válido.');
+      expect(senha.getAttribute('aria-invalid')).toBe('true');
+      expect(senha.getAttribute('aria-describedby')).toBe('erro-senha');
+      expect(elemento.querySelector('#erro-senha.campo-erro')?.textContent).toBe('Informe a senha.');
+      expect(sessao.entrar).not.toHaveBeenCalled();
+    });
+
+    it('antes de tentar, nenhum campo aparece como inválido', () => {
+      const { elemento } = criar(false);
+
+      expect(elemento.querySelectorAll('[aria-invalid]')).toHaveLength(0);
+      expect(elemento.querySelector('.campo-erro')).toBeNull();
+    });
+
+    it('corrigir o e-mail tira o erro só dele', () => {
+      const { fixture, elemento } = criar(false);
+      enviar(fixture);
+
+      const email = elemento.querySelector<HTMLInputElement>('input[type="email"]')!;
+      email.value = 'ana.lima@demo.crona';
+      email.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+
+      expect(email.getAttribute('aria-invalid')).toBeNull();
+      expect(email.getAttribute('aria-describedby')).toBeNull();
+      expect(elemento.querySelector('#erro-email')).toBeNull();
+      expect(elemento.querySelector('#erro-senha')).not.toBeNull();
+    });
+  });
+
   it('fora da demonstração, não mostra nenhuma conta', () => {
     const { elemento } = criar(false);
 

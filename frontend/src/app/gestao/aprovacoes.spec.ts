@@ -400,6 +400,8 @@ describe('Aprovacoes', () => {
       clicar('Recusar', cartao);
 
       const motivo = cartao.querySelector('textarea')!;
+      // P2 (campos): o campo tem um rótulo visível (antes era só o placeholder, que some ao digitar).
+      expect(motivo.closest('label.campo')?.textContent?.trim()).toBe('Motivo da recusa');
       motivo.value = '  Período de fechamento contábil.  ';
       motivo.dispatchEvent(new Event('input'));
       fixture.detectChanges();
@@ -498,6 +500,11 @@ describe('Aprovacoes', () => {
       const cartao = cartaoDe('Bruno Teles');
 
       clicar('Cancelar férias', cartao);
+      // P2 (campos): rótulo visível e a dica ligada ao campo.
+      const caixa = cartao.querySelector('textarea')!;
+      expect(caixa.closest('label.campo')?.firstChild?.textContent?.trim()).toBe('Motivo do cancelamento');
+      expect(caixa.getAttribute('aria-describedby')).toBe('dica-cancelamento');
+      expect(cartao.querySelector('#dica-cancelamento')?.textContent).toBe('A pessoa vai ver este motivo.');
       escreverMotivo(cartao, '  Aprovado por engano: datas trocadas  ');
       clicar('Cancelar as férias de Bruno', cartao);
 
