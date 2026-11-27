@@ -23,8 +23,9 @@ export function avisoDeExclusao(departamento: DepartamentoResumo): string | null
   if (pessoas === 0) {
     return null;
   }
-  const quantas = pessoas === 1 ? '1 pessoa' : `${pessoas} pessoas`;
-  return `${nome} ainda tem ${quantas}. Para excluir, essas pessoas precisam antes mudar de departamento.`;
+  return pessoas === 1
+    ? `${nome} ainda tem 1 pessoa. Para excluir, essa pessoa precisa antes mudar de departamento.`
+    : `${nome} ainda tem ${pessoas} pessoas. Para excluir, essas pessoas precisam antes mudar de departamento.`;
 }
 
 /** O nome digitado, sem espaços nas pontas; ou a mensagem de erro (a mesma da API). */

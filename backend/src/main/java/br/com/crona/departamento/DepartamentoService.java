@@ -82,8 +82,11 @@ public class DepartamentoService {
         } catch (DataIntegrityViolationException e) {
             // O banco recusou por causa de uma chave estrangeira: há colaboradores
             // ou períodos restritos ligados a este departamento.
+            // A tela de Cadastros só conta as pessoas ATIVAS; por isso a frase explica o caso que ela não
+            // mostra: gente com o acesso desativado (decisão do Igor: melhorar a mensagem, em vez de contar).
             throw new ConflitoException("O departamento \"" + departamento.getNome()
-                    + "\" está em uso e não pode ser excluído.");
+                    + "\" está em uso e não pode ser excluído. Ainda há pessoas nele, mesmo com o acesso"
+                    + " desativado, ou períodos restritos dele. Mude essas pessoas de departamento antes.");
         }
     }
 
