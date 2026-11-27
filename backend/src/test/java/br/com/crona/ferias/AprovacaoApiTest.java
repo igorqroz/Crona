@@ -324,5 +324,28 @@ class AprovacaoApiTest extends ComBiaTestBase {
             mockMvc.perform(get("/minhas-ferias/solicitacoes").with(como(rita, "ADMIN")))
                     .andExpect(jsonPath("$[0].status").value("AGUARDANDO_RH"));
         }
+
+        /*
+         * O caso do teste manual do Igor, com os dados de exemplo: o Rafael é o único ADMIN. Sem um
+         * gestor cadastrado, o pedido dele (agora fora da fila dele) não iria para a fila de ninguém.
+         * Decisão do Igor: o Roberto é o gestor dele.
+         */
+        @Test
+        @DisplayName("dados de exemplo: o pedido do Rafael, o único ADMIN, vai para a fila do Roberto, o gestor dele")
+        void pedidoDoRafaelTemQuemAprove() throws Exception {
+            rafael = idDoColaborador("rafael.costa@demo.crona");
+            Long periodo = jdbc.queryForObject(
+                    "SELECT id FROM periodo_aquisitivo WHERE colaborador_id = ? ORDER BY numero DESC LIMIT 1",
+                    Long.class, rafael);
+            // Direto no banco: o saldo do Rafael nos dados de exemplo depende da data de hoje.
+            Long pedido = jdbc.queryForObject("""
+                    INSERT INTO solicitacao_ferias (colaborador_id, periodo_aquisitivo_id, data_inicio, data_fim, dias_gozo, status)
+                    VALUES (?, ?, ?, ?, 10, 'AGUARDANDO_GESTOR') RETURNING id
+                    """, Long.class, rafael, periodo, segunda, segunda.plusDays(9));
+
+            mockMvc.perform(get("/aprovacoes").with(como(robertoId, "GESTOR")))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$[?(@.id == " + pedido + ")]", hasSize(1)));
+        }
     }
 }
