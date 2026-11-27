@@ -22,9 +22,10 @@
 <ng-template #formularioNovo>
   <form class="linha-formulario" (submit)="$event.preventDefault(); criar()">
     <label class="campo">
-      Nome do novo departamento
+      <span id="rotulo-novo">Nome do novo departamento</span>
       <input
         id="campo-novo"
+        aria-labelledby="rotulo-novo"
         type="text"
         maxlength="100"
         autocomplete="off"
@@ -85,9 +86,10 @@
               @if (estaAberto('renomear', d.id)) {
                 <form class="linha-formulario" (submit)="$event.preventDefault(); renomear(d)">
                   <label class="campo">
-                    Novo nome para {{ d.nome }}
+                    <span id="rotulo-renomear">Novo nome para {{ d.nome }}</span>
                     <input
                       [id]="'campo-renomear-' + d.id"
+                      aria-labelledby="rotulo-renomear"
                       type="text"
                       maxlength="100"
                       autocomplete="off"

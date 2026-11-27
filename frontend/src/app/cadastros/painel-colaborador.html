@@ -26,8 +26,9 @@
     <fieldset>
       <legend>Dados pessoais</legend>
       <label class="campo">
-        Nome completo
+        <span id="rotulo-nome">Nome completo</span>
         <input
+          aria-labelledby="rotulo-nome"
           id="painel-nome"
           type="text"
           autocomplete="off"
@@ -42,8 +43,9 @@
         }
       </label>
       <label class="campo">
-        E-mail de trabalho
+        <span id="rotulo-email">E-mail de trabalho</span>
         <input
+          aria-labelledby="rotulo-email"
           type="email"
           autocomplete="off"
           maxlength="254"
@@ -63,8 +65,9 @@
     <fieldset>
       <legend>Trabalho</legend>
       <label class="campo">
-        Cargo (opcional)
+        <span id="rotulo-cargo">Cargo (opcional)</span>
         <input
+          aria-labelledby="rotulo-cargo"
           type="text"
           autocomplete="off"
           maxlength="100"
@@ -87,8 +90,8 @@
         </select>
       </label>
       <label class="campo">
-        Gestor
-        <select (change)="gestorId.set(numeroOuNulo(valor($event)))" aria-describedby="dica-gestor">
+        <span id="rotulo-gestor">Gestor</span>
+        <select aria-labelledby="rotulo-gestor" (change)="gestorId.set(numeroOuNulo(valor($event)))" aria-describedby="dica-gestor">
           <option value="" [selected]="gestorId() === null">Sem gestor</option>
           @for (g of opcoesDeGestor(); track g.id) {
             <option [value]="g.id" [selected]="g.id === gestorId()">{{ g.nome }}</option>
@@ -97,8 +100,9 @@
         <span id="dica-gestor" class="campo-dica">É quem aprova as férias desta pessoa. Sem gestor, quem aprova é o RH, e a pessoa não consegue propor trocas.</span>
       </label>
       <label class="campo">
-        Data de admissão
+        <span id="rotulo-admissao">Data de admissão</span>
         <input
+          aria-labelledby="rotulo-admissao"
           type="date"
           [value]="dataAdmissao()"
           (input)="mudou('dataAdmissao', () => dataAdmissao.set(valor($event)))"
@@ -141,8 +145,9 @@
       <fieldset>
         <legend>Primeiro acesso</legend>
         <label class="campo">
-          Senha inicial
+          <span id="rotulo-senha">Senha inicial</span>
           <input
+            aria-labelledby="rotulo-senha"
             type="password"
             autocomplete="new-password"
             maxlength="72"
