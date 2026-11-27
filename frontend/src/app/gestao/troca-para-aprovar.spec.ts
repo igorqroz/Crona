@@ -217,4 +217,19 @@ describe('TrocaParaAprovarCartao', () => {
     expect(elemento.querySelector('textarea')!.value).toBe('');
     expect(aviso()).toBeUndefined();
   });
+
+  /*
+   * BUG-04 (registro em docs/plano-de-testes.md): depois de uma decisão em OUTRA troca, a página
+   * recarrega a lista e todas as trocas chegam como objetos novos. A MESMA troca (mesmo id) não
+   * pode perder o que o gestor está escrevendo. É a mesma ideia do BUG-02, no detalhe do pedido.
+   */
+  it('BUG-04: a MESMA troca recarregada mantém a mensagem que o gestor está escrevendo', () => {
+    const { fixture, elemento, escrever } = criar();
+    escrever('Rascunho do motivo de recusa');
+
+    fixture.componentRef.setInput('troca', troca()); // objeto novo, mesmo id (40)
+    fixture.detectChanges();
+
+    expect(elemento.querySelector('textarea')!.value).toBe('Rascunho do motivo de recusa');
+  });
 });

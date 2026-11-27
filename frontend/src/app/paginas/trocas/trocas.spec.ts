@@ -232,17 +232,23 @@ describe('Trocas', () => {
       expect(pendencias.atualizar).toHaveBeenCalledTimes(2); // ao abrir e depois de aceitar
     });
 
-    it('recusar com recado manda o recado; sem recado, manda undefined', () => {
+    it('recusar com recado manda o recado, sem os espaços das pontas', () => {
       const { cartaoCom, clicar, preencher } = criar();
 
       clicar('Recusar', cartaoCom('Bruno Teles'));
       preencher(cartaoCom('Bruno Teles').querySelector('textarea')!, '  Não posso nessas datas.  ');
       clicar('Recusar a troca', cartaoCom('Bruno Teles'));
-      expect(api.recusarTroca).toHaveBeenLastCalledWith(40, 'Não posso nessas datas.');
+
+      expect(api.recusarTroca).toHaveBeenCalledWith(40, 'Não posso nessas datas.');
+    });
+
+    it('recusar sem recado manda undefined (o recado é opcional)', () => {
+      const { cartaoCom, clicar } = criar();
 
       clicar('Recusar', cartaoCom('Bruno Teles'));
       clicar('Recusar a troca', cartaoCom('Bruno Teles'));
-      expect(api.recusarTroca).toHaveBeenLastCalledWith(40, undefined);
+
+      expect(api.recusarTroca).toHaveBeenCalledWith(40, undefined);
     });
 
     it('contrapropor: começa com as datas da proposta e manda do ponto de vista da API (eu sou a colega)', () => {
@@ -350,6 +356,63 @@ describe('Trocas', () => {
       const { elemento } = criar();
 
       expect(elemento.querySelector('.negociacoes')?.textContent).toContain('Nenhuma troca ainda.');
+    });
+  });
+
+  /*
+   * BUG-04 (registro em docs/plano-de-testes.md): uma ação num cartão recarrega a lista, e todas
+   * as negociações chegam como objetos novos. O formulário aberto em OUTRO cartão não pode fechar
+   * (nem perder o que foi digitado). Só fecha o do cartão cuja negociação mudou de verdade.
+   */
+  describe('BUG-04: a lista recarrega depois de uma ação', () => {
+    it('a contraproposta aberta no cartão do Bruno continua aberta quando cancelo a proposta da Carla', () => {
+      // Depois de cancelar, a API devolve a proposta da Carla CANCELADA; a do Bruno, igual (objeto novo).
+      api.negociacoes
+        .mockReturnValueOnce(of([encerrada, enviada, recebida]))
+        .mockReturnValueOnce(
+          of([
+            structuredClone(encerrada),
+            { ...structuredClone(enviada), status: 'CANCELADA', vezDe: null },
+            structuredClone(recebida),
+          ]),
+        );
+      const { cartaoCom, clicar, preencher } = criar();
+      clicar('Contrapropor', cartaoCom('Bruno Teles'));
+      preencher(
+        cartaoCom('Bruno Teles').querySelectorAll<HTMLInputElement>('input[type="date"]')[0],
+        '2027-06-14',
+      );
+
+      clicar('Cancelar proposta', cartaoCom('Carla Souza'));
+      clicar('Sim, cancelar', cartaoCom('Carla Souza'));
+
+      expect(api.cancelarTroca).toHaveBeenCalledWith(41);
+      const datas =
+        cartaoCom('Bruno Teles').querySelectorAll<HTMLInputElement>('input[type="date"]');
+      expect(datas).toHaveLength(2); // o formulário do Bruno continua aberto...
+      expect(datas[0].value).toBe('2027-06-14'); // ...com a data que a Ana digitou
+    });
+
+    it('guarda: quando a ação do PRÓPRIO cartão dá certo, o formulário dele fecha', () => {
+      // Depois da contraproposta, a negociação do Bruno volta com uma rodada a mais e a vez dele.
+      const depois: Negociacao = {
+        ...structuredClone(recebida),
+        status: 'AGUARDANDO_SOLICITANTE',
+        vezDe: BRUNO,
+        propostas: [
+          ...recebida.propostas,
+          { ...recebida.propostas[0], autor: ANA, inicioColega: '2027-06-14' },
+        ],
+      };
+      api.negociacoes
+        .mockReturnValueOnce(of([encerrada, enviada, recebida]))
+        .mockReturnValueOnce(of([structuredClone(encerrada), structuredClone(enviada), depois]));
+      const { cartaoCom, clicar } = criar();
+      clicar('Contrapropor', cartaoCom('Bruno Teles'));
+
+      clicar('Enviar contraproposta', cartaoCom('Bruno Teles'));
+
+      expect(cartaoCom('Bruno Teles').querySelectorAll('input[type="date"]')).toHaveLength(0);
     });
   });
 
