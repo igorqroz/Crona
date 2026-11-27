@@ -58,3 +58,14 @@ CROSS JOIN (VALUES
 ) AS x (nome, email, cargo, admissao)
 WHERE e.cnpj = '11222333000181'
 ON CONFLICT (lower(email)) DO NOTHING;
+
+-- BUG-05: ninguém decide as próprias férias. O Rafael é o único ADMIN, então sem gestor o
+-- pedido dele não entraria na fila de ninguém. Decisão do Igor: o Roberto é o gestor dele.
+-- É um UPDATE (e não o gestor_id no INSERT acima) porque o Roberto só existe depois, e para
+-- valer também nos bancos que já têm o Rafael: o INSERT com ON CONFLICT não mexe neles.
+UPDATE colaborador r
+SET gestor_id = g.id
+FROM colaborador g
+WHERE lower(r.email) = 'rafael.costa@demo.crona'
+  AND lower(g.email) = 'roberto.neves@demo.crona'
+  AND r.gestor_id IS NULL;

@@ -162,8 +162,10 @@ public class AprovacaoService {
 
     @Transactional(readOnly = true)
     public List<ItemDeAprovacao> filaDoRh() {
+        var eu = simulacaoService.colaboradorLogado();
         return solicitacaoRepository.findByStatusAndColaboradorEmpresaIdOrderByDataInicioAsc(
                         StatusSolicitacao.AGUARDANDO_RH, empresaAtual.id()).stream()
+                .filter(pedido -> naoEMeu(pedido, eu))
                 .map(pedido -> paraItem(pedido, avaliar(pedido)))
                 .toList();
     }
@@ -192,9 +194,18 @@ public class AprovacaoService {
     // ================================================================== auxiliares
 
     private List<SolicitacaoFerias> pendentesQueEuDecido(Colaborador eu, StatusSolicitacao status) {
-        return eu.getPerfil() == Perfil.ADMIN
+        var pedidos = eu.getPerfil() == Perfil.ADMIN
                 ? solicitacaoRepository.findByStatusAndColaboradorEmpresaIdOrderByDataInicioAsc(status, empresaAtual.id())
                 : solicitacaoRepository.findByStatusAndColaboradorGestorIdOrderByDataInicioAsc(status, eu.getId());
+        return pedidos.stream().filter(pedido -> naoEMeu(pedido, eu)).toList();
+    }
+
+    /**
+     * BUG-05: ninguém decide o próprio pedido, então ele não aparece nas filas de quem está logado.
+     * Quem aprova as férias de um ADMIN é o gestor cadastrado dele ou, se ele não tiver, outro ADMIN.
+     */
+    private static boolean naoEMeu(SolicitacaoFerias pedido, Colaborador eu) {
+        return !pedido.getColaborador().getId().equals(eu.getId());
     }
 
     /** O pedido existe, é da empresa e é da minha equipe (ou sou ADMIN)? Senão, "não encontrado". */
