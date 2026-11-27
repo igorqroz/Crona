@@ -1,0 +1,118 @@
+/*
+ * Cadastros > Departamentos. O visual vem quase todo das peças globais do P2 (styles.css):
+ * .topo-pagina, .aviso, .campo, .vazio. Aqui fica só o que é desta tela: a lista e as linhas.
+ */
+
+:host {
+  max-width: 880px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.lista {
+  gap: 0;
+  padding: 0;
+}
+
+.lista-topo {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.lista > .linha-formulario {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--cor-borda);
+  background: var(--cor-fundo);
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.departamento {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.departamento:last-child {
+  border-bottom: none;
+}
+
+.departamento.aberto {
+  background: var(--cor-fundo);
+}
+
+.linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+.nome {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nome strong {
+  font-size: var(--texto-14);
+  font-weight: 600;
+}
+
+.acoes {
+  display: flex;
+  gap: 4px;
+}
+
+.botao-texto.perigo {
+  color: var(--cor-perigo);
+}
+
+/* Formulário de uma linha (criar e renomear): o campo cresce, os botões ficam ao lado. */
+.linha-formulario {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.linha-formulario .campo {
+  flex: 1 1 260px;
+}
+
+.botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Os botões ficam na altura do campo (o rótulo ocupa a primeira linha). */
+.linha-formulario .botoes {
+  padding-top: 22px;
+}
+
+/* A confirmação de excluir: fundo vermelho claro, como o aviso de erro. */
+.confirmar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--cor-perigo-borda);
+  border-radius: var(--raio);
+  background: var(--cor-perigo-fundo);
+  color: var(--cor-perigo-escura);
+  font-size: var(--texto-14);
+}
+
+.confirmar p {
+  margin: 0;
+}

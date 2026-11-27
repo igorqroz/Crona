@@ -49,6 +49,21 @@ public interface ColaboradorRepository extends JpaRepository<Colaborador, Long> 
     // Quantas pessoas ativas o departamento tem (para o limite da EMP-01).
     long countByDepartamentoIdAndAtivoTrue(Long departamentoId);
 
+    /** Uma linha do "group by" abaixo. O Spring Data preenche a interface pelos nomes (alias) da consulta. */
+    interface PessoasNoDepartamento {
+        Long getDepartamentoId();
+        Long getPessoas();
+    }
+
+    // Cadastros: quantas pessoas ativas cada departamento da empresa tem, numa consulta só.
+    @Query("""
+            select c.departamento.id as departamentoId, count(c) as pessoas
+            from Colaborador c
+            where c.empresa.id = :empresaId and c.ativo = true and c.departamento is not null
+            group by c.departamento.id
+            """)
+    List<PessoasNoDepartamento> contarAtivosPorDepartamento(@Param("empresaId") Long empresaId);
+
     // Este colaborador é gestor de alguém ativo?
     boolean existsByGestorIdAndAtivoTrue(Long gestorId);
 

@@ -2,12 +2,19 @@ package br.com.crona.departamento;
 
 import br.com.crona.ApiTestBase;
 
+import com.jayway.jsonpath.JsonPath;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -112,5 +119,127 @@ class DepartamentoApiTest extends ApiTestBase {
         mockMvc.perform(get("/departamentos/999999"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.detail").value("Departamento 999999 não encontrado."));
+    }
+
+    /*
+     * Cadastros 1: a lista traz o resumo de cada departamento ("5 pessoas · até 1 fora por dia").
+     * As pessoas são só as ATIVAS, e o limite é a mesma conta da EMP-01 que o pedido de férias usa:
+     * pessoas × (100 − percentual mínimo trabalhando) / 100, no mínimo 1.
+     */
+    @Nested
+    @DisplayName("o resumo da lista (pessoas e limite da EMP-01)")
+    class Resumo {
+
+        @Autowired
+        private JdbcTemplate jdbc;
+        @Autowired
+        private EntityManager sessao;
+
+        private Long criarDepartamento(String nome) throws Exception {
+            var json = mockMvc.perform(post("/departamentos").contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"nome\": \"" + nome + "\"}"))
+                    .andExpect(status().isCreated())
+                    .andReturn().getResponse().getContentAsString();
+            return ((Number) JsonPath.read(json, "$.id")).longValue();
+        }
+
+        private Long criarPessoa(Long departamentoId, int n) throws Exception {
+            var json = mockMvc.perform(post("/colaboradores").contentType(MediaType.APPLICATION_JSON).content("""
+                            {"nome": "Pessoa %d", "email": "pessoa%d.juridico@demo.crona", "senha": "segredo123",
+                             "perfil": "COLABORADOR", "dataAdmissao": "2024-01-08", "departamentoId": %d}
+                            """.formatted(n, n, departamentoId)))
+                    .andExpect(status().isCreated())
+                    .andReturn().getResponse().getContentAsString();
+            return ((Number) JsonPath.read(json, "$.id")).longValue();
+        }
+
+        private void percentualMinimoTrabalhando(Integer percentual) {
+            jdbc.update("UPDATE configuracao_ferias SET percentual_minimo_trabalhando = ? WHERE empresa_id = ?",
+                    percentual, empresaDemo);
+        }
+
+        private String linha(Long id) {
+            return "$[?(@.id == " + id + ")]";
+        }
+
+        @Test
+        @DisplayName("conta só as pessoas ATIVAS, e o limite usa a conta da EMP-01")
+        void pessoasAtivasELimite() throws Exception {
+            percentualMinimoTrabalhando(50);
+            Long juridico = criarDepartamento("Jurídico");
+            for (int n = 1; n <= 4; n++) {
+                criarPessoa(juridico, n);
+            }
+            Long saiu = criarPessoa(juridico, 5);
+            mockMvc.perform(post("/colaboradores/" + saiu + "/desativar")).andExpect(status().is2xxSuccessful());
+
+            // 4 ativas × 50% = 2 podem estar fora no mesmo dia.
+            mockMvc.perform(get("/departamentos"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath(linha(juridico) + ".pessoas", contains(4)))
+                    .andExpect(jsonPath(linha(juridico) + ".limiteFora", contains(2)));
+        }
+
+        @Test
+        @DisplayName("departamento sem ninguém: 0 pessoas e limite 1 (o mínimo da EMP-01)")
+        void departamentoVazio() throws Exception {
+            percentualMinimoTrabalhando(50);
+            Long vazio = criarDepartamento("Jurídico");
+
+            mockMvc.perform(get("/departamentos"))
+                    .andExpect(jsonPath(linha(vazio) + ".pessoas", contains(0)))
+                    .andExpect(jsonPath(linha(vazio) + ".limiteFora", contains(1)));
+        }
+
+        /*
+         * O banco não deixa excluir um departamento que alguém ainda referencia, mesmo uma pessoa
+         * INATIVA (que o resumo não conta). A API traduz isso em 409.
+         *
+         * flush() + clear(): no teste, todas as requisições dividem a mesma sessão do Hibernate, que
+         * ainda "lembra" a pessoa ligada ao departamento e falha antes de chegar ao banco (500).
+         * Limpar a sessão simula o que acontece de verdade: cada requisição com a sua.
+         */
+        @Test
+        @DisplayName("departamento só com gente inativa: o resumo diz 0, e excluir responde 409 (está em uso)")
+        void excluirComGenteInativa() throws Exception {
+            Long juridico = criarDepartamento("Jurídico");
+            Long saiu = criarPessoa(juridico, 1);
+            mockMvc.perform(post("/colaboradores/" + saiu + "/desativar")).andExpect(status().is2xxSuccessful());
+            mockMvc.perform(get("/departamentos"))
+                    .andExpect(jsonPath(linha(juridico) + ".pessoas", contains(0)));
+            sessao.flush();
+            sessao.clear();
+
+            mockMvc.perform(delete("/departamentos/" + juridico))
+                    .andExpect(status().isConflict())
+                    // Decisão do Igor: a tela continua contando só as ativas; a mensagem explica o resto.
+                    .andExpect(jsonPath("$.detail").value("O departamento \"Jurídico\" está em uso e não pode ser"
+                            + " excluído. Ainda há pessoas nele, mesmo com o acesso desativado, ou períodos restritos"
+                            + " dele. Mude essas pessoas de departamento antes."));
+        }
+
+        @Test
+        @DisplayName("com a EMP-01 desligada (sem percentual), o limite vem nulo")
+        void semEmp01() throws Exception {
+            percentualMinimoTrabalhando(null);
+            Long juridico = criarDepartamento("Jurídico");
+            criarPessoa(juridico, 1);
+
+            mockMvc.perform(get("/departamentos"))
+                    .andExpect(jsonPath(linha(juridico) + ".pessoas", contains(1)))
+                    .andExpect(jsonPath(linha(juridico) + ".limiteFora", contains(nullValue())));
+        }
+
+        @Test
+        @DisplayName("o COLABORADOR também vê a lista (DEPARTAMENTO_VER), mas não cria (403)")
+        void colaboradorSoVe() throws Exception {
+            Long ana = jdbc.queryForObject("SELECT id FROM colaborador WHERE email = 'ana.lima@demo.crona'", Long.class);
+
+            mockMvc.perform(get("/departamentos").with(como(ana, "COLABORADOR")))
+                    .andExpect(status().isOk());
+            mockMvc.perform(post("/departamentos").with(como(ana, "COLABORADOR"))
+                            .contentType(MediaType.APPLICATION_JSON).content("{\"nome\": \"Jurídico\"}"))
+                    .andExpect(status().isForbidden());
+        }
     }
 }

@@ -1,0 +1,155 @@
+<header class="topo-pagina">
+  <div class="topo-pagina-texto">
+    <span class="secao">Cadastros</span>
+    <h1>Departamentos</h1>
+    <p>Cada pessoa fica num departamento. É por ele que o Crona conta quantas pessoas podem sair de férias no mesmo dia.</p>
+  </div>
+  @if (estado() === 'pronto' && total() > 0) {
+    <button id="botao-novo" class="botao botao-primario" type="button" [disabled]="aberto()?.tipo === 'novo'" (click)="abrirNovo()">
+      Novo departamento
+    </button>
+  }
+</header>
+
+@if (feito(); as texto) {
+  <div id="feito" class="aviso aviso-sucesso" role="status" tabindex="-1">
+    <crona-icone nome="check" [tamanho]="18" [espessura]="2" />
+    <span class="aviso-texto">{{ texto }}</span>
+  </div>
+}
+
+<!-- O formulário de criar: em cima da lista (ou no lugar do vazio). -->
+<ng-template #formularioNovo>
+  <form class="linha-formulario" (submit)="$event.preventDefault(); criar()">
+    <label class="campo">
+      Nome do novo departamento
+      <input
+        id="campo-novo"
+        type="text"
+        maxlength="100"
+        autocomplete="off"
+        [value]="nome()"
+        (input)="digitou(valor($event))"
+        (keydown.escape)="fechar()"
+        [attr.aria-invalid]="erro() ? true : null"
+        [attr.aria-describedby]="erro() ? 'erro-novo' : null"
+      />
+      @if (erro(); as texto) {
+        <span id="erro-novo" class="campo-erro">{{ texto }}</span>
+      }
+    </label>
+    <div class="botoes">
+      <button class="botao botao-primario" type="submit" [disabled]="ocupado()">Criar departamento</button>
+      <button class="botao botao-secundario" type="button" (click)="fechar()">Cancelar</button>
+    </div>
+  </form>
+</ng-template>
+
+@switch (estado()) {
+  @case ('carregando') {
+    <p class="texto-suave">Carregando…</p>
+  }
+
+  @case ('erro') {
+    <div class="aviso aviso-erro" role="alert">
+      <crona-icone nome="alerta" [tamanho]="18" [espessura]="2" />
+      <span class="aviso-texto">Não foi possível carregar os departamentos.</span>
+      <button class="botao botao-secundario" type="button" (click)="carregar()">Tentar de novo</button>
+    </div>
+  }
+
+  @case ('pronto') {
+    @if (total() === 0) {
+      <div class="vazio">
+        <strong>Nenhum departamento ainda</strong>
+        <p>Crie o primeiro, por exemplo "Engenharia" ou "Financeiro". Depois é só colocar as pessoas nele em Colaboradores.</p>
+        @if (aberto()?.tipo === 'novo') {
+          <ng-container *ngTemplateOutlet="formularioNovo" />
+        } @else {
+          <button id="botao-novo" class="botao botao-primario" type="button" (click)="abrirNovo()">Criar o primeiro departamento</button>
+        }
+      </div>
+    } @else {
+      <section class="cartao lista" aria-labelledby="titulo-lista">
+        <div class="lista-topo">
+          <h2 id="titulo-lista" class="cartao-titulo">{{ total() }} {{ total() === 1 ? 'departamento' : 'departamentos' }}</h2>
+        </div>
+
+        @if (aberto()?.tipo === 'novo') {
+          <ng-container *ngTemplateOutlet="formularioNovo" />
+        }
+
+        <ul>
+          @for (d of departamentos(); track d.id) {
+            <li class="departamento" [class.aberto]="estaAberto('renomear', d.id) || estaAberto('excluir', d.id)">
+              @if (estaAberto('renomear', d.id)) {
+                <form class="linha-formulario" (submit)="$event.preventDefault(); renomear(d)">
+                  <label class="campo">
+                    Novo nome para {{ d.nome }}
+                    <input
+                      [id]="'campo-renomear-' + d.id"
+                      type="text"
+                      maxlength="100"
+                      autocomplete="off"
+                      [value]="nome()"
+                      (input)="digitou(valor($event))"
+                      (keydown.escape)="fechar()"
+                      [attr.aria-invalid]="erro() ? true : null"
+                      [attr.aria-describedby]="erro() ? 'erro-renomear' : 'dica-renomear'"
+                    />
+                    @if (erro(); as texto) {
+                      <span id="erro-renomear" class="campo-erro">{{ texto }}</span>
+                    } @else {
+                      <span id="dica-renomear" class="campo-dica">As pessoas e os pedidos continuam ligados ao departamento: só o nome muda.</span>
+                    }
+                  </label>
+                  <div class="botoes">
+                    <button class="botao botao-primario" type="submit" [disabled]="ocupado()">Salvar nome</button>
+                    <button class="botao botao-secundario" type="button" (click)="fechar()">Cancelar</button>
+                  </div>
+                </form>
+              } @else {
+                <div class="linha">
+                  <div class="nome">
+                    <strong>{{ d.nome }}</strong>
+                    <span class="texto-suave">{{ resumo(d) }}</span>
+                  </div>
+                  <div class="acoes">
+                    <button [id]="'renomear-' + d.id" class="botao botao-texto" type="button" [attr.aria-label]="'Renomear ' + d.nome" (click)="abrirRenomear(d)">
+                      Renomear
+                    </button>
+                    <button [id]="'excluir-' + d.id" class="botao botao-texto perigo" type="button" [attr.aria-label]="'Excluir ' + d.nome" (click)="abrirExcluir(d)">
+                      Excluir
+                    </button>
+                  </div>
+                </div>
+
+                @if (estaAberto('excluir', d.id)) {
+                  @if (avisoDeExclusao(d); as texto) {
+                    <!-- Com gente no departamento, a API recusaria: em vez de confirmar, explica o que fazer. -->
+                    <div [id]="'aviso-excluir-' + d.id" class="aviso" role="alert" tabindex="-1">
+                      <crona-icone nome="alerta" [tamanho]="18" [espessura]="2" />
+                      <span class="aviso-texto">{{ texto }}</span>
+                      <button class="botao botao-secundario" type="button" (click)="fechar()">Entendi</button>
+                    </div>
+                  } @else {
+                    <div class="confirmar" role="group" [attr.aria-label]="'Excluir ' + d.nome">
+                      <p>Excluir <strong>{{ d.nome }}</strong>? Não dá para desfazer.</p>
+                      @if (erro(); as texto) {
+                        <p class="campo-erro" role="alert">{{ texto }}</p>
+                      }
+                      <div class="botoes">
+                        <button [id]="'voltar-excluir-' + d.id" class="botao botao-secundario" type="button" (click)="fechar()">Voltar</button>
+                        <button class="botao botao-perigo" type="button" [disabled]="ocupado()" (click)="excluir(d)">Excluir departamento</button>
+                      </div>
+                    </div>
+                  }
+                }
+              }
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  }
+}

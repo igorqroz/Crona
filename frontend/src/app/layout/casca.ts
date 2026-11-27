@@ -65,6 +65,13 @@ export class Casca {
       : [];
   });
 
+  /** A seção "Cadastros" é só do RH (ADMIN). */
+  protected readonly menuDeCadastros = computed<ItemDoMenu[]>(() =>
+    this.usuario()?.perfil === 'ADMIN'
+      ? [{ rota: '/cadastros/departamentos', texto: 'Departamentos', icone: 'predio' }]
+      : [],
+  );
+
   constructor() {
     // A cada troca de tela, confere de novo o que está esperando a pessoa (os números do menu).
     // Não precisa chamar também aqui no construtor: a casca nasce DURANTE a primeira navegação,
