@@ -125,7 +125,10 @@
                 }
               </div>
               @if (recusandoNoRh() === p.id) {
-                <textarea rows="2" maxlength="500" placeholder="Motivo da recusa" [value]="motivoDoRh()" (input)="motivoDoRh.set(valor($event))"></textarea>
+                <label class="campo">
+                  Motivo da recusa
+                  <textarea rows="2" maxlength="500" [value]="motivoDoRh()" (input)="motivoDoRh.set(valor($event))"></textarea>
+                </label>
                 <div class="rh-acoes">
                   <button class="botao botao-secundario" type="button" (click)="recusandoNoRh.set(null)">Voltar</button>
                   <button class="botao botao-perigo" type="button" [disabled]="ocupado() === 'rh-' + p.id" (click)="recusarNoRh(p.id)">Recusar pedido</button>
@@ -177,14 +180,19 @@
                     Combine com o financeiro antes de cancelar.
                   </div>
                 }
-                <textarea
-                  aria-label="Motivo do cancelamento"
-                  rows="2"
-                  maxlength="500"
-                  placeholder="Motivo do cancelamento (a pessoa vai ver)"
-                  [value]="motivoDoCancelamento()"
-                  (input)="motivoDoCancelamento.set(valor($event))"
-                ></textarea>
+                <label class="campo">
+                  <!-- O nome do campo é só o rótulo; a dica entra como descrição (senão o leitor de tela lê duas vezes). -->
+                  <span id="rotulo-cancelamento">Motivo do cancelamento</span>
+                  <textarea
+                    rows="2"
+                    maxlength="500"
+                    aria-labelledby="rotulo-cancelamento"
+                    aria-describedby="dica-cancelamento"
+                    [value]="motivoDoCancelamento()"
+                    (input)="motivoDoCancelamento.set(valor($event))"
+                  ></textarea>
+                  <span id="dica-cancelamento" class="campo-dica">A pessoa vai ver este motivo.</span>
+                </label>
                 <div class="rh-acoes">
                   <button class="botao botao-secundario" type="button" (click)="cancelando.set(null)">Voltar</button>
                   <button class="botao botao-perigo" type="button" [disabled]="ocupado() === 'aprovada-' + f.id" (click)="cancelarAprovada(f)">

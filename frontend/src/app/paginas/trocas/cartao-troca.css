@@ -118,33 +118,6 @@ details ol {
   gap: 12px;
 }
 
-label {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--cor-texto-secundario);
-}
-
-input,
-textarea {
-  padding: 10px 12px;
-  border: 1px solid var(--cor-borda-campo);
-  border-radius: var(--raio);
-  font-family: var(--fonte-texto);
-  font-size: 14px;
-  color: var(--cor-texto);
-}
-
-input {
-  min-height: var(--altura-toque);
-}
-
-textarea {
-  resize: vertical;
-}
-
 .acoes {
   display: flex;
   flex-wrap: wrap;
