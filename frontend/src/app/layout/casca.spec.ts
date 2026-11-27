@@ -98,6 +98,22 @@ describe('Casca', () => {
       expect(menu()).toContain('Aprovações');
       expect(menu()).toContain('Calendário da equipe');
     });
+
+    it('RH (ADMIN): só ele vê a seção Cadastros, com o link para Departamentos', () => {
+      const { elemento, menu, linkPara } = criar('ADMIN', 'Rafael Costa');
+
+      const grupos = [...elemento.querySelectorAll('.titulo-do-grupo')].map((g) => g.textContent);
+      expect(grupos).toEqual(['Gestão', 'Cadastros']);
+      expect(menu().at(-1)).toBe('Departamentos');
+      expect(linkPara('Departamentos').getAttribute('href')).toBe('/cadastros/departamentos');
+    });
+
+    it.each(['COLABORADOR', 'GESTOR'] as const)('%s: não vê a seção Cadastros', (perfil) => {
+      const { elemento, menu } = criar(perfil);
+
+      expect(elemento.textContent).not.toContain('Cadastros');
+      expect(menu()).not.toContain('Departamentos');
+    });
   });
 
   describe('quem está logado', () => {

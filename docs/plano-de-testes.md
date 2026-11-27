@@ -63,6 +63,7 @@ Mais detalhes no [README](../README.md#cobertura-dos-testes) e no [README do E2E
 | Aviso de férias em PDF | ✅ | ✅ | ✅ (Início) | — |
 | Notificações (sino) | — | ✅ | ✅ | — |
 | Calendário da equipe (gestão) | ✅ | ✅ | ✅ | — |
+| Cadastros > Departamentos (RH): lista com pessoas e limite, criar, renomear, excluir | ✅ (regras da tela) | ✅ | ✅ (tela, foco e menu) | — |
 
 ✅ coberto · ⚠️ parcial · — não coberto nesta camada
 
