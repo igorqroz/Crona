@@ -76,6 +76,14 @@ describe('Login', () => {
       expect(senha.getAttribute('aria-describedby')).toBe('erro-senha');
       expect(elemento.querySelector('#erro-senha.campo-erro')?.textContent).toBe('Informe a senha.');
       expect(sessao.entrar).not.toHaveBeenCalled();
+
+      // Sem leitura dupla: o NOME é só o rótulo (aria-labelledby); o erro vem só na descrição.
+      const rotulo = (campo: HTMLInputElement) =>
+        document.getElementById(campo.getAttribute('aria-labelledby')!)?.textContent?.trim();
+      expect(rotulo(email)).toBe('E-mail');
+      expect(rotulo(senha)).toBe('Senha');
+      expect(email.closest('label')).not.toBeNull(); // clicar no texto ainda foca o campo
+      expect(senha.closest('label')).not.toBeNull();
     });
 
     it('antes de tentar, nenhum campo aparece como inválido', () => {
