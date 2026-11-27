@@ -113,11 +113,15 @@
       </label>
     </fieldset>
 
-    <fieldset>
+    <!-- BUG-06: no próprio painel, o perfil fica travado (a API também recusa). -->
+    <fieldset [disabled]="souEu()" [attr.aria-describedby]="souEu() ? 'dica-proprio-perfil' : null">
       <legend>Perfil de acesso</legend>
+      @if (souEu()) {
+        <span id="dica-proprio-perfil" class="campo-dica">Você não pode mudar o próprio perfil. Peça para outra pessoa do RH.</span>
+      }
       <div class="perfis">
         @for (p of perfis; track p.valor) {
-          <label class="perfil" [class.escolhido]="perfil() === p.valor">
+          <label class="perfil" [class.escolhido]="perfil() === p.valor" [class.travado]="souEu()">
             <input type="radio" name="perfil" [value]="p.valor" [checked]="perfil() === p.valor" (change)="perfil.set(p.valor)" />
             <span class="perfil-texto">
               <strong>{{ p.nome }}</strong>
@@ -154,7 +158,10 @@
     @if (colaborador(); as c) {
       <fieldset>
         <legend>Acesso ao Crona</legend>
-        @if (!c.ativo) {
+        @if (souEu()) {
+          <!-- BUG-06: ninguém desativa o próprio acesso (a API também recusa). -->
+          <p class="texto-suave">Este é o seu acesso. Para desativá-lo, peça para outra pessoa do RH.</p>
+        } @else if (!c.ativo) {
           <p class="texto-suave">{{ primeiroNome(c.nome) }} não entra no Crona agora. Os pedidos e o histórico continuam guardados.</p>
           <div>
             <button class="botao botao-secundario" type="button" [disabled]="ocupado()" (click)="reativar()">Reativar acesso</button>

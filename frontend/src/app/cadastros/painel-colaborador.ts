@@ -6,6 +6,7 @@ import { Avatar } from '../compartilhado/avatar';
 import { Icone } from '../compartilhado/icone';
 import { diaMesAno } from '../nucleo/datas';
 import { Colaborador, DadosDoColaborador, DepartamentoResumo, Perfil } from '../nucleo/modelos';
+import { Sessao } from '../nucleo/sessao';
 import { CadastrosApi } from './cadastros-api';
 import {
   avisoDeEquipe,
@@ -44,6 +45,13 @@ export class PainelColaborador implements OnInit {
   private readonly janela = viewChild.required<ElementRef<HTMLElement>>('janela');
 
   protected readonly novo = computed(() => this.colaborador() === null);
+
+  /** BUG-06: é o painel de quem está logado? Aí não dá para desativar nem mudar o próprio perfil. */
+  private readonly sessao = inject(Sessao);
+  protected readonly souEu = computed(() => {
+    const c = this.colaborador();
+    return c !== null && c.id === this.sessao.usuario()?.id;
+  });
 
   // ------------------------------------------------------------------ o formulário
   protected readonly nome = signal('');
