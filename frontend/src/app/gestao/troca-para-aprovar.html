@@ -25,7 +25,7 @@
   <p class="recado">“{{ recado.texto }}” <span class="texto-suave">— {{ recado.autor }}</span></p>
 }
 
-<label class="mensagem">
+<label class="mensagem campo">
   Mensagem para os dois {{ acao() === 'aprovar' ? '(obrigatória só para recusar)' : '(obrigatória)' }}
   <textarea rows="2" maxlength="500" [value]="mensagem()" (input)="mensagem.set(valor($event))"></textarea>
 </label>

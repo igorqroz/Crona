@@ -60,16 +60,16 @@
   @case ('contrapropor') {
     <div class="formulario">
       <div class="campos">
-        <label>
+        <label class="campo">
           Suas férias começam em
           <input type="date" [min]="amanha" [value]="meuInicio()" (input)="meuInicio.set(valor($event))" />
         </label>
-        <label>
+        <label class="campo">
           As de {{ v.outro.nome.split(' ')[0] }} começam em
           <input type="date" [min]="amanha" [value]="inicioDoOutro()" (input)="inicioDoOutro.set(valor($event))" />
         </label>
       </div>
-      <label>
+      <label class="campo">
         Recado (opcional)
         <textarea rows="2" maxlength="500" [value]="mensagem()" (input)="mensagem.set(valor($event))"></textarea>
       </label>
@@ -83,7 +83,7 @@
 
   @case ('recusar') {
     <div class="formulario">
-      <label>
+      <label class="campo">
         Recado para {{ v.outro.nome.split(' ')[0] }} (opcional)
         <textarea rows="2" maxlength="500" [value]="mensagem()" (input)="mensagem.set(valor($event))"></textarea>
       </label>

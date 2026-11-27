@@ -154,12 +154,3 @@
   text-align: right;
 }
 
-textarea {
-  resize: vertical;
-  padding: 10px 12px;
-  border: 1px solid var(--cor-borda-campo);
-  border-radius: var(--raio);
-  font-family: var(--fonte-texto);
-  font-size: 14px;
-  color: var(--cor-texto);
-}

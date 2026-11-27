@@ -91,7 +91,7 @@
 }
 
 <!-- ============================================================ decisão -->
-<label class="mensagem">
+<label class="mensagem campo">
   Mensagem para {{ primeiroNome() }}
   {{ acao() === 'aprovar' ? '(opcional para aprovar, obrigatória para recusar)' : '(obrigatória)' }}
   <textarea rows="2" maxlength="500" [value]="mensagem()" (input)="mensagem.set(valor($event))"

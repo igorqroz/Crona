@@ -291,6 +291,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 
 .campo textarea { padding: 10px 12px; resize: vertical; }
 .campo :is(input, select, textarea):hover { border-color: var(--cor-texto-suave); }
+.campo :is(input, select, textarea):focus { border-color: var(--cor-primaria); }
 .campo :is(input, select, textarea)[aria-invalid="true"] { border-color: var(--cor-perigo); }
 
 .campo-dica { font-size: var(--texto-12); font-weight: 400; color: var(--cor-texto-suave); }

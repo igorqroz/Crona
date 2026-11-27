@@ -69,7 +69,7 @@
           <form class="formulario" (submit)="$event.preventDefault(); propor()">
             <h3>Propor a {{ a.colaborador.nome.split(' ')[0] }}</h3>
 
-            <label>
+            <label class="campo">
               O que você oferece em troca
               <select (change)="oferecer(valor($event) ? +valor($event) : null)">
                 @for (minha of minhasFerias(); track minha.id) {
@@ -82,24 +82,24 @@
             </label>
 
             <div class="campos">
-              <label>
+              <label class="campo">
                 Suas férias começam em
                 <input type="date" [min]="amanha" [value]="meuInicio()" (input)="meuInicio.set(valor($event))" />
               </label>
               @if (oferecida() === null) {
-                <label>
+                <label class="campo">
                   Quantos dias
                   <input type="number" min="5" max="30" [value]="meusDias()" (input)="meusDias.set(+valor($event))" />
                 </label>
               }
-              <label>
+              <label class="campo">
                 As de {{ a.colaborador.nome.split(' ')[0] }} passam para
                 <input type="date" [min]="amanha" [value]="inicioDoColega()" (input)="inicioDoColega.set(valor($event))" />
               </label>
             </div>
             <p class="texto-suave">{{ a.colaborador.nome.split(' ')[0] }} mantém os {{ a.diasGozo }} dias dele: só as datas mudam.</p>
 
-            <label>
+            <label class="campo">
               Recado (opcional)
               <textarea rows="2" maxlength="500" placeholder="Ex.: casamento da minha irmã nessa semana" [value]="mensagem()" (input)="mensagem.set(valor($event))"></textarea>
             </label>
