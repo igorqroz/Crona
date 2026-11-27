@@ -142,6 +142,10 @@ public class SolicitacaoFerias extends EntidadeBase {
     /** EMP-06: o RH confirma um pedido que o gestor já aprovou. */
     public void confirmarNoRh(Colaborador rh, Instant agora) {
         exigirStatus(StatusSolicitacao.AGUARDANDO_RH, "confirmado pelo RH");
+        // BUG-05: a mesma regra do aprovarPeloGestor. Quem é do RH não confirma as próprias férias.
+        if (rh.getId().equals(colaborador.getId())) {
+            throw new RegraVioladaException("Ninguém pode confirmar no RH o próprio pedido de férias.");
+        }
         this.rhConfirmouPor = rh;
         this.rhConfirmouEm = agora;
         this.status = StatusSolicitacao.APROVADA;

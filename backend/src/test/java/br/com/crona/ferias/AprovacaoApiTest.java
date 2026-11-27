@@ -212,4 +212,140 @@ class AprovacaoApiTest extends ComBiaTestBase {
                     .andExpect(status().isForbidden());
         }
     }
+
+    /*
+     * BUG-05 (registro em docs/plano-de-testes.md): as férias de quem é do RH ficavam presas.
+     * O pedido do ADMIN caía só na fila dele mesmo, onde ele não pode aprovar (ninguém aprova o
+     * próprio pedido), e ninguém mais conseguia decidir.
+     *
+     * Decisão do Igor: aprova o gestor cadastrado da pessoa; sem gestor, outro ADMIN. O próprio
+     * pedido sai das filas de Aprovações e de confirmação do RH de quem pediu.
+     *
+     * A "Rita" é do RH, ADMIN e sem gestor, como o Rafael dos dados de desenvolvimento. Ela é criada
+     * aqui (admitida há 18 meses) para ter saldo em qualquer dia em que os testes rodem. O Rafael é o
+     * "outro ADMIN".
+     */
+    @Nested
+    @DisplayName("BUG-05: as férias de quem é do RH")
+    class FeriasDoRh {
+
+        private Long rafael;
+
+        private Long criarRita(Long gestorId) throws Exception {
+            rafael = idDoColaborador("rafael.costa@demo.crona");
+            Long rh = jdbc.queryForObject("SELECT departamento_id FROM colaborador WHERE id = ?", Long.class, rafael);
+            var json = mockMvc.perform(post("/colaboradores").contentType(MediaType.APPLICATION_JSON).content("""
+                            {"nome": "Rita RH", "email": "rita.rh@demo.crona", "senha": "segredo123",
+                             "perfil": "ADMIN", "dataAdmissao": "%s", "departamentoId": %d, "gestorId": %s}
+                            """.formatted(LocalDate.now(RelogioConfig.FUSO).minusMonths(18), rh, gestorId)))
+                    .andExpect(status().isCreated())
+                    .andReturn().getResponse().getContentAsString();
+            return ((Number) JsonPath.read(json, "$.id")).longValue();
+        }
+
+        private Long ritaPede(Long rita) throws Exception {
+            var json = mockMvc.perform(post("/minhas-ferias/solicitacoes").with(como(rita, "ADMIN"))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {"inicio": "%s", "diasGozo": 15}
+                                    """.formatted(segunda)))
+                    .andExpect(status().isCreated())
+                    .andReturn().getResponse().getContentAsString();
+            return ((Number) JsonPath.read(json, "$.id")).longValue();
+        }
+
+        @Test
+        @DisplayName("o próprio pedido do ADMIN não aparece na fila de Aprovações dele")
+        void proprioPedidoForaDaFila() throws Exception {
+            Long rita = criarRita(null);
+            Long pedido = ritaPede(rita);
+
+            mockMvc.perform(get("/aprovacoes").with(como(rita, "ADMIN")))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$[?(@.id == " + pedido + ")]", hasSize(0)));
+        }
+
+        @Test
+        @DisplayName("sem gestor cadastrado: outro ADMIN vê o pedido na fila e aprova")
+        void semGestorOutroAdminAprova() throws Exception {
+            Long rita = criarRita(null);
+            Long pedido = ritaPede(rita);
+
+            mockMvc.perform(get("/aprovacoes").with(como(rafael, "ADMIN")))
+                    .andExpect(jsonPath("$[?(@.id == " + pedido + ")]", hasSize(1)));
+            mockMvc.perform(post("/aprovacoes/" + pedido + "/aprovar").with(como(rafael, "ADMIN")))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("APROVADA"))
+                    .andExpect(jsonPath("$.decididoPor.nome").value("Rafael Costa"));
+        }
+
+        @Test
+        @DisplayName("com gestor cadastrado: o gestor dela vê o pedido na fila e aprova")
+        void comGestorOGestorAprova() throws Exception {
+            Long rita = criarRita(robertoId);
+            Long pedido = ritaPede(rita);
+
+            mockMvc.perform(get("/aprovacoes").with(como(robertoId, "GESTOR")))
+                    .andExpect(jsonPath("$[?(@.id == " + pedido + ")]", hasSize(1)));
+            mockMvc.perform(post("/aprovacoes/" + pedido + "/aprovar").with(como(robertoId, "GESTOR")))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("APROVADA"))
+                    .andExpect(jsonPath("$.decididoPor.nome").value("Roberto Neves"));
+        }
+
+        @Test
+        @DisplayName("com a confirmação do RH ligada (EMP-06): o próprio pedido não aparece na fila do RH de quem pediu, só na do outro ADMIN")
+        void proprioPedidoForaDaFilaDoRh() throws Exception {
+            jdbc.update("UPDATE configuracao_ferias SET exige_confirmacao_rh = TRUE WHERE empresa_id = ?", empresaDemo);
+            Long rita = criarRita(robertoId);
+            Long pedido = ritaPede(rita);
+            mockMvc.perform(post("/aprovacoes/" + pedido + "/aprovar").with(como(robertoId, "GESTOR")))
+                    .andExpect(jsonPath("$.status").value("AGUARDANDO_RH"));
+
+            mockMvc.perform(get("/confirmacoes-rh").with(como(rita, "ADMIN")))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$[?(@.id == " + pedido + ")]", hasSize(0)));
+            mockMvc.perform(get("/confirmacoes-rh").with(como(rafael, "ADMIN")))
+                    .andExpect(jsonPath("$[?(@.id == " + pedido + ")]", hasSize(1)));
+        }
+
+        @Test
+        @DisplayName("com a confirmação do RH ligada (EMP-06): o ADMIN não confirma o próprio pedido (422), e o pedido continua com o RH")
+        void naoConfirmaOProprioPedido() throws Exception {
+            jdbc.update("UPDATE configuracao_ferias SET exige_confirmacao_rh = TRUE WHERE empresa_id = ?", empresaDemo);
+            Long rita = criarRita(robertoId);
+            Long pedido = ritaPede(rita);
+            mockMvc.perform(post("/aprovacoes/" + pedido + "/aprovar").with(como(robertoId, "GESTOR")))
+                    .andExpect(jsonPath("$.status").value("AGUARDANDO_RH"));
+
+            mockMvc.perform(post("/confirmacoes-rh/" + pedido + "/confirmar").with(como(rita, "ADMIN")))
+                    .andExpect(status().isUnprocessableContent());
+
+            mockMvc.perform(get("/minhas-ferias/solicitacoes").with(como(rita, "ADMIN")))
+                    .andExpect(jsonPath("$[0].status").value("AGUARDANDO_RH"));
+        }
+
+        /*
+         * O caso do teste manual do Igor, com os dados de exemplo: o Rafael é o único ADMIN. Sem um
+         * gestor cadastrado, o pedido dele (agora fora da fila dele) não iria para a fila de ninguém.
+         * Decisão do Igor: o Roberto é o gestor dele.
+         */
+        @Test
+        @DisplayName("dados de exemplo: o pedido do Rafael, o único ADMIN, vai para a fila do Roberto, o gestor dele")
+        void pedidoDoRafaelTemQuemAprove() throws Exception {
+            rafael = idDoColaborador("rafael.costa@demo.crona");
+            Long periodo = jdbc.queryForObject(
+                    "SELECT id FROM periodo_aquisitivo WHERE colaborador_id = ? ORDER BY numero DESC LIMIT 1",
+                    Long.class, rafael);
+            // Direto no banco: o saldo do Rafael nos dados de exemplo depende da data de hoje.
+            Long pedido = jdbc.queryForObject("""
+                    INSERT INTO solicitacao_ferias (colaborador_id, periodo_aquisitivo_id, data_inicio, data_fim, dias_gozo, status)
+                    VALUES (?, ?, ?, ?, 10, 'AGUARDANDO_GESTOR') RETURNING id
+                    """, Long.class, rafael, periodo, segunda, segunda.plusDays(9));
+
+            mockMvc.perform(get("/aprovacoes").with(como(robertoId, "GESTOR")))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$[?(@.id == " + pedido + ")]", hasSize(1)));
+        }
+    }
 }
