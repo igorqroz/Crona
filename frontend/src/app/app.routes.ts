@@ -52,6 +52,13 @@ export const routes: Routes = [
         canActivate: [perfilGuard('GESTOR', 'ADMIN')],
         loadComponent: () => import('./gestao/calendario-equipe').then((m) => m.CalendarioEquipe),
       },
+      {
+        // Cadastros: só o RH (ADMIN).
+        path: 'cadastros/departamentos',
+        title: 'Departamentos · Crona',
+        canActivate: [perfilGuard('ADMIN')],
+        loadComponent: () => import('./cadastros/departamentos').then((m) => m.Departamentos),
+      },
       // As próximas telas. Por enquanto, um aviso de "em breve".
       {
         path: 'historico',

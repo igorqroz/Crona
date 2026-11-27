@@ -8,7 +8,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 /**
  * Regras do cadastro de departamentos.
@@ -31,15 +30,9 @@ public class DepartamentoService {
         this.empresaAtual = empresaAtual;
     }
 
-    // readOnly: avisa o banco que é só leitura (mais leve e mais seguro).
-    @Transactional(readOnly = true)
-    public List<DepartamentoResposta> listar() {
-        return departamentoRepository.findByEmpresaIdOrderByNomeAsc(empresaAtual.id())
-                .stream()
-                .map(DepartamentoResposta::de)
-                .toList();
-    }
+    // A lista (GET /departamentos) fica no ResumoDosDepartamentos, porque traz também as pessoas e o limite.
 
+    // readOnly: avisa o banco que é só leitura (mais leve e mais seguro).
     @Transactional(readOnly = true)
     public DepartamentoResposta buscar(Long id) {
         return DepartamentoResposta.de(buscarDaEmpresa(id));

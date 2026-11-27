@@ -29,6 +29,15 @@
         }
       </div>
     }
+
+    @if (menuDeCadastros().length > 0) {
+      <div class="grupo">
+        <span class="titulo-do-grupo">Cadastros</span>
+        @for (item of menuDeCadastros(); track item.rota) {
+          <ng-container *ngTemplateOutlet="itemDoMenu; context: { $implicit: item }" />
+        }
+      </div>
+    }
   </nav>
 
   @if (usuario(); as eu) {

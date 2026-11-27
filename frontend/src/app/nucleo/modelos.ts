@@ -264,4 +264,17 @@ export interface Problema {
   detail?: string;
   /** Só nos 422 de pedido com impedimento: o checklist das regras. */
   verificacoes?: Verificacao[];
+  /** Só nos 400 de validação: o erro de cada campo ({ nome: "Informe o nome do departamento." }). */
+  erros?: Record<string, string>;
+}
+
+// ------------------------------------------------------------------ cadastros (RH)
+
+/** GET /departamentos: um departamento com quantas pessoas ativas tem e o limite da EMP-01. */
+export interface DepartamentoResumo {
+  id: number;
+  nome: string;
+  pessoas: number;
+  /** Quantas podem estar de férias no mesmo dia. Nulo = a regra está desligada na empresa. */
+  limiteFora: number | null;
 }

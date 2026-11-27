@@ -29,15 +29,18 @@ import java.util.List;
 public class DepartamentoController {
 
     private final DepartamentoService service;
+    private final ResumoDosDepartamentos resumo;
 
-    public DepartamentoController(DepartamentoService service) {
+    public DepartamentoController(DepartamentoService service, ResumoDosDepartamentos resumo) {
         this.service = service;
+        this.resumo = resumo;
     }
 
+    // A lista já vem com quantas pessoas ativas cada departamento tem e o limite da EMP-01 (tela de Cadastros).
     @PreAuthorize("hasAuthority('DEPARTAMENTO_VER')")
     @GetMapping
-    public List<DepartamentoResposta> listar() {
-        return service.listar();
+    public List<DepartamentoResumo> listar() {
+        return resumo.listar();
     }
 
     @PreAuthorize("hasAuthority('DEPARTAMENTO_VER')")
