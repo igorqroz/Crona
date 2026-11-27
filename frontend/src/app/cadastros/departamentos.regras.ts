@@ -24,7 +24,7 @@ export function avisoDeExclusao(departamento: DepartamentoResumo): string | null
     return null;
   }
   const quantas = pessoas === 1 ? '1 pessoa' : `${pessoas} pessoas`;
-  return `${nome} ainda tem ${quantas}. Para excluir, mude essas pessoas de departamento em Colaboradores.`;
+  return `${nome} ainda tem ${quantas}. Para excluir, essas pessoas precisam antes mudar de departamento.`;
 }
 
 /** O nome digitado, sem espaços nas pontas; ou a mensagem de erro (a mesma da API). */

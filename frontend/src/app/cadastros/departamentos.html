@@ -2,7 +2,7 @@
   <div class="topo-pagina-texto">
     <span class="secao">Cadastros</span>
     <h1>Departamentos</h1>
-    <p>Cada pessoa fica num departamento. É por ele que o Crona conta quantos podem sair de férias no mesmo dia.</p>
+    <p>Cada pessoa fica num departamento. É por ele que o Crona conta quantas pessoas podem sair de férias no mesmo dia.</p>
   </div>
   @if (estado() === 'pronto' && total() > 0) {
     <button id="botao-novo" class="botao botao-primario" type="button" [disabled]="aberto()?.tipo === 'novo'" (click)="abrirNovo()">
