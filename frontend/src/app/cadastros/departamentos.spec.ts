@@ -263,18 +263,18 @@ describe('Departamentos', () => {
       expect(api.departamentos).toHaveBeenCalledTimes(2);
     });
 
-    it('a API recusa (409, em uso): a frase aparece na confirmação', async () => {
-      api.excluirDepartamento.mockReturnValue(
-        erroHttp(409, { detail: 'O departamento "Comercial" está em uso e não pode ser excluído.' }),
-      );
+    // O caso real: a lista diz "Ninguém ainda" (só conta as ativas), mas há gente com o acesso desativado.
+    it('a API recusa (409, gente inativa no departamento): a explicação aparece na confirmação', async () => {
+      const explicacao =
+        'O departamento "Comercial" está em uso e não pode ser excluído. Ainda há pessoas nele, mesmo com o' +
+        ' acesso desativado, ou períodos restritos dele. Mude essas pessoas de departamento antes.';
+      api.excluirDepartamento.mockReturnValue(erroHttp(409, { detail: explicacao }));
       const { clicar, elemento } = await criar();
       await clicar('Excluir Comercial');
 
       await clicar('Excluir departamento');
 
-      expect(elemento.querySelector('.confirmar [role="alert"]')?.textContent).toBe(
-        'O departamento "Comercial" está em uso e não pode ser excluído.',
-      );
+      expect(elemento.querySelector('.confirmar [role="alert"]')?.textContent).toBe(explicacao);
     });
   });
 

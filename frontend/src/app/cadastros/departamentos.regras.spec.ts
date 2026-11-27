@@ -37,7 +37,7 @@ describe('departamentos.regras', () => {
     // Texto do Design: não manda para a tela de Colaboradores, que ainda não existe.
     it('com gente, diz quantas pessoas e o que fazer, no singular e no plural', () => {
       expect(avisoDeExclusao(departamento(1))).toBe(
-        'Engenharia ainda tem 1 pessoa. Para excluir, essas pessoas precisam antes mudar de departamento.',
+        'Engenharia ainda tem 1 pessoa. Para excluir, essa pessoa precisa antes mudar de departamento.',
       );
       expect(avisoDeExclusao(departamento(5))).toBe(
         'Engenharia ainda tem 5 pessoas. Para excluir, essas pessoas precisam antes mudar de departamento.',

@@ -212,7 +212,10 @@ class DepartamentoApiTest extends ApiTestBase {
 
             mockMvc.perform(delete("/departamentos/" + juridico))
                     .andExpect(status().isConflict())
-                    .andExpect(jsonPath("$.detail").value("O departamento \"Jurídico\" está em uso e não pode ser excluído."));
+                    // Decisão do Igor: a tela continua contando só as ativas; a mensagem explica o resto.
+                    .andExpect(jsonPath("$.detail").value("O departamento \"Jurídico\" está em uso e não pode ser"
+                            + " excluído. Ainda há pessoas nele, mesmo com o acesso desativado, ou períodos restritos"
+                            + " dele. Mude essas pessoas de departamento antes."));
         }
 
         @Test
