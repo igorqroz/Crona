@@ -355,7 +355,12 @@ describe('Trocas', () => {
       api.negociacoes.mockReturnValue(of([]));
       const { elemento } = criar();
 
-      expect(elemento.querySelector('.negociacoes')?.textContent).toContain('Nenhuma troca ainda.');
+      // O estado vazio do P2: um título curto e a explicação.
+      const vazio = elemento.querySelector('.negociacoes .vazio')!;
+      expect(vazio.querySelector('strong')?.textContent?.trim()).toBe('Nenhuma troca ainda');
+      expect(vazio.querySelector('p')?.textContent?.trim()).toBe(
+        'Para propor uma, escolha as férias de um colega ao lado.',
+      );
     });
   });
 
@@ -523,7 +528,7 @@ describe('Trocas', () => {
     expect(elemento.querySelector('[role="alert"]')?.textContent).toContain(
       'Não foi possível carregar as trocas.',
     );
-    elemento.querySelector<HTMLAnchorElement>('[role="alert"] a')!.click();
+    elemento.querySelector<HTMLButtonElement>('[role="alert"] button')!.click(); // P2: um botão, não um link
     fixture.detectChanges();
 
     expect(cartoes()).toHaveLength(3);

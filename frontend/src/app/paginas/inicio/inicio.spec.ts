@@ -215,7 +215,7 @@ describe('Inicio', () => {
     expect(elemento.querySelector('[role="alert"]')?.textContent).toContain(
       'Não foi possível carregar as suas férias.',
     );
-    clicar('[role="alert"] a');
+    clicar('[role="alert"] button'); // P2: um botão, não um link
 
     expect(api.periodos).toHaveBeenCalledTimes(2);
     expect(elemento.querySelector('[role="alert"]')).toBeNull();

@@ -268,18 +268,38 @@ describe('Aprovacoes', () => {
     expect(elemento.querySelector('[role="alert"]')?.textContent).toContain(
       'Não foi possível carregar a fila.',
     );
-    elemento.querySelector<HTMLAnchorElement>('[role="alert"] a')!.click();
+    elemento.querySelector<HTMLButtonElement>('[role="alert"] button')!.click(); // P2: um botão, não um link
     fixture.detectChanges();
 
     expect(nomesNaLista()).toEqual(['Ana Lima', 'Bruno Teles', 'Carla Souza']);
   });
 
-  it('a aba Trocas sem nada: mostra a frase de lista vazia', () => {
+  /** O estado vazio do P2: um título curto (<strong>) e a explicação (<p>). */
+  const vazio = (elemento: HTMLElement) => {
+    const caixa = elemento.querySelector('.vazio');
+    return [caixa?.querySelector('strong')?.textContent?.trim(), caixa?.querySelector('p')?.textContent?.trim()];
+  };
+
+  it('a aba Trocas sem nada: diz isso e explica quando uma troca aparece', () => {
     const { elemento, clicar } = criar();
 
     clicar('Trocas · 0');
 
-    expect(elemento.textContent).toContain('Nenhuma troca esperando você.');
+    expect(vazio(elemento)).toEqual([
+      'Nenhuma troca esperando você',
+      'Quando dois colegas combinarem uma troca, ela aparece aqui para você decidir.',
+    ]);
+  });
+
+  it('a aba do RH sem nada: diz isso e explica o que aparece ali', () => {
+    const { elemento, clicar } = criar('ADMIN');
+
+    clicar('Confirmação do RH · 0');
+
+    expect(vazio(elemento)).toEqual([
+      'Nada esperando o RH',
+      'Os pedidos que o gestor aprovou e que precisam da confirmação do RH aparecem aqui.',
+    ]);
   });
 
   /*
@@ -551,7 +571,10 @@ describe('Aprovacoes', () => {
       api.aprovadas.mockReturnValue(of([]));
       const { elemento } = abrirAprovadas();
 
-      expect(elemento.textContent).toContain('aprovada para os próximos dias');
+      expect(vazio(elemento)).toEqual([
+        'Nenhuma férias aprovada para os próximos dias',
+        'Aqui aparecem as férias aprovadas que ainda não começaram. Dá para cancelar até a véspera.',
+      ]);
     });
   });
 });
