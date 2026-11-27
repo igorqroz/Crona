@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -66,6 +67,32 @@ class SegurancaApiTest {
         // Endpoints que revelariam informação interna não existem (com token de ADMIN, ainda assim 404).
         mockMvc.perform(get("/actuator/env").with(jwt()))
                 .andExpect(status().isNotFound());
+    }
+
+    /*
+     * Versionamento: /actuator/info é público (sem token) e diz só a versão do Crona (o build-info do
+     * Maven). Não pode contar nada interno: nem as variáveis do ambiente, nem o git, nem a hora do build.
+     * A versão não fica escrita aqui: o job "Versão igual no front e na API" do CI confere o número.
+     */
+    @Test
+    @DisplayName("versionamento: /actuator/info responde sem token, só com o nome e a versão (SemVer)")
+    void info() throws Exception {
+        mockMvc.perform(get("/actuator/info"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.build.artifact").value("crona-api"))
+                .andExpect(jsonPath("$.build.version", matchesPattern("\\d+\\.\\d+\\.\\d+")))
+                .andExpect(jsonPath("$.build.time").doesNotExist())
+                .andExpect(jsonPath("$.git").doesNotExist())
+                .andExpect(jsonPath("$.env").doesNotExist())
+                .andExpect(jsonPath("$.java").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("versionamento: abrir o /actuator/info não abriu o resto do Actuator (sem token, beans e env não existem)")
+    void infoNaoAbreOResto() throws Exception {
+        mockMvc.perform(get("/actuator/env")).andExpect(status().is4xxClientError());
+        mockMvc.perform(get("/actuator/beans")).andExpect(status().is4xxClientError());
+        mockMvc.perform(get("/actuator/beans").with(jwt())).andExpect(status().isNotFound());
     }
 
     @Test

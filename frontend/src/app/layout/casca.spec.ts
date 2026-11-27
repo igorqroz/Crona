@@ -5,6 +5,7 @@ import { provideRouter, Router } from '@angular/router';
 import { Pendencias } from '../ferias/pendencias';
 import { Perfil } from '../nucleo/modelos';
 import { Sessao } from '../nucleo/sessao';
+import { VERSAO } from '../nucleo/versao';
 import { Casca } from './casca';
 
 /** Uma página vazia, só para o roteador ter para onde navegar no teste. */
@@ -124,6 +125,16 @@ describe('Casca', () => {
 
       expect(elemento.querySelector('.eu-nome')?.textContent).toBe('Rafael Costa');
       expect(elemento.querySelector('.eu-perfil')?.textContent).toBe('Administrador (RH)');
+    });
+
+    // Versionamento: a versão vem do package.json (o CI confere que é a mesma da API).
+    it('o pé do menu mostra a versão do Crona, num elemento só dela', () => {
+      const { elemento } = criar('COLABORADOR');
+
+      const versao = elemento.querySelector('.rodape .versao')!;
+      expect(versao.textContent).toBe(`Crona v${VERSAO}`);
+      expect(VERSAO).toMatch(/^\d+\.\d+\.\d+$/); // SemVer: MAIOR.MENOR.CORREÇÃO
+      expect(elemento.querySelector('.eu-nome')?.textContent).toBe('Ana Lima'); // não se mistura com o nome
     });
 
     it('"Sair" encerra a sessão e vai para o login', async () => {
