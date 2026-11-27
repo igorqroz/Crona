@@ -40,7 +40,7 @@ h1 {
 input {
   min-height: var(--altura-toque);
   padding: 0 14px;
-  border: 1px solid var(--cor-borda-forte);
+  border: 1px solid var(--cor-borda-campo);
   border-radius: var(--raio);
   font-family: var(--fonte-texto);
   font-size: 15px;
@@ -48,10 +48,9 @@ input {
   background: var(--cor-superficie);
 }
 
+/* O anel de foco vem do styles.css (o mesmo de todas as telas); aqui só a borda fica azul. */
 input:focus {
   border-color: var(--cor-primaria);
-  outline: none;
-  box-shadow: 0 0 0 3px var(--cor-primaria-clara);
 }
 
 input.invalido {

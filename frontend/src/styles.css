@@ -11,7 +11,7 @@
   --cor-primaria: #1B6FD4;
   --cor-primaria-escura: #14569F;
   --cor-primaria-clara: #EAF2FD;
-  --cor-foco: #9DBDEB;
+  --cor-foco: #1B6FD4;
 
   /* Texto */
   --cor-texto: #0D1B3E;
@@ -23,10 +23,11 @@
   --cor-superficie: #FFFFFF;
   --cor-borda: #E3E8F0;
   --cor-borda-forte: #CDD5E1;
+  --cor-borda-campo: #7D879C;  /* borda de input, select e textarea: 3:1 no branco (WCAG) */
   --cor-hover: #EEF2F8;
 
   /* Estados */
-  --cor-alerta: #E8792B;
+  --cor-alerta: #B95208;
   --cor-alerta-texto: #A84B07;
   --cor-alerta-fundo: #FFF1E5;
   --cor-sucesso: #067A57;
@@ -65,7 +66,7 @@ a:hover {
   color: var(--cor-primaria-escura);
 }
 
-button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible {
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible {
   outline: 3px solid var(--cor-foco);
   outline-offset: 2px;
 }

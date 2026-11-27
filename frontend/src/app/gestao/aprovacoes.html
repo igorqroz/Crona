@@ -13,14 +13,14 @@
   }
 </header>
 
-<nav class="abas" aria-label="O que aprovar">
-  <button type="button" [class.ativa]="aba() === 'pedidos'" (click)="mudarAba('pedidos')">Pedidos · {{ pedidos().length }}</button>
-  <button type="button" [class.ativa]="aba() === 'trocas'" (click)="mudarAba('trocas')">Trocas · {{ trocas().length }}</button>
+<div class="abas" role="group" aria-label="O que aprovar">
+  <button type="button" [attr.aria-pressed]="aba() === 'pedidos'" [class.ativa]="aba() === 'pedidos'" (click)="mudarAba('pedidos')">Pedidos · {{ pedidos().length }}</button>
+  <button type="button" [attr.aria-pressed]="aba() === 'trocas'" [class.ativa]="aba() === 'trocas'" (click)="mudarAba('trocas')">Trocas · {{ trocas().length }}</button>
   @if (ehRh) {
-    <button type="button" [class.ativa]="aba() === 'rh'" (click)="mudarAba('rh')">Confirmação do RH · {{ filaDoRh().length }}</button>
-    <button type="button" [class.ativa]="aba() === 'aprovadas'" (click)="mudarAba('aprovadas')">Aprovadas · {{ aprovadas().length }}</button>
+    <button type="button" [attr.aria-pressed]="aba() === 'rh'" [class.ativa]="aba() === 'rh'" (click)="mudarAba('rh')">Confirmação do RH · {{ filaDoRh().length }}</button>
+    <button type="button" [attr.aria-pressed]="aba() === 'aprovadas'" [class.ativa]="aba() === 'aprovadas'" (click)="mudarAba('aprovadas')">Aprovadas · {{ aprovadas().length }}</button>
   }
-</nav>
+</div>
 
 @if (feito(); as mensagem) {
   <div class="feito" role="status">
@@ -43,9 +43,9 @@
       @case ('pedidos') {
         <div class="mestre-detalhe">
           <section class="lista" aria-label="Pedidos">
-            <div class="filtros" role="tablist">
+            <div class="filtros" role="group" aria-label="Filtrar os pedidos">
               @for (f of filtros; track f.valor) {
-                <button type="button" role="tab" [attr.aria-selected]="filtro() === f.valor" [class.ativo]="filtro() === f.valor" (click)="mudarFiltro(f.valor)">
+                <button type="button" [attr.aria-pressed]="filtro() === f.valor" [class.ativo]="filtro() === f.valor" (click)="mudarFiltro(f.valor)">
                   {{ f.texto }} · {{ contagens()[f.valor] }}
                 </button>
               }

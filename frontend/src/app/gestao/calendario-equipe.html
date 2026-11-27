@@ -4,9 +4,9 @@
     <p class="texto-suave">Quem está fora, dia a dia. Só aparecem os departamentos com alguém fora no período.</p>
   </div>
   <div class="controles">
-    <div class="janelas" role="tablist" aria-label="Tamanho da janela">
+    <div class="janelas" role="group" aria-label="Tamanho da janela">
       @for (j of janelas; track j.valor) {
-        <button type="button" role="tab" [attr.aria-selected]="janela() === j.valor" [class.ativa]="janela() === j.valor" (click)="mudarJanela(j.valor)">
+        <button type="button" [attr.aria-pressed]="janela() === j.valor" [class.ativa]="janela() === j.valor" (click)="mudarJanela(j.valor)">
           {{ j.texto }}
         </button>
       }
