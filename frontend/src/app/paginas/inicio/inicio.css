@@ -147,6 +147,7 @@ h1 {
 }
 
 .selo-claro {
+  border-color: transparent; /* no cartão escuro, a borda cinza do selo global apareceria como contorno */
   background: rgba(255, 255, 255, 0.14);
   color: #FFFFFF;
 }

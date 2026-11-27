@@ -26,20 +26,42 @@
   --cor-borda-campo: #7D879C;  /* borda de input, select e textarea: 3:1 no branco (WCAG) */
   --cor-hover: #EEF2F8;
 
-  /* Estados */
+  --cor-borda-hover: #A9B4C6;
+
+  /* Estados: cada um com a cor forte, o fundo, a borda e o texto (como a escala do Radix Colors) */
+  --cor-perigo: #B42318;
+  --cor-perigo-escura: #912018;
+  --cor-perigo-fundo: #FEF3F2;
+  --cor-perigo-borda: #FECDCA;
   --cor-alerta: #B95208;
   --cor-alerta-texto: #A84B07;
-  --cor-alerta-fundo: #FFF1E5;
+  --cor-alerta-escura: #7A3504;      /* texto de aviso longo */
+  --cor-alerta-fundo: #FFF6ED;
+  --cor-alerta-borda: #F9DBAF;
   --cor-sucesso: #067A57;
-  --cor-sucesso-texto: #067A57;
-  --cor-sucesso-fundo: #E6F5EE;
+  --cor-sucesso-texto: #05573E;
+  --cor-sucesso-fundo: #ECFDF3;
+  --cor-sucesso-borda: #ABEFC6;
+  --cor-info-fundo: #EFF5FD;
+  --cor-info-borda: #C7DBF5;
 
   /* Forma */
-  --raio-pequeno: 8px;
-  --raio: 12px;
-  --raio-cartao: 16px;
+  --raio-pequeno: 6px;
+  --raio: 8px;
+  --raio-cartao: 12px;
   --raio-pilula: 999px;
   --altura-toque: 44px;       /* todo botão tem pelo menos 44px: bom para o dedo */
+  --altura-compacta: 36px;    /* controles secundários (filtros, setas): ainda fáceis de tocar */
+  --sombra-flutuante: 0 12px 32px rgba(13, 27, 62, 0.14);
+
+  /* Tamanhos de texto: só estes 7 (o 64 do saldo é a exceção) */
+  --texto-11: 11px;
+  --texto-12: 12px;
+  --texto-13: 13px;
+  --texto-14: 14px;
+  --texto-16: 16px;
+  --texto-20: 20px;
+  --texto-28: 28px;
 
   /* Fontes */
   --fonte-titulo: 'Manrope', 'Segoe UI', system-ui, sans-serif;
@@ -118,12 +140,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 
 /* Para ações que encerram algo (recusar, cancelar): vermelho, para não ser clicado sem querer. */
 .botao-perigo {
-  background: #B42318;
+  background: var(--cor-perigo);
   color: #FFFFFF;
 }
 
 .botao-perigo:hover:not(:disabled) {
-  background: #912018;
+  background: var(--cor-perigo-escura);
 }
 
 /* Botão com cara de link, para ações secundárias. */
@@ -163,29 +185,192 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   color: var(--cor-texto-suave);
 }
 
-/* ---------------------------------------------------------------- selo ("Nova", "Pendente") */
+/*
+ * ================================================================ peças do P2 (Design)
+ * Uma versão só de cada peça. Ideia geral: cinza primeiro, e cor só para estado ou ação.
+ * As telas antigas ainda têm CSS local; elas passam para estas peças aos poucos.
+ */
+
+/* ---------------------------------------------------------------- selo: metadado curto ("Nova", "Pendente") */
 
 .selo {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 3px 10px;
-  border-radius: var(--raio-pilula);
-  background: var(--cor-primaria-clara);
-  color: var(--cor-primaria-escura);
-  font-size: 12px;
-  font-weight: 600;
+  padding: 1px 7px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pequeno);
+  background: var(--cor-fundo);
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-12);
+  font-weight: 500;
   white-space: nowrap;
 }
 
-/* ---------------------------------------------------------------- aviso (fundo laranja) */
+.selo-info    { border-color: var(--cor-info-borda);    background: var(--cor-info-fundo);    color: var(--cor-primaria-escura); }
+.selo-sucesso { border-color: var(--cor-sucesso-borda); background: var(--cor-sucesso-fundo); color: var(--cor-sucesso); }
+.selo-alerta  { border-color: var(--cor-alerta-borda);  background: var(--cor-alerta-fundo);  color: var(--cor-alerta-texto); }
+.selo-perigo  { border-color: var(--cor-perigo-borda);  background: var(--cor-perigo-fundo);  color: var(--cor-perigo); }
+.selo-forte   { border-color: var(--cor-texto);         background: var(--cor-texto);         color: #FFFFFF; }
+
+/* ---------------------------------------------------------------- estado: ponto + texto (Ativo / Inativo) */
+
+.estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--texto-13);
+  font-weight: 500;
+  color: var(--cor-texto-suave);
+}
+
+.estado::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--cor-borda-campo);
+}
+
+.estado-sucesso { color: var(--cor-sucesso); }
+.estado-sucesso::before { background: var(--cor-sucesso); }
+
+/* ---------------------------------------------------------------- aviso: sempre com ícone; ação opcional no fim */
+/* Erro de carregar ou salvar: role="alert". Sucesso: role="status". */
 
 .aviso {
   display: flex;
+  align-items: flex-start;
   gap: 10px;
   padding: 12px 14px;
+  border: 1px solid var(--cor-alerta-borda);
   border-radius: var(--raio);
   background: var(--cor-alerta-fundo);
-  color: #6E3105;
-  font-size: 13px;
+  color: var(--cor-alerta-escura);
+  font-size: var(--texto-14);
+}
+
+.aviso > crona-icone { flex-shrink: 0; margin-top: 1px; color: var(--cor-alerta); }
+.aviso-texto { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+
+.aviso-erro    { border-color: var(--cor-perigo-borda);  background: var(--cor-perigo-fundo);  color: var(--cor-perigo-escura); }
+.aviso-erro > crona-icone    { color: var(--cor-perigo); }
+.aviso-sucesso { border-color: var(--cor-sucesso-borda); background: var(--cor-sucesso-fundo); color: var(--cor-sucesso-texto); }
+.aviso-sucesso > crona-icone { color: var(--cor-sucesso); }
+.aviso-info    { border-color: var(--cor-info-borda);    background: var(--cor-info-fundo);    color: var(--cor-primaria-escura); }
+.aviso-info > crona-icone    { color: var(--cor-primaria); }
+
+.aviso .botao {
+  min-height: var(--altura-compacta);
+  padding: 0 12px;
+  font-size: var(--texto-13);
+}
+
+/* ---------------------------------------------------------------- campo: <label class="campo"> texto, controle, dica, erro */
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: var(--texto-13);
+  font-weight: 600;
+  color: var(--cor-texto-secundario);
+}
+
+.campo :is(input, select, textarea) {
+  min-height: var(--altura-toque);
+  padding: 0 12px;
+  border: 1px solid var(--cor-borda-campo);
+  border-radius: var(--raio);
+  background: var(--cor-superficie);
+  font-family: var(--fonte-texto);
+  font-size: var(--texto-16);   /* 16px: o celular não dá zoom ao tocar no campo */
+  font-weight: 400;
+  color: var(--cor-texto);
+}
+
+.campo textarea { padding: 10px 12px; resize: vertical; }
+.campo :is(input, select, textarea):hover { border-color: var(--cor-texto-suave); }
+.campo :is(input, select, textarea)[aria-invalid="true"] { border-color: var(--cor-perigo); }
+
+.campo-dica { font-size: var(--texto-12); font-weight: 400; color: var(--cor-texto-suave); }
+
+.campo-erro {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--texto-12);
+  font-weight: 500;
+  color: var(--cor-perigo);
+}
+
+/* ---------------------------------------------------------------- cabeçalho de página (sempre com o <h1>) */
+
+.topo-pagina {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.topo-pagina-texto { display: flex; flex-direction: column; gap: 4px; }
+.topo-pagina .secao { font-size: var(--texto-13); font-weight: 600; color: var(--cor-texto-suave); }
+
+.topo-pagina h1 {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-size: var(--texto-28);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.topo-pagina p { margin: 0; max-width: 640px; font-size: var(--texto-14); color: var(--cor-texto-secundario); }
+
+/* ---------------------------------------------------------------- estado vazio: cartão, à esquerda, sem ilustração */
+/*
+ * O :not() é provisório. As telas antigas ainda usam "vazio" num <p>, num <li> ou num .cartao,
+ * com o estilo local delas; sem ele, elas ganhariam uma caixa dentro da outra. Sai quando essas
+ * telas migrarem para esta peça (passo 3 do P2).
+ */
+
+.vazio:not(p, li, .cartao) {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 20px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+}
+
+.vazio strong { font-size: var(--texto-14); font-weight: 600; }
+.vazio:not(p, li, .cartao) p { margin: 0; font-size: var(--texto-14); line-height: 1.5; color: var(--cor-texto-secundario); }
+
+/* ---------------------------------------------------------------- controle segmentado (escolher uma opção entre poucas) */
+
+.segmentado {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  background: var(--cor-hover);
+}
+
+.segmentado button {
+  min-height: var(--altura-compacta);
+  padding: 0 12px;
+  border: none;
+  border-radius: var(--raio-pequeno);
+  background: transparent;
+  font: 600 var(--texto-13) var(--fonte-texto);
+  color: var(--cor-texto-secundario);
+  cursor: pointer;
+}
+
+.segmentado button[aria-pressed="true"] {
+  background: var(--cor-superficie);
+  box-shadow: 0 0 0 1px var(--cor-borda-forte);
+  color: var(--cor-texto);
 }
