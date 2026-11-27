@@ -1,12 +1,14 @@
-<header class="topo">
-  <a routerLink="/inicio" class="voltar">← Início</a>
-  <h1>Solicitar férias</h1>
-  <p>
-    Clique no primeiro e no último dia.
-    @if (calendario()?.departamento; as departamento) {
-      As barrinhas mostram quantos colegas de {{ departamento }} já estarão fora.
-    }
-  </p>
+<header class="topo-pagina">
+  <div class="topo-pagina-texto">
+    <a routerLink="/inicio" class="voltar">← Início</a>
+    <h1>Solicitar férias</h1>
+    <p>
+      Clique no primeiro e no último dia.
+      @if (calendario()?.departamento; as departamento) {
+        As barrinhas mostram quantos colegas de {{ departamento }} já estarão fora.
+      }
+    </p>
+  </div>
 </header>
 
 <div class="linha">
@@ -58,9 +60,9 @@
     }
 
     @if (erro(); as mensagem) {
-      <div class="aviso" role="alert">
+      <div class="aviso aviso-erro" role="alert">
         <crona-icone nome="alerta" [tamanho]="18" [espessura]="2" />
-        <span>{{ mensagem }}</span>
+        <span class="aviso-texto">{{ mensagem }}</span>
       </div>
     }
 

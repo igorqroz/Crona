@@ -6,36 +6,6 @@
   gap: 24px;
 }
 
-/* ---------------------------------------------------------------- topo */
-
-.topo {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.saudacao {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.data {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--cor-texto-suave);
-}
-
-h1 {
-  margin: 0;
-  font-family: var(--fonte-titulo);
-  font-size: 32px;
-  font-weight: 800;
-  letter-spacing: -0.8px;
-}
-
 .linha {
   display: flex;
   flex-wrap: wrap;
@@ -68,7 +38,7 @@ h1 {
   font-variant-numeric: tabular-nums;
 }
 
-.vazio {
+.sem-itens {
   margin: 0;
 }
 
@@ -139,11 +109,6 @@ h1 {
 
 .saldo .selo {
   font-size: 12px;
-}
-
-.selo-alerta {
-  background: var(--cor-alerta-fundo);
-  color: var(--cor-alerta-texto);
 }
 
 .selo-claro {

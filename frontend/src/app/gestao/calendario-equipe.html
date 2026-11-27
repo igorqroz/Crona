@@ -1,12 +1,12 @@
-<header class="topo">
-  <div>
+<header class="topo-pagina">
+  <div class="topo-pagina-texto">
     <h1>Calendário da equipe</h1>
-    <p class="texto-suave">Quem está fora, dia a dia. Só aparecem os departamentos com alguém fora no período.</p>
+    <p>Quem está fora, dia a dia. Só aparecem os departamentos com alguém fora no período.</p>
   </div>
   <div class="controles">
-    <div class="janelas" role="group" aria-label="Tamanho da janela">
+    <div class="segmentado" role="group" aria-label="Tamanho da janela">
       @for (j of janelas; track j.valor) {
-        <button type="button" [attr.aria-pressed]="janela() === j.valor" [class.ativa]="janela() === j.valor" (click)="mudarJanela(j.valor)">
+        <button type="button" [attr.aria-pressed]="janela() === j.valor" (click)="mudarJanela(j.valor)">
           {{ j.texto }}
         </button>
       }
@@ -21,8 +21,10 @@
 
 @switch (estado()) {
   @case ('erro') {
-    <div class="aviso" role="alert">
-      Não foi possível carregar o calendário. <a href="" (click)="$event.preventDefault(); carregar()">Tentar de novo</a>
+    <div class="aviso aviso-erro" role="alert">
+      <crona-icone nome="alerta" [tamanho]="18" [espessura]="2" />
+      <span class="aviso-texto">Não foi possível carregar o calendário.</span>
+      <button class="botao botao-secundario" type="button" (click)="carregar()">Tentar de novo</button>
     </div>
   }
   @default {
@@ -79,7 +81,7 @@
               </div>
             }
           } @empty {
-            <p class="vazio texto-suave">Ninguém da equipe está fora neste período.</p>
+            <p class="sem-itens texto-suave">Ninguém da equipe está fora neste período.</p>
           }
         </div>
 

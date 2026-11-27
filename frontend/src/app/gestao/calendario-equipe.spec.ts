@@ -192,7 +192,7 @@ describe('CalendarioEquipe', () => {
       expect(elemento.querySelector('[role="alert"]')?.textContent).toContain(
         'Não foi possível carregar o calendário.',
       );
-      elemento.querySelector<HTMLAnchorElement>('[role="alert"] a')!.click();
+      elemento.querySelector<HTMLButtonElement>('[role="alert"] button')!.click(); // P2: um botão, não um link
       fixture.detectChanges();
 
       expect(linhaDe('Ana Lima')).toBeDefined();

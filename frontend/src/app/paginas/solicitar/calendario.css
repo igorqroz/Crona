@@ -14,8 +14,8 @@
 }
 
 .seta {
-  width: 32px;
-  height: 32px;
+  width: var(--altura-compacta);
+  height: var(--altura-compacta);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -27,7 +27,7 @@
 }
 
 .seta:hover {
-  border-color: #B9CBE6;
+  border-color: var(--cor-borda-hover);
 }
 
 .meses {

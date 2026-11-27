@@ -96,7 +96,7 @@ textarea {
 
 .recusar,
 .bloqueado {
-  color: #B42318;
+  color: var(--cor-perigo);
 }
 
 .bloqueado {
@@ -104,18 +104,3 @@ textarea {
   font-weight: 600;
 }
 
-/* Cores dos selos (as mesmas da lista de pedidos). */
-.selo.ok {
-  background: var(--cor-sucesso-fundo);
-  color: var(--cor-sucesso-texto);
-}
-
-.selo.atencao {
-  background: var(--cor-alerta-fundo);
-  color: var(--cor-alerta-texto);
-}
-
-.selo.impedimento {
-  background: #FDECEC;
-  color: #B42318;
-}

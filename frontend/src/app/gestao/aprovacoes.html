@@ -1,7 +1,7 @@
-<header class="topo">
-  <div>
+<header class="topo-pagina">
+  <div class="topo-pagina-texto">
     <h1>Aprovações</h1>
-    <p class="texto-suave">
+    <p>
       {{ pedidos().length }} {{ pedidos().length === 1 ? 'pedido aguardando' : 'pedidos aguardando' }} · em ordem de início
     </p>
   </div>
@@ -23,8 +23,9 @@
 </div>
 
 @if (feito(); as mensagem) {
-  <div class="feito" role="status">
-    <crona-icone nome="check" [tamanho]="16" [espessura]="2.4" /> {{ mensagem }}
+  <div class="aviso aviso-sucesso" role="status">
+    <crona-icone nome="check" [tamanho]="18" [espessura]="2" />
+    <span class="aviso-texto">{{ mensagem }}</span>
   </div>
 }
 
@@ -33,8 +34,10 @@
     <p class="texto-suave">Carregando…</p>
   }
   @case ('erro') {
-    <div class="aviso" role="alert">
-      Não foi possível carregar a fila. <a href="" (click)="$event.preventDefault(); carregar()">Tentar de novo</a>
+    <div class="aviso aviso-erro" role="alert">
+      <crona-icone nome="alerta" [tamanho]="18" [espessura]="2" />
+      <span class="aviso-texto">Não foi possível carregar a fila.</span>
+      <button class="botao botao-secundario" type="button" (click)="carregar()">Tentar de novo</button>
     </div>
   }
   @case ('pronto') {
@@ -43,9 +46,9 @@
       @case ('pedidos') {
         <div class="mestre-detalhe">
           <section class="lista" aria-label="Pedidos">
-            <div class="filtros" role="group" aria-label="Filtrar os pedidos">
+            <div class="segmentado" role="group" aria-label="Filtrar os pedidos">
               @for (f of filtros; track f.valor) {
-                <button type="button" [attr.aria-pressed]="filtro() === f.valor" [class.ativo]="filtro() === f.valor" (click)="mudarFiltro(f.valor)">
+                <button type="button" [attr.aria-pressed]="filtro() === f.valor" (click)="mudarFiltro(f.valor)">
                   {{ f.texto }} · {{ contagens()[f.valor] }}
                 </button>
               }
@@ -60,11 +63,11 @@
                     <span class="texto-suave">{{ p.departamento }}</span>
                   </span>
                   <span class="texto-suave">{{ intervalo(p.inicio, p.fim) }} · {{ p.diasGozo }} dias</span>
-                  <span class="selo" [class]="'selo ' + s.tom">{{ s.texto }}</span>
+                  <span [class]="classeDoSelo(s.tom)">{{ s.texto }}</span>
                 </span>
               </button>
             } @empty {
-              <p class="texto-suave vazio">Nenhum pedido aqui. 🎉</p>
+              <p class="texto-suave sem-itens">Nenhum pedido aqui.</p>
             }
           </section>
 
@@ -96,7 +99,10 @@
               (recusou)="recusarTroca(t.negociacao.id, $event)"
             />
           } @empty {
-            <div class="cartao"><p class="texto-suave vazio">Nenhuma troca esperando você.</p></div>
+            <div class="vazio">
+              <strong>Nenhuma troca esperando você</strong>
+              <p>Quando dois colegas combinarem uma troca, ela aparece aqui para você decidir.</p>
+            </div>
           }
         </div>
       }
@@ -126,11 +132,14 @@
                 </div>
               }
               @if (erroDe('rh-' + p.id); as e) {
-                <div class="aviso" role="alert">{{ e.mensagem }}</div>
+                <div class="aviso aviso-erro" role="alert"><crona-icone nome="alerta" [tamanho]="18" [espessura]="2" /><span class="aviso-texto">{{ e.mensagem }}</span></div>
               }
             </div>
           } @empty {
-            <div class="cartao"><p class="texto-suave vazio">Nada esperando o RH.</p></div>
+            <div class="vazio">
+              <strong>Nada esperando o RH</strong>
+              <p>Os pedidos que o gestor aprovou e que precisam da confirmação do RH aparecem aqui.</p>
+            </div>
           }
         </div>
       }
@@ -184,11 +193,14 @@
                 </div>
               }
               @if (erroDe('aprovada-' + f.id); as e) {
-                <div class="aviso" role="alert">{{ e.mensagem }}</div>
+                <div class="aviso aviso-erro" role="alert"><crona-icone nome="alerta" [tamanho]="18" [espessura]="2" /><span class="aviso-texto">{{ e.mensagem }}</span></div>
               }
             </div>
           } @empty {
-            <div class="cartao"><p class="texto-suave vazio">Nenhuma férias aprovada para os próximos dias.</p></div>
+            <div class="vazio">
+              <strong>Nenhuma férias aprovada para os próximos dias</strong>
+              <p>Aqui aparecem as férias aprovadas que ainda não começaram. Dá para cancelar até a véspera.</p>
+            </div>
           }
         </div>
       }

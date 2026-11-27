@@ -26,27 +26,6 @@
   font-weight: 600;
 }
 
-/* As cores do selo de status. */
-.selo.acao {
-  background: var(--cor-primaria);
-  color: #FFFFFF;
-}
-
-.selo.espera {
-  background: var(--cor-primaria-clara);
-  color: var(--cor-primaria-escura);
-}
-
-.selo.sucesso {
-  background: var(--cor-sucesso-fundo);
-  color: var(--cor-sucesso-texto);
-}
-
-.selo.encerrada {
-  background: var(--cor-fundo);
-  color: var(--cor-texto-suave);
-}
-
 /* ---------------------------------------------------------------- datas */
 
 .datas {

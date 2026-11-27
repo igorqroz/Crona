@@ -6,26 +6,6 @@
   gap: 20px;
 }
 
-.topo {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 16px;
-}
-
-h1 {
-  margin: 0;
-  font-family: var(--fonte-titulo);
-  font-size: 32px;
-  font-weight: 800;
-  letter-spacing: -0.8px;
-}
-
-.topo p {
-  margin: 4px 0 0;
-}
-
 /* ---------------------------------------------------------------- abas e filtros */
 
 .abas {
@@ -62,42 +42,6 @@ h1 {
   color: var(--cor-primaria-escura);
 }
 
-.filtros {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.filtros button {
-  padding: 6px 12px;
-  border: 1px solid var(--cor-borda-forte);
-  border-radius: var(--raio-pilula);
-  background: var(--cor-superficie);
-  font-family: var(--fonte-texto);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--cor-texto-secundario);
-  cursor: pointer;
-}
-
-.filtros button.ativo {
-  border-color: var(--cor-texto);
-  background: var(--cor-texto);
-  color: #FFFFFF;
-}
-
-.feito {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 14px;
-  border-radius: var(--raio);
-  background: var(--cor-sucesso-fundo);
-  color: var(--cor-sucesso-texto);
-  font-size: 14px;
-  font-weight: 600;
-}
-
 /* ---------------------------------------------------------------- mestre-detalhe */
 
 .mestre-detalhe {
@@ -131,7 +75,7 @@ h1 {
 }
 
 .item:hover {
-  border-color: #B9CBE6;
+  border-color: var(--cor-borda-hover);
 }
 
 .item.escolhido {
@@ -165,24 +109,8 @@ h1 {
   min-width: 0;
 }
 
-.vazio {
+.sem-itens {
   margin: 0;
-}
-
-/* Cores dos selos. */
-.selo.ok {
-  background: var(--cor-sucesso-fundo);
-  color: var(--cor-sucesso-texto);
-}
-
-.selo.atencao {
-  background: var(--cor-alerta-fundo);
-  color: var(--cor-alerta-texto);
-}
-
-.selo.impedimento {
-  background: #FDECEC;
-  color: #B42318;
 }
 
 /* ---------------------------------------------------------------- trocas e RH */
@@ -215,7 +143,7 @@ h1 {
 }
 
 .recusar {
-  color: #B42318;
+  color: var(--cor-perigo);
 }
 
 /* Aba "Aprovadas": por que estas férias não podem ser canceladas agora. */
