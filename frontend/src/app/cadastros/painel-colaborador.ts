@@ -10,11 +10,14 @@ import { Sessao } from '../nucleo/sessao';
 import { CadastrosApi } from './cadastros-api';
 import {
   avisoDeEquipe,
+  descricaoDoPerfil,
   errosDaApi,
   ErrosDoFormulario,
   gestoresPossiveis,
+  nomeDoPerfil,
   PERFIS,
   primeiroNome,
+  seloDoPerfil,
   validar,
 } from './colaboradores.regras';
 
@@ -78,6 +81,9 @@ export class PainelColaborador implements OnInit {
   protected readonly confirmandoDesativar = signal(false);
 
   protected readonly perfis = PERFIS;
+  protected readonly nomeDoPerfil = nomeDoPerfil;
+  protected readonly seloDoPerfil = seloDoPerfil;
+  protected readonly descricaoDoPerfil = descricaoDoPerfil;
   protected readonly primeiroNome = primeiroNome;
   protected readonly avisoDeEquipe = avisoDeEquipe;
   protected readonly diaMesAno = diaMesAno;

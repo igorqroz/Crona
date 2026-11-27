@@ -113,23 +113,28 @@
       </label>
     </fieldset>
 
-    <!-- BUG-06: no próprio painel, o perfil fica travado (a API também recusa). -->
-    <fieldset [disabled]="souEu()" [attr.aria-describedby]="souEu() ? 'dica-proprio-perfil' : null">
+    <fieldset>
       <legend>Perfil de acesso</legend>
       @if (souEu()) {
-        <span id="dica-proprio-perfil" class="campo-dica">Você não pode mudar o próprio perfil. Peça para outra pessoa do RH.</span>
+        <!-- BUG-06: no próprio painel, o perfil só aparece, sem rádios (a API também recusa a mudança). -->
+        <div class="perfil-leitura">
+          <span [class]="seloDoPerfil(perfil())">{{ nomeDoPerfil(perfil()) }}</span>
+          <p>{{ descricaoDoPerfil(perfil()) }}</p>
+          <span id="dica-proprio-perfil" class="campo-dica">Você não pode mudar o próprio perfil. Peça para outra pessoa do RH.</span>
+        </div>
+      } @else {
+        <div class="perfis">
+          @for (p of perfis; track p.valor) {
+            <label class="perfil" [class.escolhido]="perfil() === p.valor">
+              <input type="radio" name="perfil" [value]="p.valor" [checked]="perfil() === p.valor" (change)="perfil.set(p.valor)" />
+              <span class="perfil-texto">
+                <strong>{{ p.nome }}</strong>
+                <span>{{ p.descricao }}</span>
+              </span>
+            </label>
+          }
+        </div>
       }
-      <div class="perfis">
-        @for (p of perfis; track p.valor) {
-          <label class="perfil" [class.escolhido]="perfil() === p.valor" [class.travado]="souEu()">
-            <input type="radio" name="perfil" [value]="p.valor" [checked]="perfil() === p.valor" (change)="perfil.set(p.valor)" />
-            <span class="perfil-texto">
-              <strong>{{ p.nome }}</strong>
-              <span>{{ p.descricao }}</span>
-            </span>
-          </label>
-        }
-      </div>
     </fieldset>
 
     @if (novo()) {

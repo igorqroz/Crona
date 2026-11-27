@@ -16,6 +16,11 @@ export function nomeDoPerfil(perfil: Perfil): string {
   return PERFIS.find((p) => p.valor === perfil)?.nome ?? perfil;
 }
 
+/** "Também aprova as férias e as trocas da equipe." (o mesmo texto dos cartões de perfil). */
+export function descricaoDoPerfil(perfil: Perfil): string {
+  return PERFIS.find((p) => p.valor === perfil)?.descricao ?? '';
+}
+
 /** A classe do selo de cada perfil (peças do P2): Colaborador cinza, Gestor azul claro, RH escuro. */
 export function seloDoPerfil(perfil: Perfil): string {
   return perfil === 'ADMIN' ? 'selo selo-forte' : perfil === 'GESTOR' ? 'selo selo-info' : 'selo';
