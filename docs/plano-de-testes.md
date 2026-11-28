@@ -65,6 +65,7 @@ Mais detalhes no [README](../README.md#cobertura-dos-testes) e no [README do E2E
 | Calendário da equipe (gestão) | ✅ | ✅ | ✅ | — |
 | Cadastros > Departamentos (RH): lista com pessoas e limite, criar, renomear, excluir | ✅ (regras da tela) | ✅ | ✅ (tela, foco e menu) | — |
 | Cadastros > Colaboradores (RH): busca, filtros, paginação, cadastrar, editar, desativar, reativar | ✅ (regras da tela) | ✅ | ✅ (lista e painel, foco e teclado) | — |
+| Cadastros > Regras de férias (RH): EMP-01, 03, 04 e 06, com prévia ao vivo | ✅ (contas e validação da tela) | ✅ (inclusive o efeito na simulação) | ✅ (chaves, prévia, salvar, EMP-06) | — |
 
 ✅ coberto · ⚠️ parcial · — não coberto nesta camada
 
