@@ -131,4 +131,7 @@ public interface SolicitacaoFeriasRepository extends JpaRepository<SolicitacaoFe
                                                      @Param("status") Collection<StatusSolicitacao> status,
                                                      @Param("de") LocalDate de,
                                                      @Param("ate") LocalDate ate);
+
+    // Cadastros 3: quantos pedidos da empresa estão num status (o aviso de desligar a EMP-06).
+    long countByStatusAndColaboradorEmpresaId(StatusSolicitacao status, Long empresaId);
 }

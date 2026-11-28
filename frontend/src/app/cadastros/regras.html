@@ -1,0 +1,221 @@
+<header class="topo-pagina">
+  <div class="topo-pagina-texto">
+    <span class="secao">Cadastros</span>
+    <h1>Regras de férias</h1>
+    <p>O que o Crona confere em cada pedido de férias, além das regras da CLT. Vale para a empresa toda.</p>
+  </div>
+</header>
+
+@if (feito(); as texto) {
+  <div id="feito" class="aviso aviso-sucesso" role="status" tabindex="-1">
+    <crona-icone nome="check" [tamanho]="18" [espessura]="2" />
+    <span class="aviso-texto">{{ texto }}</span>
+  </div>
+}
+
+
+@switch (estado()) {
+  @case ('carregando') {
+    <p class="texto-suave">Carregando…</p>
+  }
+
+  @case ('erro') {
+    <div class="aviso aviso-erro" role="alert">
+      <crona-icone nome="alerta" [tamanho]="18" [espessura]="2" />
+      <span class="aviso-texto">Não foi possível carregar as regras.</span>
+      <button class="botao botao-secundario" type="button" (click)="carregar()">Tentar de novo</button>
+    </div>
+  }
+
+  @case ('pronto') {
+    <!-- ======================================================== EMP-03 antecedência -->
+    <section class="cartao regra" aria-labelledby="titulo-antecedencia">
+      <div class="regra-topo">
+        <div class="regra-titulo">
+          <h2 id="titulo-antecedencia" class="cartao-titulo">Antecedência mínima</h2>
+          <span class="texto-suave">Com quanto tempo a pessoa precisa pedir.</span>
+        </div>
+        <span class="sempre">Sempre ligada</span>
+      </div>
+      <div class="regra-corpo">
+        <label class="campo campo-curto">
+          <span id="rotulo-antecedencia">Pedir pelo menos (dias antes)</span>
+          <input
+            type="number"
+            inputmode="numeric"
+            min="30"
+            max="365"
+            aria-labelledby="rotulo-antecedencia"
+            [value]="antecedencia()"
+            (input)="mudouCampo('antecedencia', () => antecedencia.set(numero($event)))"
+            [attr.aria-invalid]="erros().antecedencia ? true : null"
+            [attr.aria-describedby]="erros().antecedencia ? 'erro-antecedencia' : 'dica-antecedencia'"
+          />
+          @if (erros().antecedencia; as e) {
+            <span id="erro-antecedencia" class="campo-erro">{{ e }}</span>
+          } @else {
+            <span id="dica-antecedencia" class="campo-dica">Nunca menos que 30: é o aviso mínimo da CLT.</span>
+          }
+        </label>
+        @if (primeiroDia(); as dia) {
+          <p class="previa">Um pedido feito hoje ({{ hoje }}) pode começar a partir de <strong>{{ dia }}</strong>.</p>
+        }
+      </div>
+      <p class="regra-pe"><span class="selo selo-alerta">Ponto de atenção</span> O pedido pode ser enviado. Quem aprova vê o aviso e decide.</p>
+    </section>
+
+    <!-- ======================================================== EMP-01 limite por departamento -->
+    <section class="cartao regra" aria-labelledby="titulo-departamento">
+      <div class="regra-topo">
+        <div class="regra-titulo">
+          <h2 id="titulo-departamento" class="cartao-titulo">Limite por departamento</h2>
+          <span class="texto-suave">Quantas pessoas de cada departamento podem sair no mesmo dia.</span>
+        </div>
+        <button
+          class="chave"
+          type="button"
+          role="switch"
+          [attr.aria-checked]="percentualLigado()"
+          aria-labelledby="titulo-departamento"
+          (click)="alternar('percentual')"
+        >
+          <span class="trilho" aria-hidden="true"><span class="bolinha"></span></span>
+          <span class="chave-texto">{{ percentualLigado() ? 'Ligada' : 'Desligada' }}</span>
+        </button>
+      </div>
+      @if (percentualLigado()) {
+        <div class="regra-corpo">
+          <label class="campo campo-curto">
+            <span id="rotulo-percentual">Continuam trabalhando (% de cada departamento)</span>
+            <input
+              type="number"
+              inputmode="numeric"
+              min="0"
+              max="100"
+              aria-labelledby="rotulo-percentual"
+              [value]="percentual()"
+              (input)="mudouCampo('percentual', () => percentual.set(numero($event)))"
+              [attr.aria-invalid]="erros().percentual ? true : null"
+              [attr.aria-describedby]="erros().percentual ? 'erro-percentual' : 'dica-percentual'"
+            />
+            @if (erros().percentual; as e) {
+              <span id="erro-percentual" class="campo-erro">{{ e }}</span>
+            } @else {
+              <span id="dica-percentual" class="campo-dica">De 0 a 100. O mesmo para todos os departamentos.</span>
+            }
+          </label>
+          @if (previa().length > 0 || vazios()) {
+            <div class="previa">
+              <strong>Como fica hoje</strong>
+              <ul>
+                @for (linha of previa(); track linha) {
+                  <li>{{ linha }}</li>
+                }
+              </ul>
+              @if (vazios(); as texto) {
+                <span class="texto-suave">{{ texto }}</span>
+              }
+            </div>
+          }
+        </div>
+        <p class="regra-pe">
+          <span class="selo selo-alerta">Ponto de atenção</span> Passou do limite? O pedido pode ser enviado, com o aviso e uma data
+          alternativa.
+        </p>
+      } @else {
+        <p class="desligada">Desligada: o Crona não confere quantas pessoas do departamento estão fora.</p>
+      }
+    </section>
+
+    <!-- ======================================================== EMP-04 limite da empresa -->
+    <section class="cartao regra" aria-labelledby="titulo-empresa">
+      <div class="regra-topo">
+        <div class="regra-titulo">
+          <h2 id="titulo-empresa" class="cartao-titulo">Limite da empresa toda</h2>
+          <span class="texto-suave">Para não sair gente demais ao mesmo tempo (impacto no caixa).</span>
+        </div>
+        <button
+          class="chave"
+          type="button"
+          role="switch"
+          [attr.aria-checked]="limiteLigado()"
+          aria-labelledby="titulo-empresa"
+          (click)="alternar('limite')"
+        >
+          <span class="trilho" aria-hidden="true"><span class="bolinha"></span></span>
+          <span class="chave-texto">{{ limiteLigado() ? 'Ligada' : 'Desligada' }}</span>
+        </button>
+      </div>
+      @if (limiteLigado()) {
+        <div class="regra-corpo">
+          <label class="campo campo-curto">
+            <span id="rotulo-limite">No máximo (pessoas fora no mesmo dia)</span>
+            <input
+              type="number"
+              inputmode="numeric"
+              min="1"
+              aria-labelledby="rotulo-limite"
+              [value]="limite()"
+              (input)="mudouCampo('limite', () => limite.set(numero($event)))"
+              [attr.aria-invalid]="erros().limite ? true : null"
+              [attr.aria-describedby]="erros().limite ? 'erro-limite' : 'dica-limite'"
+            />
+            @if (erros().limite; as e) {
+              <span id="erro-limite" class="campo-erro">{{ e }}</span>
+            } @else {
+              <span id="dica-limite" class="campo-dica">Hoje a empresa tem {{ salvas()?.pessoasAtivas }} pessoas com acesso ativo.</span>
+            }
+          </label>
+        </div>
+        <p class="regra-pe"><span class="selo selo-alerta">Ponto de atenção</span> Igual ao limite por departamento.</p>
+      } @else {
+        <p class="desligada">Desligada: só vale o limite de cada departamento.</p>
+      }
+    </section>
+
+    <!-- ======================================================== EMP-06 confirmação do RH -->
+    <section class="cartao regra" aria-labelledby="titulo-rh">
+      <div class="regra-topo">
+        <div class="regra-titulo">
+          <h2 id="titulo-rh" class="cartao-titulo">Confirmação do RH</h2>
+          <span class="texto-suave">Depois do gestor, o RH confere antes de as férias ficarem aprovadas de vez.</span>
+        </div>
+        <button class="chave" type="button" role="switch" [attr.aria-checked]="rhLigado()" aria-labelledby="titulo-rh" (click)="alternar('rh')">
+          <span class="trilho" aria-hidden="true"><span class="bolinha"></span></span>
+          <span class="chave-texto">{{ rhLigado() ? 'Ligada' : 'Desligada' }}</span>
+        </button>
+      </div>
+      <p class="fluxo">
+        {{ rhLigado() ? 'Ligada: gestor aprova → RH confirma → aviso de férias.' : 'Desligada: a aprovação do gestor já é a final e gera o aviso de férias.' }}
+      </p>
+      @if (pedidosNaFilaDoRh() > 0) {
+        <div class="aviso" role="note">
+          <crona-icone nome="alerta" [tamanho]="18" [espessura]="2" />
+          <span class="aviso-texto">
+            <strong>{{ pedidosNaFilaDoRh() === 1 ? '1 pedido está esperando' : pedidosNaFilaDoRh() + ' pedidos estão esperando' }} a confirmação do RH.</strong>
+            {{ pedidosNaFilaDoRh() === 1 ? 'Ele continua' : 'Eles continuam' }} na aba "Confirmação do RH" até alguém confirmar. Os pedidos aprovados
+            pelo gestor depois de salvar já ficam aprovados de vez.
+          </span>
+        </div>
+      }
+    </section>
+
+    @if (erroDaApi(); as e) {
+      <div class="aviso aviso-erro" role="alert">
+        <crona-icone nome="alerta" [tamanho]="18" [espessura]="2" />
+        <span class="aviso-texto">{{ e }}</span>
+      </div>
+    }
+
+
+    @if (alterado()) {
+      <div class="barra-salvar" role="region" aria-label="Alterações não salvas">
+        <span>Alterações não salvas</span>
+        <div class="botoes">
+          <button class="botao botao-contorno" type="button" (click)="descartar()">Descartar</button>
+          <button class="botao botao-claro" type="button" [disabled]="ocupado()" (click)="salvar()">Salvar regras</button>
+        </div>
+      </div>
+    }
+  }
+}

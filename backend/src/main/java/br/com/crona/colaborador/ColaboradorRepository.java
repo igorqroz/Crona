@@ -60,6 +60,9 @@ public interface ColaboradorRepository extends JpaRepository<Colaborador, Long> 
     // Quantas pessoas ativas o departamento tem (para o limite da EMP-01).
     long countByDepartamentoIdAndAtivoTrue(Long departamentoId);
 
+    // Cadastros 3: quantas pessoas ativas a empresa tem (a dica do limite da empresa, EMP-04).
+    long countByEmpresaIdAndAtivoTrue(Long empresaId);
+
     /** Uma linha do "group by" abaixo. O Spring Data preenche a interface pelos nomes (alias) da consulta. */
     interface PessoasNoDepartamento {
         Long getDepartamentoId();

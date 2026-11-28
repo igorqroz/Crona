@@ -322,3 +322,21 @@ export interface FiltrosDeColaboradores {
   ativo: boolean | null;
   pagina: number;
 }
+
+/** PUT /configuracao-ferias: as regras de férias da empresa (Cadastros 3). Nulo = regra desligada. */
+export interface RegrasDaEmpresa {
+  /** EMP-01: quanto de cada departamento continua trabalhando (0 a 100). */
+  percentualMinimoTrabalhando: number | null;
+  /** EMP-03: com quantos dias de antecedência pedir (30 ou mais). */
+  antecedenciaMinimaDias: number;
+  /** EMP-04: quantas pessoas da empresa podem estar fora ao mesmo tempo. */
+  limiteFeriasSimultaneasEmpresa: number | null;
+  /** EMP-06: o RH confirma depois do gestor. */
+  exigeConfirmacaoRh: boolean;
+}
+
+/** GET /configuracao-ferias: as regras e dois números para a tela explicar o efeito delas. */
+export interface RegrasDaEmpresaComContexto extends RegrasDaEmpresa {
+  pessoasAtivas: number;
+  pedidosAguardandoRh: number;
+}

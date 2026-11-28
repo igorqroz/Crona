@@ -26,13 +26,13 @@ public class RegrasDaEmpresaController {
 
     @PreAuthorize("hasAuthority('REGRAS_GERENCIAR')")
     @GetMapping
-    public RegrasDaEmpresa buscar() {
+    public RegrasDaEmpresaResposta buscar() {
         return service.buscar();
     }
 
     @PreAuthorize("hasAuthority('REGRAS_GERENCIAR')")
     @PutMapping
-    public RegrasDaEmpresa alterar(@Valid @RequestBody RegrasDaEmpresa regras) {
+    public RegrasDaEmpresaResposta alterar(@Valid @RequestBody RegrasDaEmpresa regras) {
         return service.alterar(regras);
     }
 }
