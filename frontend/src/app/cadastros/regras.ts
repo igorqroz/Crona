@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, ElementRef, inject, signal } from '@angular/core';
 import { forkJoin } from 'rxjs';
 
 import { Icone } from '../compartilhado/icone';
@@ -20,6 +20,7 @@ import { departamentosVazios, ErrosDasRegras, mudou, previaDosDepartamentos, pri
 })
 export class Regras {
   private readonly api = inject(CadastrosApi);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   protected readonly estado = signal<'carregando' | 'pronto' | 'erro'>('carregando');
   /** O que está gravado na API (com os dois números de contexto). */
@@ -145,7 +146,7 @@ export class Regras {
     this.erroDaApi.set(null);
     if (Object.keys(erros).length > 0) {
       // O foco vai para o primeiro campo com erro.
-      setTimeout(() => document.querySelector<HTMLElement>('crona-regras [aria-invalid="true"]')?.focus());
+      setTimeout(() => this.host.nativeElement.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus());
       return;
     }
     this.ocupado.set(true);

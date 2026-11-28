@@ -163,7 +163,7 @@
             @if (erros().limite; as e) {
               <span id="erro-limite" class="campo-erro">{{ e }}</span>
             } @else {
-              <span id="dica-limite" class="campo-dica">Hoje a empresa tem {{ salvas()?.pessoasAtivas }} pessoas com acesso ativo.</span>
+              <span id="dica-limite" class="campo-dica">Hoje a empresa tem {{ salvas()?.pessoasAtivas === 1 ? "1 pessoa" : salvas()?.pessoasAtivas + " pessoas" }} com acesso ativo.</span>
             }
           </label>
         </div>
