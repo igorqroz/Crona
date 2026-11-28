@@ -139,7 +139,7 @@ Para responder com quem conhece o processo na empresa antes da Fase 4:
 - [x] O gestor pode aprovar uma solicitação que passa do limite do departamento? **Sim** (decidido no redesign): o pedido chega com ponto de atenção e o gestor pode "aprovar mesmo assim". Ver EMP-01.
 - [x] Faltas injustificadas (CLT-02) vão ser lançadas no Crona ou vêm de outro sistema? **O RH lança no Crona** (ver seção 3).
 - [x] Criar a **EMP-07** (não permitir cancelar férias aprovadas a menos de N dias do início)? **Não, por enquanto**: o RH pode cancelar até a véspera, e a tela só avisa quando faltam 3 dias ou menos. Ver "Cancelamento de férias aprovadas" na seção 4.
-- [ ] Feriados móveis e estaduais/municipais para a CLT-05: como cadastrar? Ver [PAD-11](padroes-de-referencia.md#pad-11--feriados-recorrentes-e-móveis).
+- [x] Feriados móveis para a CLT-05: os **nacionais** são calculados e cadastrados pelo sistema, sempre 10 anos à frente (BUG-08). Estaduais e municipais continuam em aberto. Ver [PAD-11](padroes-de-referencia.md#pad-11--feriados-recorrentes-e-móveis).
 
 ## 7. O que corrigir em relação ao protótipo
 
