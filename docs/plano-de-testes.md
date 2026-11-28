@@ -21,11 +21,13 @@ Quando algo quebra, o objetivo é descobrir **no PR**, antes do merge, e não em
 Quanto mais baixo na pirâmide, mais rápido e barato é o teste. Por isso há muitos testes embaixo e poucos em cima. Cada camada testa o que só ela consegue testar bem.
 
 ```
-              /\        E2E (Playwright)             11    o sistema inteiro, no navegador
-             /  \       Componente (Vitest)          114   uma tela, com a API falsa
-            /    \      Integração da API (JUnit)    ~110  HTTP + banco de verdade
-           /      \     Unidade (JUnit e Vitest)     ~200  regras puras, em milissegundos
-          ----------                                       (~147 no back + 54 no front)
+              /\        E2E (Playwright)             13    o sistema inteiro, no navegador
+             /  \       Componente (Vitest)          195   uma tela, com a API falsa
+            /    \      Integração da API (JUnit)    128   HTTP + banco de verdade
+           /      \     Unidade (JUnit e Vitest)     246   regras puras, em milissegundos
+          ----------                                       (150 no back + 96 no front)
+
+          Contagem de 27/11/2026: back 278, front 291, E2E 13.
 ```
 
 | Camada | Ferramenta | Onde fica | O que testa | Exemplo |
@@ -63,9 +65,10 @@ Mais detalhes no [README](../README.md#cobertura-dos-testes) e no [README do E2E
 | Aviso de férias em PDF | ✅ | ✅ | ✅ (Início) | — |
 | Notificações (sino) | — | ✅ | ✅ | — |
 | Calendário da equipe (gestão) | ✅ | ✅ | ✅ | — |
-| Cadastros > Departamentos (RH): lista com pessoas e limite, criar, renomear, excluir | ✅ (regras da tela) | ✅ | ✅ (tela, foco e menu) | — |
-| Cadastros > Colaboradores (RH): busca, filtros, paginação, cadastrar, editar, desativar, reativar | ✅ (regras da tela) | ✅ | ✅ (lista e painel, foco e teclado) | — |
+| Cadastros > Departamentos (RH): lista com pessoas e limite, criar, renomear, excluir | ✅ (regras da tela) | ✅ | ✅ (tela, foco e menu) | ✅ (criar e excluir) |
+| Cadastros > Colaboradores (RH): busca, filtros, paginação, cadastrar, editar, desativar, reativar | ✅ (regras da tela) | ✅ | ✅ (lista e painel, foco e teclado) | ✅ (cadastrar, primeiro acesso, desativar) |
 | Cadastros > Regras de férias (RH): EMP-01, 03, 04 e 06, com prévia ao vivo | ✅ (contas e validação da tela) | ✅ (inclusive o efeito na simulação) | ✅ (chaves, prévia, salvar, EMP-06) | — |
+| Versão do Crona (rodapé do menu, /actuator/info e o CI conferindo front = API) | — | ✅ | ✅ (menu) | — |
 
 ✅ coberto · ⚠️ parcial · — não coberto nesta camada
 
