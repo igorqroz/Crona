@@ -73,6 +73,7 @@ export class Casca {
       ? [
           { rota: '/cadastros/departamentos', texto: 'Departamentos', icone: 'predio' },
           { rota: '/cadastros/colaboradores', texto: 'Colaboradores', icone: 'pessoas' },
+          { rota: '/cadastros/regras', texto: 'Regras de férias', icone: 'ajustes' },
         ]
       : [],
   );

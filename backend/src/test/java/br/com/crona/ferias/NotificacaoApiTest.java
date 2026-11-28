@@ -125,6 +125,11 @@ class NotificacaoApiTest extends ComBiaTestBase {
             LocalDate depois = segundaLivreDepoisDe(segunda.plusWeeks(5));
             Long periodoDaAna = jdbc.queryForObject(
                     "SELECT id FROM periodo_aquisitivo WHERE colaborador_id = ? AND numero = 2", Long.class, ana);
+            // As datas do teste andam com o calendário, mas o prazo de concessão da Ana (seed) é fixo: quando
+            // as datas passaram dele, a CLT-03 começou a recusar a troca. O teste dá um prazo folgado ao período
+            // (a transação do teste desfaz a mudança no fim).
+            jdbc.update("UPDATE periodo_aquisitivo SET data_limite_concessao = ? WHERE id = ?",
+                    depois.plusYears(1), periodoDaAna);
             Long daAna = jdbc.queryForObject("""
                     INSERT INTO solicitacao_ferias (colaborador_id, periodo_aquisitivo_id, data_inicio, data_fim, dias_gozo, status)
                     VALUES (?, ?, ?, ?, 15, 'APROVADA') RETURNING id

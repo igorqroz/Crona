@@ -65,6 +65,12 @@ export const routes: Routes = [
         canActivate: [perfilGuard('ADMIN')],
         loadComponent: () => import('./cadastros/colaboradores').then((m) => m.Colaboradores),
       },
+      {
+        path: 'cadastros/regras',
+        title: 'Regras de férias · Crona',
+        canActivate: [perfilGuard('ADMIN')],
+        loadComponent: () => import('./cadastros/regras').then((m) => m.Regras),
+      },
       // As próximas telas. Por enquanto, um aviso de "em breve".
       {
         path: 'historico',

@@ -1,6 +1,7 @@
 package br.com.crona.empresa;
 
 import br.com.crona.compartilhado.EntidadeBase;
+import br.com.crona.compartilhado.erro.RegraVioladaException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -38,6 +39,35 @@ public class ConfiguracaoFerias extends EntidadeBase {
     /** Uma empresa sem configuração gravada usa os padrões: só a antecedência de 30 dias ligada. */
     public static ConfiguracaoFerias padrao() {
         return new ConfiguracaoFerias();
+    }
+
+    /** Cadastros 3: a primeira vez que o RH salva as regras de uma empresa que ainda usava o padrão. */
+    public static ConfiguracaoFerias daEmpresa(Empresa empresa) {
+        var configuracao = new ConfiguracaoFerias();
+        configuracao.empresa = empresa;
+        return configuracao;
+    }
+
+    /**
+     * Cadastros 3: o RH muda as regras. Os limites também estão no banco (CHECK em V1) e na
+     * requisição (@Valid); aqui a entidade garante sozinha o que é regra de negócio.
+     */
+    public void alterar(Integer percentualMinimoTrabalhando, int antecedenciaMinimaDias,
+                        Integer limiteFeriasSimultaneasEmpresa, boolean exigeConfirmacaoRh) {
+        if (percentualMinimoTrabalhando != null
+                && (percentualMinimoTrabalhando < 0 || percentualMinimoTrabalhando > 100)) {
+            throw new RegraVioladaException("O percentual que continua trabalhando vai de 0 a 100.");
+        }
+        if (antecedenciaMinimaDias < 30) {
+            throw new RegraVioladaException("A antecedência mínima não pode ser menor que 30 dias (CLT, art. 135).");
+        }
+        if (limiteFeriasSimultaneasEmpresa != null && limiteFeriasSimultaneasEmpresa < 1) {
+            throw new RegraVioladaException("O limite da empresa precisa ser de pelo menos 1 pessoa.");
+        }
+        this.percentualMinimoTrabalhando = percentualMinimoTrabalhando;
+        this.antecedenciaMinimaDias = antecedenciaMinimaDias;
+        this.limiteFeriasSimultaneasEmpresa = limiteFeriasSimultaneasEmpresa;
+        this.exigeConfirmacaoRh = exigeConfirmacaoRh;
     }
 
     public Integer getPercentualMinimoTrabalhando() {

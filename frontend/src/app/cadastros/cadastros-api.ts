@@ -6,6 +6,8 @@ import {
   Colaborador,
   DadosDoColaborador,
   DepartamentoResumo,
+  RegrasDaEmpresa,
+  RegrasDaEmpresaComContexto,
   FiltrosDeColaboradores,
   Pagina,
   Referencia,
@@ -106,5 +108,15 @@ export class CadastrosApi {
 
   reativarColaborador(id: number) {
     return this.http.post<Colaborador>(`/api/colaboradores/${id}/reativar`, {});
+  }
+
+  // ------------------------------------------------------------------ regras da empresa (Cadastros 3)
+
+  regras() {
+    return this.http.get<RegrasDaEmpresaComContexto>('/api/configuracao-ferias');
+  }
+
+  salvarRegras(regras: RegrasDaEmpresa) {
+    return this.http.put<RegrasDaEmpresaComContexto>('/api/configuracao-ferias', regras);
   }
 }

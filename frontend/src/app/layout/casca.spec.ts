@@ -100,14 +100,15 @@ describe('Casca', () => {
       expect(menu()).toContain('Calendário da equipe');
     });
 
-    it('RH (ADMIN): só ele vê a seção Cadastros, com Departamentos e Colaboradores', () => {
+    it('RH (ADMIN): só ele vê a seção Cadastros, com Departamentos, Colaboradores e Regras de férias', () => {
       const { elemento, menu, linkPara } = criar('ADMIN', 'Rafael Costa');
 
       const grupos = [...elemento.querySelectorAll('.titulo-do-grupo')].map((g) => g.textContent);
       expect(grupos).toEqual(['Gestão', 'Cadastros']);
-      expect(menu().slice(-2)).toEqual(['Departamentos', 'Colaboradores']);
+      expect(menu().slice(-3)).toEqual(['Departamentos', 'Colaboradores', 'Regras de férias']);
       expect(linkPara('Departamentos').getAttribute('href')).toBe('/cadastros/departamentos');
       expect(linkPara('Colaboradores').getAttribute('href')).toBe('/cadastros/colaboradores');
+      expect(linkPara('Regras de férias').getAttribute('href')).toBe('/cadastros/regras');
     });
 
     it.each(['COLABORADOR', 'GESTOR'] as const)('%s: não vê a seção Cadastros', (perfil) => {
@@ -116,6 +117,7 @@ describe('Casca', () => {
       expect(elemento.textContent).not.toContain('Cadastros');
       expect(menu()).not.toContain('Departamentos');
       expect(menu()).not.toContain('Colaboradores');
+      expect(menu()).not.toContain('Regras de férias');
     });
   });
 
